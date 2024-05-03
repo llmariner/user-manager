@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "user-mananger-server.fullname" . }}
+  name: {{ include "user-manager-server.fullname" . }}
   labels:
-    {{- include "user-mananger-server.labels" . | nindent 4 }}
+    {{- include "user-manager-server.labels" . | nindent 4 }}
 data:
   config.yaml: |
     httpPort: {{ .Values.httpPort }}

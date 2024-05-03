@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "user-mananger-server.fullname" . }}-http
+  name: {{ include "user-manager-server.fullname" . }}-http
   labels:
-    {{- include "user-mananger-server.labels" . | nindent 4 }}
+    {{- include "user-manager-server.labels" . | nindent 4 }}
 spec:
   type: ClusterIP
   ports:
@@ -12,16 +12,16 @@ spec:
       protocol: TCP
       name: http
   selector:
-    {{- include "user-mananger-server.selectorLabels" . | nindent 4 }}
+    {{- include "user-manager-server.selectorLabels" . | nindent 4 }}
 
 ---
 
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "user-mananger-server.fullname" . }}-grpc
+  name: {{ include "user-manager-server.fullname" . }}-grpc
   labels:
-    {{- include "user-mananger-server.labels" . | nindent 4 }}
+    {{- include "user-manager-server.labels" . | nindent 4 }}
   annotations:
     konghq.com/protocol: grpc
 spec:
@@ -32,7 +32,7 @@ spec:
     protocol: TCP
     targetPort: grpc
   selector:
-    {{- include "user-mananger-server.selectorLabels" . | nindent 4 }}
+    {{- include "user-manager-server.selectorLabels" . | nindent 4 }}
 
 
 ---
@@ -40,9 +40,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "user-mananger-server.fullname" . }}-internal-grpc
+  name: {{ include "user-manager-server.fullname" . }}-internal-grpc
   labels:
-    {{- include "user-mananger-server.labels" . | nindent 4 }}
+    {{- include "user-manager-server.labels" . | nindent 4 }}
   annotations:
     konghq.com/protocol: grpc
 spec:
@@ -53,4 +53,4 @@ spec:
     protocol: TCP
     targetPort: internal-grpc
   selector:
-    {{- include "user-mananger-server.selectorLabels" . | nindent 4 }}
+    {{- include "user-manager-server.selectorLabels" . | nindent 4 }}

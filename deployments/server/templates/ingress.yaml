@@ -1,9 +1,9 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "user-mananger-server.fullname" . }}-http
+  name: {{ include "user-manager-server.fullname" . }}-http
   labels:
-    {{- include "user-mananger-server.labels" . | nindent 4 }}
+    {{- include "user-manager-server.labels" . | nindent 4 }}
 spec:
   ingressClassName: {{ .Values.global.ingress.ingressClassName }}
   rules:
@@ -13,6 +13,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: {{ include "user-mananger-server.fullname" . }}-http
+            name: {{ include "user-manager-server.fullname" . }}-http
             port:
               number: {{ .Values.httpPort }}
