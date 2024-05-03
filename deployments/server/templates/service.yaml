@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "user-mananger-server.fullname" . }}-http
+  labels:
+    {{- include "user-mananger-server.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.httpPort }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "user-mananger-server.selectorLabels" . | nindent 4 }}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "user-mananger-server.fullname" . }}-grpc
+  labels:
+    {{- include "user-mananger-server.labels" . | nindent 4 }}
+  annotations:
+    konghq.com/protocol: grpc
+spec:
+  type: ClusterIP
+  ports:
+  - name: grpc
+    port: {{ .Values.grpcPort }}
+    protocol: TCP
+    targetPort: grpc
+  selector:
+    {{- include "user-mananger-server.selectorLabels" . | nindent 4 }}
+
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "user-mananger-server.fullname" . }}-internal-grpc
+  labels:
+    {{- include "user-mananger-server.labels" . | nindent 4 }}
+  annotations:
+    konghq.com/protocol: grpc
+spec:
+  type: ClusterIP
+  ports:
+  - name: grpc
+    port: {{ .Values.internalGrpcPort }}
+    protocol: TCP
+    targetPort: internal-grpc
+  selector:
+    {{- include "user-mananger-server.selectorLabels" . | nindent 4 }}

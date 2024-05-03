@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package llmoperator.users.server.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/llm-operator/user-manager/api/v1";
+
+message APIKey {
+  string id = 1;
+  string object = 2;
+  string name = 3;
+  // secret is populated only when a new API key is created.
+  string secret = 4;
+  int64 created_at = 5;
+
+}
+
+message CreateAPIKeyRequest {
+  string name = 1;
+}
+
+message ListAPIKeysRequest {
+}
+
+message ListAPIKeysResponse {
+  string object = 1;
+  repeated APIKey data = 2;
+}
+
+message DeleteAPIKeyRequest {
+  string id = 1;
+}
+
+message DeleteAPIKeyResponse {
+  string id = 1;
+  string object = 2;
+  bool deleted = 3;
+}
+
+service UsersService {
+  rpc CreateAPIKey(CreateAPIKeyRequest) returns (APIKey) {
+    option (google.api.http) = {
+      post: "/v1/users/api_keys"
+      body: "*"
+    };
+  }
+
+  rpc ListAPIKeys(ListAPIKeysRequest) returns (ListAPIKeysResponse) {
+    option (google.api.http) = {
+      get: "/v1/users/api_keys"
+    };
+  }
+
+  rpc DeleteAPIKey(DeleteAPIKeyRequest) returns (DeleteAPIKeyResponse) {
+    option (google.api.http) = {
+      delete: "/v1/users/api_keys/{id}"
+    };
+  }
+}
+
+service UsersInternalService {
+  rpc ListAPIKeys(ListAPIKeysRequest) returns (ListAPIKeysResponse) {
+  }
+}

@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "user-mananger-server.fullname" . }}
+  labels:
+    {{- include "user-mananger-server.labels" . | nindent 4 }}
+data:
+  config.yaml: |
+    httpPort: {{ .Values.httpPort }}
+    grpcPort: {{ .Values.grpcPort }}
+    internalGrpcPort: {{ .Values.internalGrpcPort }}
+    database:
+      host: {{ .Values.global.database.host }}
+      port: {{ .Values.global.database.port }}
+      database: {{ .Values.database.database }}
+      username: {{ .Values.global.database.username }}
+      passwordEnvName: DB_PASSWORD
+    auth:
+      enable: {{ .Values.global.auth.enable }}
+      rbacInternalServerAddr: {{ .Values.global.auth.rbacInternalServerAddr }}
