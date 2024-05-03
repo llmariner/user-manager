@@ -1,0 +1,30 @@
+global:
+  database:
+    host:
+    port:
+    username:
+
+  databaseSecret:
+    name:
+    key:
+
+  ingress:
+    ingressClassName:
+
+  auth:
+    enable:
+    rbacInternalServerAddr:
+
+httpPort: 8080
+grpcPort: 8081
+internalGrpcPort: 8082
+
+database:
+  database: user_manager
+
+replicaCount: 1
+image:
+  repository: public.ecr.aws/v8n3t7y5/llm-operator/user-mananger-server
+  pullPolicy: IfNotPresent
+
+version:
