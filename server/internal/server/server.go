@@ -36,7 +36,7 @@ func (s *S) Run(ctx context.Context, port int, authConfig config.AuthConfig) err
 
 	var opts []grpc.ServerOption
 	if authConfig.Enable {
-		ai, err := auth.NewInterceptor(ctx, authConfig.RBACInternalServerAddr, "api.files")
+		ai, err := auth.NewInterceptor(ctx, authConfig.RBACInternalServerAddr, "api.users.api_keys")
 		if err != nil {
 			return err
 		}
