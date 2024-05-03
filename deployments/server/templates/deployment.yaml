@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "user-mananger-server.fullname" . }}
+  name: {{ include "user-manager-server.fullname" . }}
   labels:
-    {{- include "user-mananger-server.labels" . | nindent 4 }}
+    {{- include "user-manager-server.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "user-mananger-server.selectorLabels" . | nindent 6 }}
+      {{- include "user-manager-server.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "user-mananger-server.selectorLabels" . | nindent 8 }}
+        {{- include "user-manager-server.selectorLabels" . | nindent 8 }}
       annotations:
         checksum/config: {{ sha256sum (toJson .Values) }}
     spec:
       containers:
-      - name: user-mananger-server
+      - name: user-manager-server
         image: "{{ .Values.image.repository }}:{{ default .Chart.Version .Values.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         args:
@@ -61,4 +61,4 @@ spec:
       volumes:
       - name: config
         configMap:
-          name: {{ include "user-mananger-server.fullname" . }}
+          name: {{ include "user-manager-server.fullname" . }}

@@ -1,6 +1,6 @@
 apiVersion: v2
-name: user-mananger-server
-description: A Helm chart for user-mananger-server
+name: user-manager-server
+description: A Helm chart for user-manager-server
 type: application
 version: 0.1.0
 appVersion: 0.1.0
