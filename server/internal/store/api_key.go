@@ -9,9 +9,11 @@ type APIKey struct {
 	gorm.Model
 
 	APIKeyID string `gorm:"uniqueIndex:idx_api_key_api_key_id_tenant_id"`
-	TenantID string `gorm:"uniqueIndex:idx_api_key_api_key_id_tenant_id"`
 
-	Name   string
+	Name string `gorm:"uniqueIndex:idx_api_key_name_tenant_id"`
+
+	TenantID string `gorm:"uniqueIndex:idx_api_key_api_key_id_tenant_id;uniqueIndex:idx_api_key_name_tenant_id"`
+
 	Secret string
 
 	// TODO(kenji): Associate roles.
