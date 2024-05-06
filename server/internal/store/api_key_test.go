@@ -81,3 +81,39 @@ func TestAPIKey(t *testing.T) {
 	assert.Len(t, got, 1)
 	assert.Equal(t, "k1", got[0].APIKeyID)
 }
+
+func TestAPIKeySameName(t *testing.T) {
+	st, tearDown := NewTest(t)
+	defer tearDown()
+
+	_, err := st.CreateAPIKey(APIKeySpec{
+		Key: APIKeyKey{
+			APIKeyID: "k1",
+			TenantID: "t1",
+		},
+		Name:   "n1",
+		Secret: "s1",
+	})
+	assert.NoError(t, err)
+
+	_, err = st.CreateAPIKey(APIKeySpec{
+		Key: APIKeyKey{
+			APIKeyID: "k2",
+			TenantID: "t1",
+		},
+		Name:   "n1",
+		Secret: "s2",
+	})
+	assert.Error(t, err)
+
+	// A different tenant can have the same name.
+	_, err = st.CreateAPIKey(APIKeySpec{
+		Key: APIKeyKey{
+			APIKeyID: "k3",
+			TenantID: "t2",
+		},
+		Name:   "n1",
+		Secret: "s3",
+	})
+	assert.NoError(t, err)
+}
