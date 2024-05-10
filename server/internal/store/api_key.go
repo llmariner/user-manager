@@ -14,6 +14,9 @@ type APIKey struct {
 
 	TenantID string `gorm:"uniqueIndex:idx_api_key_api_key_id_tenant_id;uniqueIndex:idx_api_key_name_tenant_id"`
 
+	OrganizationID string
+	UserID         string
+
 	Secret string
 
 	// TODO(kenji): Associate roles.
@@ -21,8 +24,10 @@ type APIKey struct {
 
 // APIKeyKey represents a key of an API key.
 type APIKeyKey struct {
-	APIKeyID string
-	TenantID string
+	APIKeyID       string
+	TenantID       string
+	OrganizationID string
+	UserID         string
 }
 
 // APIKeySpec is a spec of the API key.
@@ -36,8 +41,10 @@ type APIKeySpec struct {
 // CreateAPIKey creates a new API key.
 func (s *S) CreateAPIKey(spec APIKeySpec) (*APIKey, error) {
 	k := &APIKey{
-		APIKeyID: spec.Key.APIKeyID,
-		TenantID: spec.Key.TenantID,
+		APIKeyID:       spec.Key.APIKeyID,
+		TenantID:       spec.Key.TenantID,
+		OrganizationID: spec.Key.OrganizationID,
+		UserID:         spec.Key.UserID,
 
 		Name:   spec.Name,
 		Secret: spec.Secret,

@@ -12,8 +12,10 @@ func TestAPIKey(t *testing.T) {
 
 	k0, err := st.CreateAPIKey(APIKeySpec{
 		Key: APIKeyKey{
-			APIKeyID: "k0",
-			TenantID: "t0",
+			APIKeyID:       "k0",
+			TenantID:       "t0",
+			OrganizationID: "o0",
+			UserID:         "u0",
 		},
 		Name:   "n0",
 		Secret: "s0",
@@ -23,6 +25,8 @@ func TestAPIKey(t *testing.T) {
 	assert.Equal(t, "t0", k0.TenantID)
 	assert.Equal(t, "n0", k0.Name)
 	assert.Equal(t, "s0", k0.Secret)
+	assert.Equal(t, "o0", k0.OrganizationID)
+	assert.Equal(t, "u0", k0.UserID)
 
 	got, err := st.ListAPIKeysByTenantID("t0")
 	assert.NoError(t, err)
