@@ -55,13 +55,22 @@ func (s *S) CreateAPIKey(spec APIKeySpec) (*APIKey, error) {
 	return k, nil
 }
 
-// ListAPIKeysByTenantID list API keys by a tenant ID.
+// ListAPIKeysByTenantID lists API keys by a tenant ID.
 func (s *S) ListAPIKeysByTenantID(tenantID string) ([]*APIKey, error) {
 	var ks []*APIKey
 	if err := s.db.Where("tenant_id = ?", tenantID).Find(&ks).Error; err != nil {
 		return nil, err
 	}
 	return ks, nil
+}
+
+// GetAPIKeyByNameAndTenantID gets an API key by its name and tenant ID.
+func (s *S) GetAPIKeyByNameAndTenantID(name, tenantID string) (*APIKey, error) {
+	var k APIKey
+	if err := s.db.Where("name = ? AND tenant_id = ?", name, tenantID).Take(&k).Error; err != nil {
+		return nil, err
+	}
+	return &k, nil
 }
 
 // ListAllAPIKeys lists all API keys.

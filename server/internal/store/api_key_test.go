@@ -1,14 +1,20 @@
 package store
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"gorm.io/gorm"
 )
 
 func TestAPIKey(t *testing.T) {
 	st, tearDown := NewTest(t)
 	defer tearDown()
+
+	_, err := st.GetAPIKeyByNameAndTenantID("n0", "t0")
+	assert.Error(t, err)
+	assert.True(t, errors.Is(err, gorm.ErrRecordNotFound))
 
 	k0, err := st.CreateAPIKey(APIKeySpec{
 		Key: APIKeyKey{
@@ -27,6 +33,10 @@ func TestAPIKey(t *testing.T) {
 	assert.Equal(t, "s0", k0.Secret)
 	assert.Equal(t, "o0", k0.OrganizationID)
 	assert.Equal(t, "u0", k0.UserID)
+
+	k, err := st.GetAPIKeyByNameAndTenantID("n0", "t0")
+	assert.NoError(t, err)
+	assert.Equal(t, "k0", k.APIKeyID)
 
 	got, err := st.ListAPIKeysByTenantID("t0")
 	assert.NoError(t, err)
