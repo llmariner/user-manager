@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
+	"github.com/llm-operator/rbac-manager/pkg/auth"
 	v1 "github.com/llm-operator/user-manager/api/v1"
 	"github.com/llm-operator/user-manager/server/internal/store"
 	"google.golang.org/grpc/codes"
@@ -21,14 +22,25 @@ func (s *S) CreateAPIKey(
 	ctx context.Context,
 	req *v1.CreateAPIKeyRequest,
 ) (*v1.APIKey, error) {
+	var userInfo auth.UserInfo
+	if s.enableAuth {
+		i, ok := auth.ExtractUserInfoFromContext(ctx)
+		if !ok {
+			return nil, status.Error(codes.Unauthenticated, "user info not found")
+		}
+		userInfo = *i
+	}
+
 	if req.Name == "" {
 		return nil, status.Error(codes.InvalidArgument, "name is required")
 	}
 
 	spec := store.APIKeySpec{
 		Key: store.APIKeyKey{
-			APIKeyID: newAPIKeyID(),
-			TenantID: fakeTenantID,
+			APIKeyID:       newAPIKeyID(),
+			TenantID:       fakeTenantID,
+			OrganizationID: userInfo.OrganizationID,
+			UserID:         userInfo.UserID,
 		},
 		Name:   req.Name,
 		Secret: newSecret(),
@@ -111,6 +123,12 @@ func toAPIKeyProto(k *store.APIKey, includeSecret bool) *v1.APIKey {
 		CreatedAt: k.CreatedAt.UTC().Unix(),
 		Name:      k.Name,
 		Object:    "user.api_key",
+		User: &v1.User{
+			Id: k.UserID,
+		},
+		Organization: &v1.Organization{
+			Id: k.OrganizationID,
+		},
 	}
 	if includeSecret {
 		kp.Secret = k.Secret
