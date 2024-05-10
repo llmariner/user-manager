@@ -7,7 +7,9 @@ import (
 	v1 "github.com/llm-operator/user-manager/api/v1"
 	"github.com/llm-operator/user-manager/server/internal/store"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 )
 
 func TestAPIKey(t *testing.T) {
@@ -25,6 +27,12 @@ func TestAPIKey(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "dummy", cresp.Name)
 
+	_, err = srv.CreateAPIKey(ctx, &v1.CreateAPIKeyRequest{
+		Name: "dummy",
+	})
+	assert.Error(t, err)
+	assert.Equal(t, codes.AlreadyExists, status.Code(err))
+
 	lresp, err := srv.ListAPIKeys(ctx, &v1.ListAPIKeysRequest{})
 	assert.NoError(t, err)
 	assert.Len(t, lresp.Data, 1)
@@ -41,5 +49,4 @@ func TestAPIKey(t *testing.T) {
 	lresp, err = srv.ListAPIKeys(ctx, &v1.ListAPIKeysRequest{})
 	assert.NoError(t, err)
 	assert.Empty(t, lresp.Data)
-
 }

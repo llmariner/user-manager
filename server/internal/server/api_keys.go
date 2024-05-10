@@ -35,6 +35,16 @@ func (s *S) CreateAPIKey(
 		return nil, status.Error(codes.InvalidArgument, "name is required")
 	}
 
+	// Check if the name is already taken.
+	if _, err := s.store.GetAPIKeyByNameAndTenantID(req.Name, fakeTenantID); err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, status.Errorf(codes.Internal, "get api key: %s", err)
+		}
+		// The key does not exist. Move to creation.
+	} else {
+		return nil, status.Errorf(codes.AlreadyExists, "api key %q already exists", req.Name)
+	}
+
 	spec := store.APIKeySpec{
 		Key: store.APIKeyKey{
 			APIKeyID:       newAPIKeyID(),
