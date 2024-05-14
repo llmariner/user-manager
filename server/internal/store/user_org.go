@@ -2,7 +2,7 @@ package store
 
 import "gorm.io/gorm"
 
-// UserOrganization is a model for user_organization
+// UserOrganization is a model for user_organization.
 type UserOrganization struct {
 	gorm.Model
 

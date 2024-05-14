@@ -6,8 +6,8 @@ import "gorm.io/gorm"
 type Organization struct {
 	gorm.Model
 
-	TenantID       string `gorm:"uniqueIndex:tenant_id_org_id"`
-	OrganizationID string `gorm:"uniqueIndex:tenant_id_org_id"`
+	TenantID       string `gorm:"index"`
+	OrganizationID string `gorm:"uniqueIndex"`
 
 	Title string
 }
