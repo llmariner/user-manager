@@ -8,6 +8,4 @@ type User struct {
 
 	TenantID string `gorm:"uniqueIndex:tenant_id_user_id"`
 	UserID   string `gorm:"uniqueIndex:tenant_id_user_id"`
-
-	Name string
 }

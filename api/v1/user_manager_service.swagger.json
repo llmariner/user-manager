@@ -19,6 +19,126 @@
     "application/json"
   ],
   "paths": {
+    "/v1/organizations": {
+      "get": {
+        "operationId": "UsersService_ListOrganization",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListOrganizationResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "UsersService"
+        ]
+      },
+      "post": {
+        "operationId": "UsersService_CreateOrganization",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1Organization"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreateOrganizationRequest"
+            }
+          }
+        ],
+        "tags": [
+          "UsersService"
+        ]
+      }
+    },
+    "/v1/organizations/{id}": {
+      "delete": {
+        "operationId": "UsersService_DeleteOrganization",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1DeleteOrganizationResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "UsersService"
+        ]
+      }
+    },
+    "/v1/organizations/{organizationId}/users": {
+      "post": {
+        "operationId": "UsersService_AddUserToOrganization",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1AddUserToOrganizationResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "organizationId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UsersServiceAddUserToOrganizationBody"
+            }
+          }
+        ],
+        "tags": [
+          "UsersService"
+        ]
+      }
+    },
     "/v1/users/api_keys": {
       "get": {
         "operationId": "UsersService_ListAPIKeys",
@@ -103,6 +223,14 @@
     }
   },
   "definitions": {
+    "UsersServiceAddUserToOrganizationBody": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        }
+      }
+    },
     "protobufAny": {
       "type": "object",
       "properties": {
@@ -159,10 +287,21 @@
         }
       }
     },
+    "v1AddUserToOrganizationResponse": {
+      "type": "object"
+    },
     "v1CreateAPIKeyRequest": {
       "type": "object",
       "properties": {
         "name": {
+          "type": "string"
+        }
+      }
+    },
+    "v1CreateOrganizationRequest": {
+      "type": "object",
+      "properties": {
+        "title": {
           "type": "string"
         }
       }
@@ -181,6 +320,9 @@
         }
       }
     },
+    "v1DeleteOrganizationResponse": {
+      "type": "object"
+    },
     "v1ListAPIKeysResponse": {
       "type": "object",
       "properties": {
@@ -196,10 +338,25 @@
         }
       }
     },
+    "v1ListOrganizationResponse": {
+      "type": "object",
+      "properties": {
+        "organizations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1Organization"
+          }
+        }
+      }
+    },
     "v1Organization": {
       "type": "object",
       "properties": {
         "id": {
+          "type": "string"
+        },
+        "title": {
           "type": "string"
         }
       }

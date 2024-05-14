@@ -23,6 +23,8 @@ message User {
 
 message Organization {
   string id = 1;
+  string title = 2;
+  int64 created_at = 3;
 }
 
 message CreateAPIKeyRequest {
@@ -47,6 +49,32 @@ message DeleteAPIKeyResponse {
   bool deleted = 3;
 }
 
+message CreateOrganizationRequest {
+  string title = 1;
+}
+
+message ListOrganizationRequest {
+}
+
+message ListOrganizationResponse {
+  repeated Organization organizations = 1;
+}
+
+message DeleteOrganizationRequest {
+  string id = 1;
+}
+
+message DeleteOrganizationResponse {
+}
+
+message AddUserToOrganizationRequest {
+  string organization_id = 1;
+  string user_id = 2;
+}
+
+message AddUserToOrganizationResponse {
+}
+
 service UsersService {
   rpc CreateAPIKey(CreateAPIKeyRequest) returns (APIKey) {
     option (google.api.http) = {
@@ -64,6 +92,30 @@ service UsersService {
   rpc DeleteAPIKey(DeleteAPIKeyRequest) returns (DeleteAPIKeyResponse) {
     option (google.api.http) = {
       delete: "/v1/users/api_keys/{id}"
+    };
+  }
+
+  rpc CreateOrganization(CreateOrganizationRequest) returns (Organization) {
+    option (google.api.http) = {
+      post: "/v1/organizations"
+      body: "*"
+    };
+  }
+  rpc ListOrganization(ListOrganizationRequest) returns (ListOrganizationResponse) {
+    option (google.api.http) = {
+      get: "/v1/organizations"
+    };
+  }
+  rpc DeleteOrganization(DeleteOrganizationRequest) returns (DeleteOrganizationResponse) {
+    option (google.api.http) = {
+      delete: "/v1/organizations/{id}"
+    };
+  }
+
+  rpc AddUserToOrganization(AddUserToOrganizationRequest) returns (AddUserToOrganizationResponse) {
+    option (google.api.http) = {
+      post: "/v1/organizations/{organization_id}/users"
+      body: "*"
     };
   }
 }
