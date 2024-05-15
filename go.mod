@@ -3,7 +3,6 @@ module github.com/llm-operator/user-manager
 go 1.22.2
 
 require (
-	github.com/google/uuid v1.6.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0
 	github.com/llm-operator/rbac-manager v0.26.0
 	github.com/spf13/cobra v1.8.0

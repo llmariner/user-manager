@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 
-	"github.com/google/uuid"
 	"github.com/llm-operator/rbac-manager/pkg/auth"
 	v1 "github.com/llm-operator/user-manager/api/v1"
 	"github.com/llm-operator/user-manager/server/internal/store"
@@ -45,15 +44,24 @@ func (s *S) CreateAPIKey(
 		return nil, status.Errorf(codes.AlreadyExists, "api key %q already exists", req.Name)
 	}
 
+	trackID, err := generateRandomString("key_", 16)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "generate api key id: %s", err)
+	}
+	secKey, err := generateRandomString("sk-", 48)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "generate secret key: %s", err)
+	}
+
 	spec := store.APIKeySpec{
 		Key: store.APIKeyKey{
-			APIKeyID:       newAPIKeyID(),
+			APIKeyID:       trackID,
 			TenantID:       fakeTenantID,
 			OrganizationID: userInfo.OrganizationID,
 			UserID:         userInfo.UserID,
 		},
 		Name:   req.Name,
-		Secret: newSecret(),
+		Secret: secKey,
 	}
 	k, err := s.store.CreateAPIKey(spec)
 	if err != nil {
@@ -144,13 +152,4 @@ func toAPIKeyProto(k *store.APIKey, includeSecret bool) *v1.APIKey {
 		kp.Secret = k.Secret
 	}
 	return kp
-}
-
-func newAPIKeyID() string {
-	return uuid.New().String()
-}
-
-// TODO(kenji): Revisit.
-func newSecret() string {
-	return uuid.New().String()
 }
