@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/llm-operator/user-manager/server/internal/db"
+	"github.com/llm-operator/common/pkg/db"
 	"gopkg.in/yaml.v3"
 )
 

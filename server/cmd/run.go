@@ -7,9 +7,9 @@ import (
 	"net/http"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/llm-operator/common/pkg/db"
 	v1 "github.com/llm-operator/user-manager/api/v1"
 	"github.com/llm-operator/user-manager/server/internal/config"
-	"github.com/llm-operator/user-manager/server/internal/db"
 	"github.com/llm-operator/user-manager/server/internal/server"
 	"github.com/llm-operator/user-manager/server/internal/store"
 	"github.com/spf13/cobra"
