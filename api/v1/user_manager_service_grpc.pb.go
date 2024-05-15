@@ -19,9 +19,13 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	UsersService_CreateAPIKey_FullMethodName = "/llmoperator.users.server.v1.UsersService/CreateAPIKey"
-	UsersService_ListAPIKeys_FullMethodName  = "/llmoperator.users.server.v1.UsersService/ListAPIKeys"
-	UsersService_DeleteAPIKey_FullMethodName = "/llmoperator.users.server.v1.UsersService/DeleteAPIKey"
+	UsersService_CreateAPIKey_FullMethodName          = "/llmoperator.users.server.v1.UsersService/CreateAPIKey"
+	UsersService_ListAPIKeys_FullMethodName           = "/llmoperator.users.server.v1.UsersService/ListAPIKeys"
+	UsersService_DeleteAPIKey_FullMethodName          = "/llmoperator.users.server.v1.UsersService/DeleteAPIKey"
+	UsersService_CreateOrganization_FullMethodName    = "/llmoperator.users.server.v1.UsersService/CreateOrganization"
+	UsersService_ListOrganizations_FullMethodName     = "/llmoperator.users.server.v1.UsersService/ListOrganizations"
+	UsersService_DeleteOrganization_FullMethodName    = "/llmoperator.users.server.v1.UsersService/DeleteOrganization"
+	UsersService_AddUserToOrganization_FullMethodName = "/llmoperator.users.server.v1.UsersService/AddUserToOrganization"
 )
 
 // UsersServiceClient is the client API for UsersService service.
@@ -31,6 +35,10 @@ type UsersServiceClient interface {
 	CreateAPIKey(ctx context.Context, in *CreateAPIKeyRequest, opts ...grpc.CallOption) (*APIKey, error)
 	ListAPIKeys(ctx context.Context, in *ListAPIKeysRequest, opts ...grpc.CallOption) (*ListAPIKeysResponse, error)
 	DeleteAPIKey(ctx context.Context, in *DeleteAPIKeyRequest, opts ...grpc.CallOption) (*DeleteAPIKeyResponse, error)
+	CreateOrganization(ctx context.Context, in *CreateOrganizationRequest, opts ...grpc.CallOption) (*Organization, error)
+	ListOrganizations(ctx context.Context, in *ListOrganizationsRequest, opts ...grpc.CallOption) (*ListOrganizationsResponse, error)
+	DeleteOrganization(ctx context.Context, in *DeleteOrganizationRequest, opts ...grpc.CallOption) (*DeleteOrganizationResponse, error)
+	AddUserToOrganization(ctx context.Context, in *AddUserToOrganizationRequest, opts ...grpc.CallOption) (*AddUserToOrganizationResponse, error)
 }
 
 type usersServiceClient struct {
@@ -68,6 +76,42 @@ func (c *usersServiceClient) DeleteAPIKey(ctx context.Context, in *DeleteAPIKeyR
 	return out, nil
 }
 
+func (c *usersServiceClient) CreateOrganization(ctx context.Context, in *CreateOrganizationRequest, opts ...grpc.CallOption) (*Organization, error) {
+	out := new(Organization)
+	err := c.cc.Invoke(ctx, UsersService_CreateOrganization_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *usersServiceClient) ListOrganizations(ctx context.Context, in *ListOrganizationsRequest, opts ...grpc.CallOption) (*ListOrganizationsResponse, error) {
+	out := new(ListOrganizationsResponse)
+	err := c.cc.Invoke(ctx, UsersService_ListOrganizations_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *usersServiceClient) DeleteOrganization(ctx context.Context, in *DeleteOrganizationRequest, opts ...grpc.CallOption) (*DeleteOrganizationResponse, error) {
+	out := new(DeleteOrganizationResponse)
+	err := c.cc.Invoke(ctx, UsersService_DeleteOrganization_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *usersServiceClient) AddUserToOrganization(ctx context.Context, in *AddUserToOrganizationRequest, opts ...grpc.CallOption) (*AddUserToOrganizationResponse, error) {
+	out := new(AddUserToOrganizationResponse)
+	err := c.cc.Invoke(ctx, UsersService_AddUserToOrganization_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UsersServiceServer is the server API for UsersService service.
 // All implementations must embed UnimplementedUsersServiceServer
 // for forward compatibility
@@ -75,6 +119,10 @@ type UsersServiceServer interface {
 	CreateAPIKey(context.Context, *CreateAPIKeyRequest) (*APIKey, error)
 	ListAPIKeys(context.Context, *ListAPIKeysRequest) (*ListAPIKeysResponse, error)
 	DeleteAPIKey(context.Context, *DeleteAPIKeyRequest) (*DeleteAPIKeyResponse, error)
+	CreateOrganization(context.Context, *CreateOrganizationRequest) (*Organization, error)
+	ListOrganizations(context.Context, *ListOrganizationsRequest) (*ListOrganizationsResponse, error)
+	DeleteOrganization(context.Context, *DeleteOrganizationRequest) (*DeleteOrganizationResponse, error)
+	AddUserToOrganization(context.Context, *AddUserToOrganizationRequest) (*AddUserToOrganizationResponse, error)
 	mustEmbedUnimplementedUsersServiceServer()
 }
 
@@ -90,6 +138,18 @@ func (UnimplementedUsersServiceServer) ListAPIKeys(context.Context, *ListAPIKeys
 }
 func (UnimplementedUsersServiceServer) DeleteAPIKey(context.Context, *DeleteAPIKeyRequest) (*DeleteAPIKeyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteAPIKey not implemented")
+}
+func (UnimplementedUsersServiceServer) CreateOrganization(context.Context, *CreateOrganizationRequest) (*Organization, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateOrganization not implemented")
+}
+func (UnimplementedUsersServiceServer) ListOrganizations(context.Context, *ListOrganizationsRequest) (*ListOrganizationsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListOrganizations not implemented")
+}
+func (UnimplementedUsersServiceServer) DeleteOrganization(context.Context, *DeleteOrganizationRequest) (*DeleteOrganizationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteOrganization not implemented")
+}
+func (UnimplementedUsersServiceServer) AddUserToOrganization(context.Context, *AddUserToOrganizationRequest) (*AddUserToOrganizationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddUserToOrganization not implemented")
 }
 func (UnimplementedUsersServiceServer) mustEmbedUnimplementedUsersServiceServer() {}
 
@@ -158,6 +218,78 @@ func _UsersService_DeleteAPIKey_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UsersService_CreateOrganization_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateOrganizationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServiceServer).CreateOrganization(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UsersService_CreateOrganization_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServiceServer).CreateOrganization(ctx, req.(*CreateOrganizationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UsersService_ListOrganizations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListOrganizationsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServiceServer).ListOrganizations(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UsersService_ListOrganizations_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServiceServer).ListOrganizations(ctx, req.(*ListOrganizationsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UsersService_DeleteOrganization_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteOrganizationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServiceServer).DeleteOrganization(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UsersService_DeleteOrganization_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServiceServer).DeleteOrganization(ctx, req.(*DeleteOrganizationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UsersService_AddUserToOrganization_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddUserToOrganizationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServiceServer).AddUserToOrganization(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UsersService_AddUserToOrganization_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServiceServer).AddUserToOrganization(ctx, req.(*AddUserToOrganizationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UsersService_ServiceDesc is the grpc.ServiceDesc for UsersService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -176,6 +308,22 @@ var UsersService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteAPIKey",
 			Handler:    _UsersService_DeleteAPIKey_Handler,
+		},
+		{
+			MethodName: "CreateOrganization",
+			Handler:    _UsersService_CreateOrganization_Handler,
+		},
+		{
+			MethodName: "ListOrganizations",
+			Handler:    _UsersService_ListOrganizations_Handler,
+		},
+		{
+			MethodName: "DeleteOrganization",
+			Handler:    _UsersService_DeleteOrganization_Handler,
+		},
+		{
+			MethodName: "AddUserToOrganization",
+			Handler:    _UsersService_AddUserToOrganization_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
