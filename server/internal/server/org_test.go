@@ -16,6 +16,7 @@ func TestOrganization(t *testing.T) {
 	defer tearDown()
 
 	srv := New(st)
+	isrv := NewInternal(st)
 	ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs("Authorization", "dummy"))
 
 	for i := 0; i < 2; i++ {
@@ -27,8 +28,11 @@ func TestOrganization(t *testing.T) {
 		assert.Equal(t, title, cresp.Title)
 
 		_, err = srv.AddUserToOrganization(ctx, &v1.AddUserToOrganizationRequest{
-			OrganizationId: cresp.Id,
-			UserId:         "user 1",
+			User: &v1.OrganizationUser{
+				OrganizationId: cresp.Id,
+				UserId:         "user 1",
+				Role:           v1.Role_OWNER,
+			},
 		})
 		assert.NoError(t, err)
 	}
@@ -36,6 +40,10 @@ func TestOrganization(t *testing.T) {
 	lresp, err := srv.ListOrganizations(ctx, &v1.ListOrganizationsRequest{})
 	assert.NoError(t, err)
 	assert.Len(t, lresp.Organizations, 2)
+
+	laresp, err := isrv.store.ListAllOrganizationUsers()
+	assert.NoError(t, err)
+	assert.Len(t, laresp, 2)
 
 	_, err = srv.DeleteOrganization(ctx, &v1.DeleteOrganizationRequest{
 		Id: lresp.Organizations[0].Id,
@@ -46,4 +54,8 @@ func TestOrganization(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, lresp2.Organizations, 1)
 	assert.Equal(t, lresp2.Organizations[0].Id, lresp.Organizations[1].Id)
+
+	laresp2, err := isrv.store.ListAllOrganizationUsers()
+	assert.NoError(t, err)
+	assert.Len(t, laresp2, 1)
 }

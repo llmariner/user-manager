@@ -331,7 +331,8 @@ var UsersService_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	UsersInternalService_ListAPIKeys_FullMethodName = "/llmoperator.users.server.v1.UsersInternalService/ListAPIKeys"
+	UsersInternalService_ListAPIKeys_FullMethodName           = "/llmoperator.users.server.v1.UsersInternalService/ListAPIKeys"
+	UsersInternalService_ListOrganizationUsers_FullMethodName = "/llmoperator.users.server.v1.UsersInternalService/ListOrganizationUsers"
 )
 
 // UsersInternalServiceClient is the client API for UsersInternalService service.
@@ -339,6 +340,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UsersInternalServiceClient interface {
 	ListAPIKeys(ctx context.Context, in *ListAPIKeysRequest, opts ...grpc.CallOption) (*ListAPIKeysResponse, error)
+	ListOrganizationUsers(ctx context.Context, in *ListOrganizationUsersRequest, opts ...grpc.CallOption) (*ListOrganizationUsersResponse, error)
 }
 
 type usersInternalServiceClient struct {
@@ -358,11 +360,21 @@ func (c *usersInternalServiceClient) ListAPIKeys(ctx context.Context, in *ListAP
 	return out, nil
 }
 
+func (c *usersInternalServiceClient) ListOrganizationUsers(ctx context.Context, in *ListOrganizationUsersRequest, opts ...grpc.CallOption) (*ListOrganizationUsersResponse, error) {
+	out := new(ListOrganizationUsersResponse)
+	err := c.cc.Invoke(ctx, UsersInternalService_ListOrganizationUsers_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UsersInternalServiceServer is the server API for UsersInternalService service.
 // All implementations must embed UnimplementedUsersInternalServiceServer
 // for forward compatibility
 type UsersInternalServiceServer interface {
 	ListAPIKeys(context.Context, *ListAPIKeysRequest) (*ListAPIKeysResponse, error)
+	ListOrganizationUsers(context.Context, *ListOrganizationUsersRequest) (*ListOrganizationUsersResponse, error)
 	mustEmbedUnimplementedUsersInternalServiceServer()
 }
 
@@ -372,6 +384,9 @@ type UnimplementedUsersInternalServiceServer struct {
 
 func (UnimplementedUsersInternalServiceServer) ListAPIKeys(context.Context, *ListAPIKeysRequest) (*ListAPIKeysResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListAPIKeys not implemented")
+}
+func (UnimplementedUsersInternalServiceServer) ListOrganizationUsers(context.Context, *ListOrganizationUsersRequest) (*ListOrganizationUsersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListOrganizationUsers not implemented")
 }
 func (UnimplementedUsersInternalServiceServer) mustEmbedUnimplementedUsersInternalServiceServer() {}
 
@@ -404,6 +419,24 @@ func _UsersInternalService_ListAPIKeys_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UsersInternalService_ListOrganizationUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListOrganizationUsersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersInternalServiceServer).ListOrganizationUsers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UsersInternalService_ListOrganizationUsers_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersInternalServiceServer).ListOrganizationUsers(ctx, req.(*ListOrganizationUsersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UsersInternalService_ServiceDesc is the grpc.ServiceDesc for UsersInternalService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -414,6 +447,10 @@ var UsersInternalService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListAPIKeys",
 			Handler:    _UsersInternalService_ListAPIKeys_Handler,
+		},
+		{
+			MethodName: "ListOrganizationUsers",
+			Handler:    _UsersInternalService_ListOrganizationUsers_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

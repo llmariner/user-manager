@@ -26,7 +26,6 @@ func autoMigrate(db *gorm.DB) error {
 		&APIKey{},
 		&Organization{},
 		&User{},
-		&UserOrganization{},
-		&RoleBinding{},
+		&OrganizationUser{},
 	)
 }

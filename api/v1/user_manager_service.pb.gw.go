@@ -258,14 +258,14 @@ func request_UsersService_AddUserToOrganization_0(ctx context.Context, marshaler
 		_   = err
 	)
 
-	val, ok = pathParams["organization_id"]
+	val, ok = pathParams["user.organization_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "organization_id")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user.organization_id")
 	}
 
-	protoReq.OrganizationId, err = runtime.String(val)
+	err = runtime.PopulateFieldFromPath(&protoReq, "user.organization_id", val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "organization_id", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user.organization_id", err)
 	}
 
 	msg, err := client.AddUserToOrganization(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -292,14 +292,14 @@ func local_request_UsersService_AddUserToOrganization_0(ctx context.Context, mar
 		_   = err
 	)
 
-	val, ok = pathParams["organization_id"]
+	val, ok = pathParams["user.organization_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "organization_id")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user.organization_id")
 	}
 
-	protoReq.OrganizationId, err = runtime.String(val)
+	err = runtime.PopulateFieldFromPath(&protoReq, "user.organization_id", val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "organization_id", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user.organization_id", err)
 	}
 
 	msg, err := server.AddUserToOrganization(ctx, &protoReq)
@@ -471,7 +471,7 @@ func RegisterUsersServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/AddUserToOrganization", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/users:addUser"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/AddUserToOrganization", runtime.WithHTTPPathPattern("/v1/organizations/{user.organization_id}/users:addUser"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -667,7 +667,7 @@ func RegisterUsersServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/AddUserToOrganization", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/users:addUser"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/AddUserToOrganization", runtime.WithHTTPPathPattern("/v1/organizations/{user.organization_id}/users:addUser"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -699,7 +699,7 @@ var (
 
 	pattern_UsersService_DeleteOrganization_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "organizations", "id"}, ""))
 
-	pattern_UsersService_AddUserToOrganization_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "organizations", "organization_id", "users"}, "addUser"))
+	pattern_UsersService_AddUserToOrganization_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "organizations", "user.organization_id", "users"}, "addUser"))
 )
 
 var (

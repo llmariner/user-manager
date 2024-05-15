@@ -64,5 +64,6 @@ func (s *S) DeleteOrganization(tenantID, orgID string) error {
 	if res.RowsAffected == 0 {
 		return gorm.ErrRecordNotFound
 	}
-	return nil
+
+	return s.db.Unscoped().Where("organization_id = ?", orgID).Delete(&OrganizationUser{}).Error
 }
