@@ -13,7 +13,7 @@ func TestCreateUserOrganization(t *testing.T) {
 	_, err := s.CreateOrganization("t1", "o1", "Test Organization")
 	assert.NoError(t, err)
 
-	userOrg, err := s.CreateUserOrganization("o1", "user1")
+	userOrg, err := s.CreateUserOrganization("t1", "o1", "user1")
 	assert.NoError(t, err)
 	assert.NotNil(t, userOrg)
 }

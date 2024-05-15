@@ -36,8 +36,8 @@ func (s *S) GetOrganization(orgID string) (*Organization, error) {
 	return &org, nil
 }
 
-// ListOrganization lists all organizations in the tenant.
-func (s *S) ListOrganization(tenantID string) ([]*Organization, error) {
+// ListOrganizations lists all organizations in the tenant.
+func (s *S) ListOrganizations(tenantID string) ([]*Organization, error) {
 	var orgs []*Organization
 	if err := s.db.Where("tenant_id = ?", tenantID).Find(&orgs).Error; err != nil {
 		return nil, err
@@ -46,8 +46,8 @@ func (s *S) ListOrganization(tenantID string) ([]*Organization, error) {
 }
 
 // DeleteOrganization deletes an organization.
-func (s *S) DeleteOrganization(orgID string) error {
-	res := s.db.Unscoped().Where("organization_id = ?", orgID).Delete(&Organization{})
+func (s *S) DeleteOrganization(tenantID, orgID string) error {
+	res := s.db.Unscoped().Where("organization_id = ? AND tenant_id = ?", orgID, tenantID).Delete(&Organization{})
 	if res.Error != nil {
 		return res.Error
 	}

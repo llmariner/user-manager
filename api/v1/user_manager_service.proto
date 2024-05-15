@@ -53,10 +53,10 @@ message CreateOrganizationRequest {
   string title = 1;
 }
 
-message ListOrganizationRequest {
+message ListOrganizationsRequest {
 }
 
-message ListOrganizationResponse {
+message ListOrganizationsResponse {
   repeated Organization organizations = 1;
 }
 
@@ -101,7 +101,7 @@ service UsersService {
       body: "*"
     };
   }
-  rpc ListOrganization(ListOrganizationRequest) returns (ListOrganizationResponse) {
+  rpc ListOrganizations(ListOrganizationsRequest) returns (ListOrganizationsResponse) {
     option (google.api.http) = {
       get: "/v1/organizations"
     };
@@ -114,7 +114,7 @@ service UsersService {
 
   rpc AddUserToOrganization(AddUserToOrganizationRequest) returns (AddUserToOrganizationResponse) {
     option (google.api.http) = {
-      post: "/v1/organizations/{organization_id}/users"
+      post: "/v1/organizations/{organization_id}/users:addUser"
       body: "*"
     };
   }

@@ -32,11 +32,11 @@ func TestOrganization(t *testing.T) {
 
 	_, err = s.CreateOrganization(org.TenantID, "o2", "Test Organization 2")
 	assert.NoError(t, err)
-	gotOrgs, err := s.ListOrganization(org.TenantID)
+	gotOrgs, err := s.ListOrganizations(org.TenantID)
 	assert.NoError(t, err)
 	assert.Len(t, gotOrgs, 2)
 
-	err = s.DeleteOrganization(org.OrganizationID)
+	err = s.DeleteOrganization(org.TenantID, org.OrganizationID)
 	assert.NoError(t, err)
 	gotOrg, err = s.GetOrganization(org.OrganizationID)
 	assert.Error(t, err)

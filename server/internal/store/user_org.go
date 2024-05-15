@@ -1,6 +1,10 @@
 package store
 
-import "gorm.io/gorm"
+import (
+	"errors"
+
+	"gorm.io/gorm"
+)
 
 // UserOrganization is a model for user_organization.
 type UserOrganization struct {
@@ -11,10 +15,13 @@ type UserOrganization struct {
 }
 
 // CreateUserOrganization adds a user to an organization.
-func (s *S) CreateUserOrganization(orgID, userID string) (*UserOrganization, error) {
+func (s *S) CreateUserOrganization(tenantID, orgID, userID string) (*UserOrganization, error) {
 	org, err := s.GetOrganization(orgID)
 	if err != nil {
 		return nil, err
+	}
+	if org.TenantID != tenantID {
+		return nil, errors.New("organization not found")
 	}
 
 	// TODO(aya): Revisit user creation:

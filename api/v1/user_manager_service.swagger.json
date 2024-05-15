@@ -21,12 +21,12 @@
   "paths": {
     "/v1/organizations": {
       "get": {
-        "operationId": "UsersService_ListOrganization",
+        "operationId": "UsersService_ListOrganizations",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1ListOrganizationResponse"
+              "$ref": "#/definitions/v1ListOrganizationsResponse"
             }
           },
           "default": {
@@ -101,7 +101,7 @@
         ]
       }
     },
-    "/v1/organizations/{organizationId}/users": {
+    "/v1/organizations/{organizationId}/users:addUser": {
       "post": {
         "operationId": "UsersService_AddUserToOrganization",
         "responses": {
@@ -338,7 +338,7 @@
         }
       }
     },
-    "v1ListOrganizationResponse": {
+    "v1ListOrganizationsResponse": {
       "type": "object",
       "properties": {
         "organizations": {
@@ -358,6 +358,10 @@
         },
         "title": {
           "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },

@@ -23,7 +23,7 @@ const (
 	UsersService_ListAPIKeys_FullMethodName           = "/llmoperator.users.server.v1.UsersService/ListAPIKeys"
 	UsersService_DeleteAPIKey_FullMethodName          = "/llmoperator.users.server.v1.UsersService/DeleteAPIKey"
 	UsersService_CreateOrganization_FullMethodName    = "/llmoperator.users.server.v1.UsersService/CreateOrganization"
-	UsersService_ListOrganization_FullMethodName      = "/llmoperator.users.server.v1.UsersService/ListOrganization"
+	UsersService_ListOrganizations_FullMethodName     = "/llmoperator.users.server.v1.UsersService/ListOrganizations"
 	UsersService_DeleteOrganization_FullMethodName    = "/llmoperator.users.server.v1.UsersService/DeleteOrganization"
 	UsersService_AddUserToOrganization_FullMethodName = "/llmoperator.users.server.v1.UsersService/AddUserToOrganization"
 )
@@ -36,7 +36,7 @@ type UsersServiceClient interface {
 	ListAPIKeys(ctx context.Context, in *ListAPIKeysRequest, opts ...grpc.CallOption) (*ListAPIKeysResponse, error)
 	DeleteAPIKey(ctx context.Context, in *DeleteAPIKeyRequest, opts ...grpc.CallOption) (*DeleteAPIKeyResponse, error)
 	CreateOrganization(ctx context.Context, in *CreateOrganizationRequest, opts ...grpc.CallOption) (*Organization, error)
-	ListOrganization(ctx context.Context, in *ListOrganizationRequest, opts ...grpc.CallOption) (*ListOrganizationResponse, error)
+	ListOrganizations(ctx context.Context, in *ListOrganizationsRequest, opts ...grpc.CallOption) (*ListOrganizationsResponse, error)
 	DeleteOrganization(ctx context.Context, in *DeleteOrganizationRequest, opts ...grpc.CallOption) (*DeleteOrganizationResponse, error)
 	AddUserToOrganization(ctx context.Context, in *AddUserToOrganizationRequest, opts ...grpc.CallOption) (*AddUserToOrganizationResponse, error)
 }
@@ -85,9 +85,9 @@ func (c *usersServiceClient) CreateOrganization(ctx context.Context, in *CreateO
 	return out, nil
 }
 
-func (c *usersServiceClient) ListOrganization(ctx context.Context, in *ListOrganizationRequest, opts ...grpc.CallOption) (*ListOrganizationResponse, error) {
-	out := new(ListOrganizationResponse)
-	err := c.cc.Invoke(ctx, UsersService_ListOrganization_FullMethodName, in, out, opts...)
+func (c *usersServiceClient) ListOrganizations(ctx context.Context, in *ListOrganizationsRequest, opts ...grpc.CallOption) (*ListOrganizationsResponse, error) {
+	out := new(ListOrganizationsResponse)
+	err := c.cc.Invoke(ctx, UsersService_ListOrganizations_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +120,7 @@ type UsersServiceServer interface {
 	ListAPIKeys(context.Context, *ListAPIKeysRequest) (*ListAPIKeysResponse, error)
 	DeleteAPIKey(context.Context, *DeleteAPIKeyRequest) (*DeleteAPIKeyResponse, error)
 	CreateOrganization(context.Context, *CreateOrganizationRequest) (*Organization, error)
-	ListOrganization(context.Context, *ListOrganizationRequest) (*ListOrganizationResponse, error)
+	ListOrganizations(context.Context, *ListOrganizationsRequest) (*ListOrganizationsResponse, error)
 	DeleteOrganization(context.Context, *DeleteOrganizationRequest) (*DeleteOrganizationResponse, error)
 	AddUserToOrganization(context.Context, *AddUserToOrganizationRequest) (*AddUserToOrganizationResponse, error)
 	mustEmbedUnimplementedUsersServiceServer()
@@ -142,8 +142,8 @@ func (UnimplementedUsersServiceServer) DeleteAPIKey(context.Context, *DeleteAPIK
 func (UnimplementedUsersServiceServer) CreateOrganization(context.Context, *CreateOrganizationRequest) (*Organization, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateOrganization not implemented")
 }
-func (UnimplementedUsersServiceServer) ListOrganization(context.Context, *ListOrganizationRequest) (*ListOrganizationResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListOrganization not implemented")
+func (UnimplementedUsersServiceServer) ListOrganizations(context.Context, *ListOrganizationsRequest) (*ListOrganizationsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListOrganizations not implemented")
 }
 func (UnimplementedUsersServiceServer) DeleteOrganization(context.Context, *DeleteOrganizationRequest) (*DeleteOrganizationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteOrganization not implemented")
@@ -236,20 +236,20 @@ func _UsersService_CreateOrganization_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UsersService_ListOrganization_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListOrganizationRequest)
+func _UsersService_ListOrganizations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListOrganizationsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UsersServiceServer).ListOrganization(ctx, in)
+		return srv.(UsersServiceServer).ListOrganizations(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: UsersService_ListOrganization_FullMethodName,
+		FullMethod: UsersService_ListOrganizations_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UsersServiceServer).ListOrganization(ctx, req.(*ListOrganizationRequest))
+		return srv.(UsersServiceServer).ListOrganizations(ctx, req.(*ListOrganizationsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -314,8 +314,8 @@ var UsersService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _UsersService_CreateOrganization_Handler,
 		},
 		{
-			MethodName: "ListOrganization",
-			Handler:    _UsersService_ListOrganization_Handler,
+			MethodName: "ListOrganizations",
+			Handler:    _UsersService_ListOrganizations_Handler,
 		},
 		{
 			MethodName: "DeleteOrganization",
