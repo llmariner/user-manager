@@ -19,7 +19,7 @@ func (s *S) CreateOrganization(ctx context.Context, req *v1.CreateOrganizationRe
 		return nil, status.Error(codes.InvalidArgument, "title is required")
 	}
 
-	orgID, err := generateOrgID()
+	orgID, err := generateRandomString("org-", 22)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "generate organization id: %s", err)
 	}
@@ -79,7 +79,7 @@ func (s *S) AddUserToOrganization(ctx context.Context, req *v1.AddUserToOrganiza
 	return &v1.AddUserToOrganizationResponse{}, nil
 }
 
-func generateRandomString(n int) (string, error) {
+func generateRandomString(prefix string, n int) (string, error) {
 	numBytes := (n * 3) / 4
 	randBytes := make([]byte, numBytes)
 	if _, err := rand.Read(randBytes); err != nil {
@@ -91,18 +91,6 @@ func generateRandomString(n int) (string, error) {
 
 	if len(randStr) > n {
 		randStr = randStr[:n]
-	}
-	return randStr, nil
-}
-
-func generateOrgID() (string, error) {
-	const (
-		prefix = "org-"
-		length = 22
-	)
-	randStr, err := generateRandomString(length)
-	if err != nil {
-		return "", err
 	}
 	return prefix + randStr, nil
 }
