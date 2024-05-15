@@ -28,11 +28,7 @@ func (s *S) CreateOrganization(ctx context.Context, req *v1.CreateOrganizationRe
 		return nil, status.Errorf(codes.Internal, "create organization: %s", err)
 	}
 
-	return &v1.Organization{
-		Id:        org.OrganizationID,
-		Title:     org.Title,
-		CreatedAt: org.CreatedAt.UTC().Unix(),
-	}, nil
+	return org.ToProto(), nil
 }
 
 // ListOrganizations lists all organizations.
@@ -44,10 +40,7 @@ func (s *S) ListOrganizations(ctx context.Context, req *v1.ListOrganizationsRequ
 
 	var orgProtos []*v1.Organization
 	for _, org := range orgs {
-		orgProtos = append(orgProtos, &v1.Organization{
-			Id:    org.OrganizationID,
-			Title: org.Title,
-		})
+		orgProtos = append(orgProtos, org.ToProto())
 	}
 	return &v1.ListOrganizationsResponse{
 		Organizations: orgProtos,

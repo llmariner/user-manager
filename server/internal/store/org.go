@@ -1,6 +1,7 @@
 package store
 
 import (
+	v1 "github.com/llm-operator/user-manager/api/v1"
 	"gorm.io/gorm"
 )
 
@@ -12,6 +13,15 @@ type Organization struct {
 	OrganizationID string `gorm:"uniqueIndex"`
 
 	Title string
+}
+
+// ToProto converts the organization to proto.
+func (o *Organization) ToProto() *v1.Organization {
+	return &v1.Organization{
+		Id:        o.OrganizationID,
+		Title:     o.Title,
+		CreatedAt: o.CreatedAt.UTC().Unix(),
+	}
 }
 
 // CreateOrganization creates a new organization.
