@@ -101,7 +101,7 @@
         ]
       }
     },
-    "/v1/organizations/{organizationId}/users:addUser": {
+    "/v1/organizations/{user.organizationId}/users:addUser": {
       "post": {
         "operationId": "UsersService_AddUserToOrganization",
         "responses": {
@@ -120,7 +120,7 @@
         },
         "parameters": [
           {
-            "name": "organizationId",
+            "name": "user.organizationId",
             "in": "path",
             "required": true,
             "type": "string"
@@ -226,8 +226,16 @@
     "UsersServiceAddUserToOrganizationBody": {
       "type": "object",
       "properties": {
-        "userId": {
-          "type": "string"
+        "user": {
+          "type": "object",
+          "properties": {
+            "userId": {
+              "type": "string"
+            },
+            "role": {
+              "$ref": "#/definitions/v1Role"
+            }
+          }
         }
       }
     },
@@ -338,6 +346,18 @@
         }
       }
     },
+    "v1ListOrganizationUsersResponse": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1OrganizationUser"
+          }
+        }
+      }
+    },
     "v1ListOrganizationsResponse": {
       "type": "object",
       "properties": {
@@ -364,6 +384,29 @@
           "format": "int64"
         }
       }
+    },
+    "v1OrganizationUser": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "organizationId": {
+          "type": "string"
+        },
+        "role": {
+          "$ref": "#/definitions/v1Role"
+        }
+      }
+    },
+    "v1Role": {
+      "type": "string",
+      "enum": [
+        "UNSPECIFIED",
+        "OWNER",
+        "READER"
+      ],
+      "default": "UNSPECIFIED"
     },
     "v1User": {
       "type": "object",

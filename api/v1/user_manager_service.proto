@@ -21,6 +21,18 @@ message User {
   string id = 1;
 }
 
+enum Role {
+  UNSPECIFIED = 0;
+  OWNER = 1;
+  READER = 2;
+}
+
+message OrganizationUser {
+  string user_id = 1;
+  string organization_id = 2;
+  Role role = 3;
+}
+
 message Organization {
   string id = 1;
   string title = 2;
@@ -68,11 +80,17 @@ message DeleteOrganizationResponse {
 }
 
 message AddUserToOrganizationRequest {
-  string organization_id = 1;
-  string user_id = 2;
+  OrganizationUser user = 1;
 }
 
 message AddUserToOrganizationResponse {
+}
+
+message ListOrganizationUsersRequest {
+}
+
+message ListOrganizationUsersResponse {
+  repeated OrganizationUser users = 1;
 }
 
 service UsersService {
@@ -114,7 +132,7 @@ service UsersService {
 
   rpc AddUserToOrganization(AddUserToOrganizationRequest) returns (AddUserToOrganizationResponse) {
     option (google.api.http) = {
-      post: "/v1/organizations/{organization_id}/users:addUser"
+      post: "/v1/organizations/{user.organization_id}/users:addUser"
       body: "*"
     };
   }
@@ -122,5 +140,7 @@ service UsersService {
 
 service UsersInternalService {
   rpc ListAPIKeys(ListAPIKeysRequest) returns (ListAPIKeysResponse) {
+  }
+  rpc ListOrganizationUsers(ListOrganizationUsersRequest) returns (ListOrganizationUsersResponse) {
   }
 }
