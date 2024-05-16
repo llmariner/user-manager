@@ -57,13 +57,14 @@ func (s *S) ListOrganizations(tenantID string) ([]*Organization, error) {
 
 // DeleteOrganization deletes an organization.
 func (s *S) DeleteOrganization(tenantID, orgID string) error {
-	res := s.db.Unscoped().Where("organization_id = ? AND tenant_id = ?", orgID, tenantID).Delete(&Organization{})
-	if res.Error != nil {
-		return res.Error
-	}
-	if res.RowsAffected == 0 {
-		return gorm.ErrRecordNotFound
-	}
-
-	return s.db.Unscoped().Where("organization_id = ?", orgID).Delete(&OrganizationUser{}).Error
+	return s.db.Transaction(func(tx *gorm.DB) error {
+		res := tx.Unscoped().Where("organization_id = ? AND tenant_id = ?", orgID, tenantID).Delete(&Organization{})
+		if res.Error != nil {
+			return res.Error
+		}
+		if res.RowsAffected == 0 {
+			return gorm.ErrRecordNotFound
+		}
+		return tx.Unscoped().Where("organization_id = ?", orgID).Delete(&OrganizationUser{}).Error
+	})
 }

@@ -76,6 +76,9 @@ func (s *S) AddUserToOrganization(ctx context.Context, req *v1.AddUserToOrganiza
 	}
 
 	if _, err := s.store.CreateOrganizationUser(fakeTenantID, req.User.OrganizationId, req.User.UserId, req.User.Role.String()); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, status.Errorf(codes.FailedPrecondition, "organization %q not found", req.User.OrganizationId)
+		}
 		return nil, status.Errorf(codes.Internal, "add user to organization: %s", err)
 	}
 
