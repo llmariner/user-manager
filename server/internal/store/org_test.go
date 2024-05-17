@@ -14,12 +14,13 @@ func TestOrganization(t *testing.T) {
 	defer tearDown()
 
 	org := &Organization{
-		TenantID:       "t1",
-		OrganizationID: "o1",
-		Title:          "Test Organization",
+		TenantID:            "t1",
+		OrganizationID:      "o1",
+		Title:               "Test Organization",
+		KubernetesNamespace: "test-namespace",
 	}
 
-	gotOrg, err := s.CreateOrganization(org.TenantID, org.OrganizationID, org.Title)
+	gotOrg, err := s.CreateOrganization(org.TenantID, org.OrganizationID, org.Title, org.KubernetesNamespace)
 	assert.NoError(t, err)
 	assert.NotNil(t, gotOrg)
 	assert.Equal(t, org.TenantID, gotOrg.TenantID)
@@ -48,7 +49,7 @@ func TestOrganization(t *testing.T) {
 	assert.Error(t, err)
 	assert.True(t, errors.Is(err, gorm.ErrRecordNotFound))
 
-	_, err = s.CreateOrganization(org.TenantID, "o2", "Test Organization 2")
+	_, err = s.CreateOrganization(org.TenantID, "o2", "Test Organization 2", "ns")
 	assert.NoError(t, err)
 	gotOrgs, err := s.ListOrganizations(org.TenantID)
 	assert.NoError(t, err)
@@ -65,13 +66,13 @@ func TestOrganization_UniqueConstraint(t *testing.T) {
 	s, tearDown := NewTest(t)
 	defer tearDown()
 
-	_, err := s.CreateOrganization("t1", "o1", "Test Organization")
+	_, err := s.CreateOrganization("t1", "o1", "Test Organization", "ns")
 	assert.NoError(t, err)
 
-	_, err = s.CreateOrganization("t1", "o2", "Test Organization")
+	_, err = s.CreateOrganization("t1", "o2", "Test Organization", "ns")
 	assert.Error(t, err)
 	assert.True(t, gerrors.IsUniqueConstraintViolation(err))
 
-	_, err = s.CreateOrganization("t2", "o3", "Test Organization")
+	_, err = s.CreateOrganization("t2", "o3", "Test Organization", "ns")
 	assert.NoError(t, err)
 }

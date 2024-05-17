@@ -364,6 +364,10 @@
       "properties": {
         "title": {
           "type": "string"
+        },
+        "kubernetesNamespace": {
+          "type": "string",
+          "description": "kubernetes_namespace is the namespace where the fine-tuning jobs for the organization run."
         }
       }
     },
@@ -427,6 +431,9 @@
           "type": "string"
         },
         "title": {
+          "type": "string"
+        },
+        "kubernetesNamespace": {
           "type": "string"
         },
         "createdAt": {

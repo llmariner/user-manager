@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
+	"log"
 	"strings"
 
 	v1 "github.com/llm-operator/user-manager/api/v1"
@@ -13,6 +14,7 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"gorm.io/gorm"
+	"k8s.io/apimachinery/pkg/api/validation"
 )
 
 // CreateOrganization creates a new organization.
@@ -20,12 +22,19 @@ func (s *S) CreateOrganization(ctx context.Context, req *v1.CreateOrganizationRe
 	if req.Title == "" {
 		return nil, status.Error(codes.InvalidArgument, "title is required")
 	}
+	if req.KubernetesNamespace == "" {
+		return nil, status.Error(codes.InvalidArgument, "kubernetes namespace is required")
+	}
+
+	if errs := validation.ValidateNamespaceName(req.KubernetesNamespace, false); len(errs) != 0 {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid kubernetes namespace: %s", errs)
+	}
 
 	orgID, err := generateRandomString("org-", 22)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "generate organization id: %s", err)
 	}
-	org, err := s.store.CreateOrganization(fakeTenantID, orgID, req.Title)
+	org, err := s.store.CreateOrganization(fakeTenantID, orgID, req.Title, req.KubernetesNamespace)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "create organization: %s", err)
 	}
@@ -156,6 +165,7 @@ func (s *S) validateOrgID(orgID string) error {
 // TODO(kenji): This is not the best place for this function as there is nothing related to
 // the server itself.
 func (s *S) CreateDefaultOrganization(ctx context.Context, c *config.DefaultOrganizationConfig) error {
+	log.Printf("Creating default org %q", c.Title)
 	_, err := s.store.GetOrganizationByTenantIDAndTitle(fakeTenantID, c.Title)
 	if err == nil {
 		// Do nothing.
@@ -166,7 +176,10 @@ func (s *S) CreateDefaultOrganization(ctx context.Context, c *config.DefaultOrga
 		return err
 	}
 
-	org, err := s.CreateOrganization(ctx, &v1.CreateOrganizationRequest{Title: c.Title})
+	org, err := s.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
+		Title:               c.Title,
+		KubernetesNamespace: c.KubernetesNamespace,
+	})
 	if err != nil {
 		return err
 	}

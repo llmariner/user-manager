@@ -2,6 +2,12 @@ httpPort: 8080
 grpcPort: 8081
 internalGrpcPort: 8082
 
+defaultOrganization:
+  title: Default
+  kubernetesNamespace: default
+  userIds:
+  - admin@example.com
+
 debug:
   standalone: true
   sqlitePath: /tmp/user_manager.db

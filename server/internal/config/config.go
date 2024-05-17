@@ -10,8 +10,23 @@ import (
 
 // DefaultOrganizationConfig is the default organization configuration.
 type DefaultOrganizationConfig struct {
-	Title   string   `yaml:"title"`
-	UserIDs []string `yaml:"userIds"`
+	Title               string   `yaml:"title"`
+	KubernetesNamespace string   `yaml:"kubernetesNamespace"`
+	UserIDs             []string `yaml:"userIds"`
+}
+
+// validate validates the configuration.
+func (c *DefaultOrganizationConfig) validate() error {
+	if c.Title == "" {
+		return fmt.Errorf("title must be set")
+	}
+	if c.KubernetesNamespace == "" {
+		return fmt.Errorf("kubernetes namespace must be set")
+	}
+	if len(c.UserIDs) == 0 {
+		return fmt.Errorf("userIds must be set")
+	}
+	return nil
 }
 
 // DebugConfig is the debug configuration.
@@ -72,6 +87,10 @@ func (c *Config) Validate() error {
 		if err := c.Database.Validate(); err != nil {
 			return fmt.Errorf("database: %s", err)
 		}
+	}
+
+	if err := c.DefaultOrganization.validate(); err != nil {
+		return err
 	}
 
 	if err := c.AuthConfig.validate(); err != nil {
