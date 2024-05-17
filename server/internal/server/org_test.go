@@ -55,7 +55,7 @@ func TestOrganization(t *testing.T) {
 	assert.Len(t, lresp2.Organizations, 1)
 	assert.Equal(t, lresp2.Organizations[0].Id, lresp.Organizations[1].Id)
 
-	laresp2, err := isrv.store.ListAllOrganizationUsers()
+	laresp2, err := isrv.ListOrganizationUsers(ctx, &v1.ListOrganizationUsersRequest{})
 	assert.NoError(t, err)
-	assert.Len(t, laresp2, 1)
+	assert.Len(t, laresp2.Users, 1)
 }
