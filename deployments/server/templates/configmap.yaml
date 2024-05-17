@@ -9,6 +9,10 @@ data:
     httpPort: {{ .Values.httpPort }}
     grpcPort: {{ .Values.grpcPort }}
     internalGrpcPort: {{ .Values.internalGrpcPort }}
+    defaultOrganization:
+      title: {{ .Values.defaultOrganization.title }}
+      userIds:
+      {{- toYaml .Values.defaultOrganization.userIds | nindent 6 }}
     database:
       host: {{ .Values.global.database.host }}
       port: {{ .Values.global.database.port }}

@@ -87,10 +87,17 @@ func run(ctx context.Context, c *config.Config) error {
 		errCh <- http.ListenAndServe(fmt.Sprintf(":%d", c.HTTPPort), mux)
 	}()
 
+	s := server.New(st)
 	go func() {
-		s := server.New(st)
 		errCh <- s.Run(ctx, c.GRPCPort, c.AuthConfig)
 	}()
+
+	if do := &c.DefaultOrganization; do.Title != "" {
+		log.Printf("Creating default org %q", do.Title)
+		if err := s.CreateDefaultOrganization(ctx, do); err != nil {
+			return err
+		}
+	}
 
 	go func() {
 		s := server.NewInternal(st)

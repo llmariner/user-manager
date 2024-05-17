@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	v1 "github.com/llm-operator/user-manager/api/v1"
+	"github.com/llm-operator/user-manager/server/internal/config"
 	"github.com/llm-operator/user-manager/server/internal/store"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc/metadata"
@@ -58,4 +59,34 @@ func TestOrganization(t *testing.T) {
 	laresp2, err := isrv.ListOrganizationUsers(ctx, &v1.ListOrganizationUsersRequest{})
 	assert.NoError(t, err)
 	assert.Len(t, laresp2.Users, 1)
+}
+
+func TestCreateDefaultOrganization(t *testing.T) {
+	st, tearDown := store.NewTest(t)
+	defer tearDown()
+
+	srv := New(st)
+	c := &config.DefaultOrganizationConfig{
+		Title: "default",
+		UserIDs: []string{
+			"admin",
+		},
+	}
+	err := srv.CreateDefaultOrganization(context.Background(), c)
+	assert.NoError(t, err)
+
+	o, err := st.GetOrganizationByTenantIDAndTitle(fakeTenantID, "default")
+	assert.NoError(t, err)
+
+	users, err := st.ListAllOrganizationUsers()
+	assert.NoError(t, err)
+	assert.Len(t, users, 1)
+	u := users[0]
+	assert.Equal(t, o.OrganizationID, u.OrganizationID)
+	assert.Equal(t, "admin", u.UserID)
+	assert.Equal(t, v1.Role_OWNER.String(), u.Role)
+
+	// Calling again is no-op.
+	err = srv.CreateDefaultOrganization(context.Background(), c)
+	assert.NoError(t, err)
 }
