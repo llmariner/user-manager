@@ -55,3 +55,15 @@ func (s *S) ListAllOrganizationUsers() ([]OrganizationUser, error) {
 	}
 	return users, nil
 }
+
+// DeleteOrganizationUser deletes a organization user.
+func (s *S) DeleteOrganizationUser(orgID, userID string) error {
+	res := s.db.Unscoped().Where("organization_id = ? AND user_id = ?", orgID, userID).Delete(&OrganizationUser{})
+	if err := res.Error; err != nil {
+		return err
+	}
+	if res.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
+}

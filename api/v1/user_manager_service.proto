@@ -3,6 +3,7 @@ syntax = "proto3";
 package llmoperator.users.server.v1;
 
 import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
 
 option go_package = "github.com/llm-operator/user-manager/api/v1";
 
@@ -94,6 +95,17 @@ message ListOrganizationUsersResponse {
   repeated OrganizationUser users = 1;
 }
 
+message DeleteOrganizationUserRequest {
+  string organization_id = 1;
+  string user_id = 2;
+}
+
+message DeleteOrganizationUserResponse {
+  string id = 1;
+  string object = 2;
+  bool deleted = 3;
+}
+
 service UsersService {
   rpc CreateAPIKey(CreateAPIKeyRequest) returns (APIKey) {
     option (google.api.http) = {
@@ -137,12 +149,17 @@ service UsersService {
       body: "*"
     };
   }
-
   rpc ListOrganizationUsers(ListOrganizationUsersRequest) returns (ListOrganizationUsersResponse) {
     option (google.api.http) = {
       get: "/v1/organizations/{organization_id}/users"
     };
   }
+  rpc DeleteOrganizationUser(DeleteOrganizationUserRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1/organizations/{organization_id}/users/{user_id}"
+    };
+  }
+
 }
 
 service UsersInternalService {

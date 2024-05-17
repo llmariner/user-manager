@@ -7,6 +7,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -26,6 +27,7 @@ type UsersServiceClient interface {
 	DeleteOrganization(ctx context.Context, in *DeleteOrganizationRequest, opts ...grpc.CallOption) (*DeleteOrganizationResponse, error)
 	CreateOrganizationUser(ctx context.Context, in *CreateOrganizationUserRequest, opts ...grpc.CallOption) (*OrganizationUser, error)
 	ListOrganizationUsers(ctx context.Context, in *ListOrganizationUsersRequest, opts ...grpc.CallOption) (*ListOrganizationUsersResponse, error)
+	DeleteOrganizationUser(ctx context.Context, in *DeleteOrganizationUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type usersServiceClient struct {
@@ -108,6 +110,15 @@ func (c *usersServiceClient) ListOrganizationUsers(ctx context.Context, in *List
 	return out, nil
 }
 
+func (c *usersServiceClient) DeleteOrganizationUser(ctx context.Context, in *DeleteOrganizationUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersService/DeleteOrganizationUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UsersServiceServer is the server API for UsersService service.
 // All implementations must embed UnimplementedUsersServiceServer
 // for forward compatibility
@@ -120,6 +131,7 @@ type UsersServiceServer interface {
 	DeleteOrganization(context.Context, *DeleteOrganizationRequest) (*DeleteOrganizationResponse, error)
 	CreateOrganizationUser(context.Context, *CreateOrganizationUserRequest) (*OrganizationUser, error)
 	ListOrganizationUsers(context.Context, *ListOrganizationUsersRequest) (*ListOrganizationUsersResponse, error)
+	DeleteOrganizationUser(context.Context, *DeleteOrganizationUserRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedUsersServiceServer()
 }
 
@@ -150,6 +162,9 @@ func (UnimplementedUsersServiceServer) CreateOrganizationUser(context.Context, *
 }
 func (UnimplementedUsersServiceServer) ListOrganizationUsers(context.Context, *ListOrganizationUsersRequest) (*ListOrganizationUsersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListOrganizationUsers not implemented")
+}
+func (UnimplementedUsersServiceServer) DeleteOrganizationUser(context.Context, *DeleteOrganizationUserRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteOrganizationUser not implemented")
 }
 func (UnimplementedUsersServiceServer) mustEmbedUnimplementedUsersServiceServer() {}
 
@@ -308,6 +323,24 @@ func _UsersService_ListOrganizationUsers_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UsersService_DeleteOrganizationUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteOrganizationUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServiceServer).DeleteOrganizationUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/llmoperator.users.server.v1.UsersService/DeleteOrganizationUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServiceServer).DeleteOrganizationUser(ctx, req.(*DeleteOrganizationUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UsersService_ServiceDesc is the grpc.ServiceDesc for UsersService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -346,6 +379,10 @@ var UsersService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListOrganizationUsers",
 			Handler:    _UsersService_ListOrganizationUsers_Handler,
+		},
+		{
+			MethodName: "DeleteOrganizationUser",
+			Handler:    _UsersService_DeleteOrganizationUser_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
