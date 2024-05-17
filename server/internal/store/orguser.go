@@ -9,8 +9,8 @@ import (
 type OrganizationUser struct {
 	gorm.Model
 
-	UserID         string `gorm:"uniqueIndex:user_id_org_id"`
 	OrganizationID string `gorm:"uniqueIndex:user_id_org_id"`
+	UserID         string `gorm:"uniqueIndex:user_id_org_id"`
 
 	Role string
 }
@@ -18,8 +18,8 @@ type OrganizationUser struct {
 // ToProto converts the model to Porto.
 func (o *OrganizationUser) ToProto() *v1.OrganizationUser {
 	return &v1.OrganizationUser{
-		UserId:         o.UserID,
 		OrganizationId: o.OrganizationID,
+		UserId:         o.UserID,
 		Role:           v1.Role(v1.Role_value[o.Role]),
 	}
 }
@@ -37,8 +37,8 @@ func (s *S) CreateOrganizationUser(tenantID, orgID, userID, role string) (*Organ
 	// TODO(aya): rethink user validation: retrieving user information from dex?
 
 	orgusr := &OrganizationUser{
-		UserID:         userID,
 		OrganizationID: orgID,
+		UserID:         userID,
 		Role:           role,
 	}
 	if err := s.db.Create(orgusr).Error; err != nil {
