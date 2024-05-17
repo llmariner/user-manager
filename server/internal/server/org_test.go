@@ -28,12 +28,10 @@ func TestOrganization(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, title, cresp.Title)
 
-		_, err = srv.AddUserToOrganization(ctx, &v1.AddUserToOrganizationRequest{
-			User: &v1.OrganizationUser{
-				OrganizationId: cresp.Id,
-				UserId:         "user 1",
-				Role:           v1.Role_OWNER,
-			},
+		_, err = srv.CreateOrganizationUser(ctx, &v1.CreateOrganizationUserRequest{
+			OrganizationId: cresp.Id,
+			UserId:         "user 1",
+			Role:           v1.Role_OWNER,
 		})
 		assert.NoError(t, err)
 	}

@@ -64,26 +64,27 @@ func (s *S) DeleteOrganization(ctx context.Context, req *v1.DeleteOrganizationRe
 	return &v1.DeleteOrganizationResponse{}, nil
 }
 
-// AddUserToOrganization adds a user to an organization.
-func (s *S) AddUserToOrganization(ctx context.Context, req *v1.AddUserToOrganizationRequest) (*v1.AddUserToOrganizationResponse, error) {
-	if req.User.OrganizationId == "" {
+// CreateOrganizationUser adds a user to an organization.
+func (s *S) CreateOrganizationUser(ctx context.Context, req *v1.CreateOrganizationUserRequest) (*v1.OrganizationUser, error) {
+	if req.OrganizationId == "" {
 		return nil, status.Error(codes.InvalidArgument, "organization id is required")
 	}
-	if req.User.UserId == "" {
+	if req.UserId == "" {
 		return nil, status.Error(codes.InvalidArgument, "user id is required")
 	}
-	if req.User.Role == v1.Role_UNSPECIFIED {
+	if req.Role == v1.Role_UNSPECIFIED {
 		return nil, status.Error(codes.InvalidArgument, "role is required")
 	}
 
-	if _, err := s.store.CreateOrganizationUser(fakeTenantID, req.User.OrganizationId, req.User.UserId, req.User.Role.String()); err != nil {
+	ou, err := s.store.CreateOrganizationUser(fakeTenantID, req.OrganizationId, req.UserId, req.Role.String())
+	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, status.Errorf(codes.FailedPrecondition, "organization %q not found", req.User.OrganizationId)
+			return nil, status.Errorf(codes.FailedPrecondition, "organization %q not found", req.OrganizationId)
 		}
 		return nil, status.Errorf(codes.Internal, "add user to organization: %s", err)
 	}
 
-	return &v1.AddUserToOrganizationResponse{}, nil
+	return ou.ToProto(), nil
 }
 
 // CreateDefaultOrganization creates the default org.
@@ -106,12 +107,10 @@ func (s *S) CreateDefaultOrganization(ctx context.Context, c *config.DefaultOrga
 	}
 
 	for _, uid := range c.UserIDs {
-		if _, err := s.AddUserToOrganization(ctx, &v1.AddUserToOrganizationRequest{
-			User: &v1.OrganizationUser{
-				OrganizationId: org.Id,
-				UserId:         uid,
-				Role:           v1.Role_OWNER,
-			},
+		if _, err := s.CreateOrganizationUser(ctx, &v1.CreateOrganizationUserRequest{
+			OrganizationId: org.Id,
+			UserId:         uid,
+			Role:           v1.Role_OWNER,
 		}); err != nil {
 			return err
 		}

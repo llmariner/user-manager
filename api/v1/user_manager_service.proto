@@ -79,11 +79,10 @@ message DeleteOrganizationRequest {
 message DeleteOrganizationResponse {
 }
 
-message AddUserToOrganizationRequest {
-  OrganizationUser user = 1;
-}
-
-message AddUserToOrganizationResponse {
+message CreateOrganizationUserRequest {
+  string organization_id = 1;
+  string user_id = 2;
+  Role role = 3;
 }
 
 message ListOrganizationUsersRequest {
@@ -130,9 +129,9 @@ service UsersService {
     };
   }
 
-  rpc AddUserToOrganization(AddUserToOrganizationRequest) returns (AddUserToOrganizationResponse) {
+  rpc CreateOrganizationUser(CreateOrganizationUserRequest) returns (OrganizationUser) {
     option (google.api.http) = {
-      post: "/v1/organizations/{user.organization_id}/users:addUser"
+      post: "/v1/organizations/{organization_id}/users"
       body: "*"
     };
   }
