@@ -8,6 +8,12 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// DefaultOrganizationConfig is the default organization configuration.
+type DefaultOrganizationConfig struct {
+	Title   string   `yaml:"title"`
+	UserIDs []string `yaml:"userIds"`
+}
+
 // DebugConfig is the debug configuration.
 type DebugConfig struct {
 	Standalone bool   `yaml:"standalone"`
@@ -38,6 +44,8 @@ type Config struct {
 	InternalGRPCPort int `yaml:"internalGrpcPort"`
 
 	Database db.Config `yaml:"database"`
+
+	DefaultOrganization DefaultOrganizationConfig `yaml:"defaultOrganization"`
 
 	Debug DebugConfig `yaml:"debug"`
 

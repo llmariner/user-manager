@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	v1 "github.com/llm-operator/user-manager/api/v1"
+	"github.com/llm-operator/user-manager/server/internal/config"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
@@ -83,6 +84,39 @@ func (s *S) AddUserToOrganization(ctx context.Context, req *v1.AddUserToOrganiza
 	}
 
 	return &v1.AddUserToOrganizationResponse{}, nil
+}
+
+// CreateDefaultOrganization creates the default org.
+// TODO(kenji): This is not the best place for this function as there is nothing related to
+// the server itself.
+func (s *S) CreateDefaultOrganization(ctx context.Context, c *config.DefaultOrganizationConfig) error {
+	_, err := s.store.GetOrganizationByTenantIDAndTitle(fakeTenantID, c.Title)
+	if err == nil {
+		// Do nothing.
+		return nil
+	}
+
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
+
+	org, err := s.CreateOrganization(ctx, &v1.CreateOrganizationRequest{Title: c.Title})
+	if err != nil {
+		return err
+	}
+
+	for _, uid := range c.UserIDs {
+		if _, err := s.AddUserToOrganization(ctx, &v1.AddUserToOrganizationRequest{
+			User: &v1.OrganizationUser{
+				OrganizationId: org.Id,
+				UserId:         uid,
+				Role:           v1.Role_OWNER,
+			},
+		}); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // ListOrganizationUsers lists organization users.

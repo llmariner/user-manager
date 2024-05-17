@@ -9,10 +9,10 @@ import (
 type Organization struct {
 	gorm.Model
 
-	TenantID       string `gorm:"index"`
+	TenantID       string `gorm:"index;uniqueIndex:idx_orgs_tenant_id_title"`
 	OrganizationID string `gorm:"uniqueIndex"`
 
-	Title string
+	Title string `gorm:"uniqueIndex:idx_orgs_tenant_id_title"`
 }
 
 // ToProto converts the organization to proto.
@@ -41,6 +41,15 @@ func (s *S) CreateOrganization(tenantID, orgID, title string) (*Organization, er
 func (s *S) GetOrganization(orgID string) (*Organization, error) {
 	var org Organization
 	if err := s.db.Where("organization_id = ?", orgID).First(&org).Error; err != nil {
+		return nil, err
+	}
+	return &org, nil
+}
+
+// GetOrganizationByTenantIDAndTitle gets an organization ID and a title.
+func (s *S) GetOrganizationByTenantIDAndTitle(tenantID, title string) (*Organization, error) {
+	var org Organization
+	if err := s.db.Where("tenant_id = ? AND title = ?", tenantID, title).First(&org).Error; err != nil {
 		return nil, err
 	}
 	return &org, nil
