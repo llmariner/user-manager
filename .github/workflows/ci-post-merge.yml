@@ -82,7 +82,7 @@ jobs:
       uses: Azure/setup-helm@v4
     - name: Set up charts directory
       run: mkdir charts
-    - name: build dispatcher helm chart
+    - name: build server helm chart
       run: helm package --version ${{ needs.update-tag.outputs.new_version }} --destination ./charts ./deployments/server
     - name: Rebuild index.yaml and push
       run: |
