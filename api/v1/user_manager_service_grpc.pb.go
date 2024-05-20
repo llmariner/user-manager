@@ -28,6 +28,12 @@ type UsersServiceClient interface {
 	CreateOrganizationUser(ctx context.Context, in *CreateOrganizationUserRequest, opts ...grpc.CallOption) (*OrganizationUser, error)
 	ListOrganizationUsers(ctx context.Context, in *ListOrganizationUsersRequest, opts ...grpc.CallOption) (*ListOrganizationUsersResponse, error)
 	DeleteOrganizationUser(ctx context.Context, in *DeleteOrganizationUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	CreateProject(ctx context.Context, in *CreateProjectRequest, opts ...grpc.CallOption) (*Project, error)
+	ListProjects(ctx context.Context, in *ListProjectsRequest, opts ...grpc.CallOption) (*ListProjectsResponse, error)
+	DeleteProject(ctx context.Context, in *DeleteProjectRequest, opts ...grpc.CallOption) (*DeleteProjectResponse, error)
+	CreateProjectUser(ctx context.Context, in *CreateProjectUserRequest, opts ...grpc.CallOption) (*ProjectUser, error)
+	ListProjectUsers(ctx context.Context, in *ListProjectUsersRequest, opts ...grpc.CallOption) (*ListProjectUsersResponse, error)
+	DeleteProjectUser(ctx context.Context, in *DeleteProjectUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type usersServiceClient struct {
@@ -119,6 +125,60 @@ func (c *usersServiceClient) DeleteOrganizationUser(ctx context.Context, in *Del
 	return out, nil
 }
 
+func (c *usersServiceClient) CreateProject(ctx context.Context, in *CreateProjectRequest, opts ...grpc.CallOption) (*Project, error) {
+	out := new(Project)
+	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersService/CreateProject", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *usersServiceClient) ListProjects(ctx context.Context, in *ListProjectsRequest, opts ...grpc.CallOption) (*ListProjectsResponse, error) {
+	out := new(ListProjectsResponse)
+	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersService/ListProjects", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *usersServiceClient) DeleteProject(ctx context.Context, in *DeleteProjectRequest, opts ...grpc.CallOption) (*DeleteProjectResponse, error) {
+	out := new(DeleteProjectResponse)
+	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersService/DeleteProject", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *usersServiceClient) CreateProjectUser(ctx context.Context, in *CreateProjectUserRequest, opts ...grpc.CallOption) (*ProjectUser, error) {
+	out := new(ProjectUser)
+	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersService/CreateProjectUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *usersServiceClient) ListProjectUsers(ctx context.Context, in *ListProjectUsersRequest, opts ...grpc.CallOption) (*ListProjectUsersResponse, error) {
+	out := new(ListProjectUsersResponse)
+	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersService/ListProjectUsers", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *usersServiceClient) DeleteProjectUser(ctx context.Context, in *DeleteProjectUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersService/DeleteProjectUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UsersServiceServer is the server API for UsersService service.
 // All implementations must embed UnimplementedUsersServiceServer
 // for forward compatibility
@@ -132,6 +192,12 @@ type UsersServiceServer interface {
 	CreateOrganizationUser(context.Context, *CreateOrganizationUserRequest) (*OrganizationUser, error)
 	ListOrganizationUsers(context.Context, *ListOrganizationUsersRequest) (*ListOrganizationUsersResponse, error)
 	DeleteOrganizationUser(context.Context, *DeleteOrganizationUserRequest) (*emptypb.Empty, error)
+	CreateProject(context.Context, *CreateProjectRequest) (*Project, error)
+	ListProjects(context.Context, *ListProjectsRequest) (*ListProjectsResponse, error)
+	DeleteProject(context.Context, *DeleteProjectRequest) (*DeleteProjectResponse, error)
+	CreateProjectUser(context.Context, *CreateProjectUserRequest) (*ProjectUser, error)
+	ListProjectUsers(context.Context, *ListProjectUsersRequest) (*ListProjectUsersResponse, error)
+	DeleteProjectUser(context.Context, *DeleteProjectUserRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedUsersServiceServer()
 }
 
@@ -165,6 +231,24 @@ func (UnimplementedUsersServiceServer) ListOrganizationUsers(context.Context, *L
 }
 func (UnimplementedUsersServiceServer) DeleteOrganizationUser(context.Context, *DeleteOrganizationUserRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteOrganizationUser not implemented")
+}
+func (UnimplementedUsersServiceServer) CreateProject(context.Context, *CreateProjectRequest) (*Project, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateProject not implemented")
+}
+func (UnimplementedUsersServiceServer) ListProjects(context.Context, *ListProjectsRequest) (*ListProjectsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListProjects not implemented")
+}
+func (UnimplementedUsersServiceServer) DeleteProject(context.Context, *DeleteProjectRequest) (*DeleteProjectResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteProject not implemented")
+}
+func (UnimplementedUsersServiceServer) CreateProjectUser(context.Context, *CreateProjectUserRequest) (*ProjectUser, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateProjectUser not implemented")
+}
+func (UnimplementedUsersServiceServer) ListProjectUsers(context.Context, *ListProjectUsersRequest) (*ListProjectUsersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListProjectUsers not implemented")
+}
+func (UnimplementedUsersServiceServer) DeleteProjectUser(context.Context, *DeleteProjectUserRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteProjectUser not implemented")
 }
 func (UnimplementedUsersServiceServer) mustEmbedUnimplementedUsersServiceServer() {}
 
@@ -341,6 +425,114 @@ func _UsersService_DeleteOrganizationUser_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UsersService_CreateProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateProjectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServiceServer).CreateProject(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/llmoperator.users.server.v1.UsersService/CreateProject",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServiceServer).CreateProject(ctx, req.(*CreateProjectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UsersService_ListProjects_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListProjectsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServiceServer).ListProjects(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/llmoperator.users.server.v1.UsersService/ListProjects",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServiceServer).ListProjects(ctx, req.(*ListProjectsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UsersService_DeleteProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteProjectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServiceServer).DeleteProject(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/llmoperator.users.server.v1.UsersService/DeleteProject",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServiceServer).DeleteProject(ctx, req.(*DeleteProjectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UsersService_CreateProjectUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateProjectUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServiceServer).CreateProjectUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/llmoperator.users.server.v1.UsersService/CreateProjectUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServiceServer).CreateProjectUser(ctx, req.(*CreateProjectUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UsersService_ListProjectUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListProjectUsersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServiceServer).ListProjectUsers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/llmoperator.users.server.v1.UsersService/ListProjectUsers",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServiceServer).ListProjectUsers(ctx, req.(*ListProjectUsersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UsersService_DeleteProjectUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteProjectUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServiceServer).DeleteProjectUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/llmoperator.users.server.v1.UsersService/DeleteProjectUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServiceServer).DeleteProjectUser(ctx, req.(*DeleteProjectUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UsersService_ServiceDesc is the grpc.ServiceDesc for UsersService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -384,6 +576,30 @@ var UsersService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "DeleteOrganizationUser",
 			Handler:    _UsersService_DeleteOrganizationUser_Handler,
 		},
+		{
+			MethodName: "CreateProject",
+			Handler:    _UsersService_CreateProject_Handler,
+		},
+		{
+			MethodName: "ListProjects",
+			Handler:    _UsersService_ListProjects_Handler,
+		},
+		{
+			MethodName: "DeleteProject",
+			Handler:    _UsersService_DeleteProject_Handler,
+		},
+		{
+			MethodName: "CreateProjectUser",
+			Handler:    _UsersService_CreateProjectUser_Handler,
+		},
+		{
+			MethodName: "ListProjectUsers",
+			Handler:    _UsersService_ListProjectUsers_Handler,
+		},
+		{
+			MethodName: "DeleteProjectUser",
+			Handler:    _UsersService_DeleteProjectUser_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "api/v1/user_manager_service.proto",
@@ -396,6 +612,8 @@ type UsersInternalServiceClient interface {
 	ListAPIKeys(ctx context.Context, in *ListAPIKeysRequest, opts ...grpc.CallOption) (*ListAPIKeysResponse, error)
 	ListOrganizations(ctx context.Context, in *ListOrganizationsRequest, opts ...grpc.CallOption) (*ListOrganizationsResponse, error)
 	ListOrganizationUsers(ctx context.Context, in *ListOrganizationUsersRequest, opts ...grpc.CallOption) (*ListOrganizationUsersResponse, error)
+	ListProjects(ctx context.Context, in *ListProjectsRequest, opts ...grpc.CallOption) (*ListProjectsResponse, error)
+	ListProjectUsers(ctx context.Context, in *ListProjectUsersRequest, opts ...grpc.CallOption) (*ListProjectUsersResponse, error)
 }
 
 type usersInternalServiceClient struct {
@@ -433,6 +651,24 @@ func (c *usersInternalServiceClient) ListOrganizationUsers(ctx context.Context, 
 	return out, nil
 }
 
+func (c *usersInternalServiceClient) ListProjects(ctx context.Context, in *ListProjectsRequest, opts ...grpc.CallOption) (*ListProjectsResponse, error) {
+	out := new(ListProjectsResponse)
+	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersInternalService/ListProjects", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *usersInternalServiceClient) ListProjectUsers(ctx context.Context, in *ListProjectUsersRequest, opts ...grpc.CallOption) (*ListProjectUsersResponse, error) {
+	out := new(ListProjectUsersResponse)
+	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersInternalService/ListProjectUsers", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UsersInternalServiceServer is the server API for UsersInternalService service.
 // All implementations must embed UnimplementedUsersInternalServiceServer
 // for forward compatibility
@@ -440,6 +676,8 @@ type UsersInternalServiceServer interface {
 	ListAPIKeys(context.Context, *ListAPIKeysRequest) (*ListAPIKeysResponse, error)
 	ListOrganizations(context.Context, *ListOrganizationsRequest) (*ListOrganizationsResponse, error)
 	ListOrganizationUsers(context.Context, *ListOrganizationUsersRequest) (*ListOrganizationUsersResponse, error)
+	ListProjects(context.Context, *ListProjectsRequest) (*ListProjectsResponse, error)
+	ListProjectUsers(context.Context, *ListProjectUsersRequest) (*ListProjectUsersResponse, error)
 	mustEmbedUnimplementedUsersInternalServiceServer()
 }
 
@@ -455,6 +693,12 @@ func (UnimplementedUsersInternalServiceServer) ListOrganizations(context.Context
 }
 func (UnimplementedUsersInternalServiceServer) ListOrganizationUsers(context.Context, *ListOrganizationUsersRequest) (*ListOrganizationUsersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListOrganizationUsers not implemented")
+}
+func (UnimplementedUsersInternalServiceServer) ListProjects(context.Context, *ListProjectsRequest) (*ListProjectsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListProjects not implemented")
+}
+func (UnimplementedUsersInternalServiceServer) ListProjectUsers(context.Context, *ListProjectUsersRequest) (*ListProjectUsersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListProjectUsers not implemented")
 }
 func (UnimplementedUsersInternalServiceServer) mustEmbedUnimplementedUsersInternalServiceServer() {}
 
@@ -523,6 +767,42 @@ func _UsersInternalService_ListOrganizationUsers_Handler(srv interface{}, ctx co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UsersInternalService_ListProjects_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListProjectsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersInternalServiceServer).ListProjects(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/llmoperator.users.server.v1.UsersInternalService/ListProjects",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersInternalServiceServer).ListProjects(ctx, req.(*ListProjectsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UsersInternalService_ListProjectUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListProjectUsersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersInternalServiceServer).ListProjectUsers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/llmoperator.users.server.v1.UsersInternalService/ListProjectUsers",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersInternalServiceServer).ListProjectUsers(ctx, req.(*ListProjectUsersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UsersInternalService_ServiceDesc is the grpc.ServiceDesc for UsersInternalService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -541,6 +821,14 @@ var UsersInternalService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListOrganizationUsers",
 			Handler:    _UsersInternalService_ListOrganizationUsers_Handler,
+		},
+		{
+			MethodName: "ListProjects",
+			Handler:    _UsersInternalService_ListProjects_Handler,
+		},
+		{
+			MethodName: "ListProjectUsers",
+			Handler:    _UsersInternalService_ListProjectUsers_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

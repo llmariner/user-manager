@@ -101,6 +101,245 @@
         ]
       }
     },
+    "/v1/organizations/{organizationId}/projects": {
+      "get": {
+        "operationId": "UsersService_ListProjects",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListProjectsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "organizationId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "UsersService"
+        ]
+      },
+      "post": {
+        "operationId": "UsersService_CreateProject",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1Project"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "organizationId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "kubernetesNamespace": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "UsersService"
+        ]
+      }
+    },
+    "/v1/organizations/{organizationId}/projects/{id}": {
+      "delete": {
+        "operationId": "UsersService_DeleteProject",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1DeleteProjectResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "organizationId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "UsersService"
+        ]
+      }
+    },
+    "/v1/organizations/{organizationId}/projects/{projectId}/users": {
+      "get": {
+        "operationId": "UsersService_ListProjectUsers",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListProjectUsersResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "organizationId",
+            "description": "organization_id and project_id must be set for UsersService. It is no-op for UsersInternalService.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "UsersService"
+        ]
+      },
+      "post": {
+        "operationId": "UsersService_CreateProjectUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ProjectUser"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "organizationId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "userId": {
+                  "type": "string"
+                },
+                "role": {
+                  "$ref": "#/definitions/v1ProjectRole"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "UsersService"
+        ]
+      }
+    },
+    "/v1/organizations/{organizationId}/projects/{projectId}/users/{userId}": {
+      "delete": {
+        "operationId": "UsersService_DeleteProjectUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "organizationId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "UsersService"
+        ]
+      }
+    },
     "/v1/organizations/{organizationId}/users": {
       "get": {
         "operationId": "UsersService_ListOrganizationUsers",
@@ -348,6 +587,9 @@
         },
         "organization": {
           "$ref": "#/definitions/v1Organization"
+        },
+        "project": {
+          "$ref": "#/definitions/v1Project"
         }
       }
     },
@@ -367,7 +609,7 @@
         },
         "kubernetesNamespace": {
           "type": "string",
-          "description": "kubernetes_namespace is the namespace where the fine-tuning jobs for the organization run."
+          "description": "kubernetes_namespace is the namespace where the fine-tuning jobs for the organization run.\nTODO(kenji): Remove this."
         }
       }
     },
@@ -386,6 +628,20 @@
       }
     },
     "v1DeleteOrganizationResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object": {
+          "type": "string"
+        },
+        "deleted": {
+          "type": "boolean"
+        }
+      }
+    },
+    "v1DeleteProjectResponse": {
       "type": "object",
       "properties": {
         "id": {
@@ -435,6 +691,28 @@
         }
       }
     },
+    "v1ListProjectUsersResponse": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1ProjectUser"
+          }
+        }
+      }
+    },
+    "v1ListProjectsResponse": {
+      "type": "object",
+      "properties": {
+        "projects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1Project"
+          }
+        }
+      }
+    },
     "v1Organization": {
       "type": "object",
       "properties": {
@@ -445,7 +723,8 @@
           "type": "string"
         },
         "kubernetesNamespace": {
-          "type": "string"
+          "type": "string",
+          "description": "TODO(kenji): Remove this."
         },
         "createdAt": {
           "type": "string",
@@ -473,6 +752,53 @@
         },
         "role": {
           "$ref": "#/definitions/v1OrganizationRole"
+        }
+      }
+    },
+    "v1Project": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "kubernetesNamespace": {
+          "type": "string"
+        },
+        "organizationId": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "v1ProjectRole": {
+      "type": "string",
+      "enum": [
+        "PROJECT_ROLE_UNSPECIFIED",
+        "PROJECT_ROLE_OWNER",
+        "PROJECT_ROLE_MEMBER"
+      ],
+      "default": "PROJECT_ROLE_UNSPECIFIED"
+    },
+    "v1ProjectUser": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "projectId": {
+          "type": "string"
+        },
+        "organizationId": {
+          "type": "string"
+        },
+        "role": {
+          "$ref": "#/definitions/v1ProjectRole"
         }
       }
     },
