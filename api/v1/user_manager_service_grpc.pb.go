@@ -394,6 +394,7 @@ var UsersService_ServiceDesc = grpc.ServiceDesc{
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UsersInternalServiceClient interface {
 	ListAPIKeys(ctx context.Context, in *ListAPIKeysRequest, opts ...grpc.CallOption) (*ListAPIKeysResponse, error)
+	ListOrganizations(ctx context.Context, in *ListOrganizationsRequest, opts ...grpc.CallOption) (*ListOrganizationsResponse, error)
 	ListOrganizationUsers(ctx context.Context, in *ListOrganizationUsersRequest, opts ...grpc.CallOption) (*ListOrganizationUsersResponse, error)
 }
 
@@ -414,6 +415,15 @@ func (c *usersInternalServiceClient) ListAPIKeys(ctx context.Context, in *ListAP
 	return out, nil
 }
 
+func (c *usersInternalServiceClient) ListOrganizations(ctx context.Context, in *ListOrganizationsRequest, opts ...grpc.CallOption) (*ListOrganizationsResponse, error) {
+	out := new(ListOrganizationsResponse)
+	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersInternalService/ListOrganizations", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *usersInternalServiceClient) ListOrganizationUsers(ctx context.Context, in *ListOrganizationUsersRequest, opts ...grpc.CallOption) (*ListOrganizationUsersResponse, error) {
 	out := new(ListOrganizationUsersResponse)
 	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersInternalService/ListOrganizationUsers", in, out, opts...)
@@ -428,6 +438,7 @@ func (c *usersInternalServiceClient) ListOrganizationUsers(ctx context.Context, 
 // for forward compatibility
 type UsersInternalServiceServer interface {
 	ListAPIKeys(context.Context, *ListAPIKeysRequest) (*ListAPIKeysResponse, error)
+	ListOrganizations(context.Context, *ListOrganizationsRequest) (*ListOrganizationsResponse, error)
 	ListOrganizationUsers(context.Context, *ListOrganizationUsersRequest) (*ListOrganizationUsersResponse, error)
 	mustEmbedUnimplementedUsersInternalServiceServer()
 }
@@ -438,6 +449,9 @@ type UnimplementedUsersInternalServiceServer struct {
 
 func (UnimplementedUsersInternalServiceServer) ListAPIKeys(context.Context, *ListAPIKeysRequest) (*ListAPIKeysResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListAPIKeys not implemented")
+}
+func (UnimplementedUsersInternalServiceServer) ListOrganizations(context.Context, *ListOrganizationsRequest) (*ListOrganizationsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListOrganizations not implemented")
 }
 func (UnimplementedUsersInternalServiceServer) ListOrganizationUsers(context.Context, *ListOrganizationUsersRequest) (*ListOrganizationUsersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListOrganizationUsers not implemented")
@@ -473,6 +487,24 @@ func _UsersInternalService_ListAPIKeys_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UsersInternalService_ListOrganizations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListOrganizationsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersInternalServiceServer).ListOrganizations(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/llmoperator.users.server.v1.UsersInternalService/ListOrganizations",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersInternalServiceServer).ListOrganizations(ctx, req.(*ListOrganizationsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _UsersInternalService_ListOrganizationUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListOrganizationUsersRequest)
 	if err := dec(in); err != nil {
@@ -501,6 +533,10 @@ var UsersInternalService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListAPIKeys",
 			Handler:    _UsersInternalService_ListAPIKeys_Handler,
+		},
+		{
+			MethodName: "ListOrganizations",
+			Handler:    _UsersInternalService_ListOrganizations_Handler,
 		},
 		{
 			MethodName: "ListOrganizationUsers",
