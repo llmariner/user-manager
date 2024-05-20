@@ -38,6 +38,7 @@ func (s *S) Run(ctx context.Context, port int, authConfig config.AuthConfig) err
 
 	var opts []grpc.ServerOption
 	if authConfig.Enable {
+		// TODO(kenji): Change the scope depending on RPC methods.
 		ai, err := auth.NewInterceptor(ctx, authConfig.RBACInternalServerAddr, "api.users.api_keys")
 		if err != nil {
 			return err
