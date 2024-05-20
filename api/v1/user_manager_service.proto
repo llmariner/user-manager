@@ -16,6 +16,7 @@ message APIKey {
   int64 created_at = 5;
   User user = 6;
   Organization organization = 7;
+  Project project = 8;
 }
 
 message User {
@@ -28,6 +29,12 @@ enum OrganizationRole {
   ORGANIZATION_ROLE_READER = 2;
 }
 
+enum ProjectRole {
+  PROJECT_ROLE_UNSPECIFIED = 0;
+  PROJECT_ROLE_OWNER = 1;
+  PROJECT_ROLE_MEMBER = 2;
+}
+
 message OrganizationUser {
   string user_id = 1;
   string organization_id = 2;
@@ -37,8 +44,24 @@ message OrganizationUser {
 message Organization {
   string id = 1;
   string name = 2;
+  // TODO(kenji): Remove this.
   string kubernetes_namespace = 3;
   int64 created_at = 4;
+}
+
+message ProjectUser {
+  string user_id = 1;
+  string project_id = 2;
+  string organization_id = 3;
+  ProjectRole role = 4;
+}
+
+message Project {
+  string id = 1;
+  string name = 2;
+  string kubernetes_namespace = 3;
+  string organization_id = 4;
+  int64 created_at = 5;
 }
 
 message CreateAPIKeyRequest {
@@ -66,6 +89,7 @@ message DeleteAPIKeyResponse {
 message CreateOrganizationRequest {
   string name = 1;
   // kubernetes_namespace is the namespace where the fine-tuning jobs for the organization run.
+  // TODO(kenji): Remove this.
   string kubernetes_namespace = 2;
 }
 
@@ -107,6 +131,60 @@ message DeleteOrganizationUserRequest {
 }
 
 message DeleteOrganizationUserResponse {
+  string id = 1;
+  string object = 2;
+  bool deleted = 3;
+}
+
+message CreateProjectRequest {
+  string name = 1;
+  string organization_id = 2;
+  string kubernetes_namespace = 3;
+}
+
+message ListProjectsRequest {
+    string organization_id = 1;
+}
+
+message ListProjectsResponse {
+  repeated Project projects = 1;
+}
+
+message DeleteProjectRequest {
+  string organization_id = 1;
+  string id = 2;
+}
+
+message DeleteProjectResponse {
+  string id = 1;
+  string object = 2;
+  bool deleted = 3;
+}
+
+message CreateProjectUserRequest {
+  string organization_id = 1;
+  string project_id = 2;
+  string user_id = 3;
+  ProjectRole role = 4;
+}
+
+message ListProjectUsersRequest {
+  // organization_id and project_id must be set for UsersService. It is no-op for UsersInternalService.
+  string organization_id = 1;
+  string project_id = 2;
+}
+
+message ListProjectUsersResponse {
+  repeated ProjectUser users = 1;
+}
+
+message DeleteProjectUserRequest {
+  string organization_id = 1;
+  string project_id = 2;
+  string user_id = 3;
+}
+
+message DeleteProjectUserResponse {
   string id = 1;
   string object = 2;
   bool deleted = 3;
@@ -166,6 +244,40 @@ service UsersService {
     };
   }
 
+  rpc CreateProject(CreateProjectRequest) returns (Project) {
+    option (google.api.http) = {
+      post: "/v1/organizations/{organization_id}/projects"
+      body: "*"
+    };
+  }
+  rpc ListProjects(ListProjectsRequest) returns (ListProjectsResponse) {
+    option (google.api.http) = {
+      get: "/v1/organizations/{organization_id}/projects"
+    };
+  }
+  rpc DeleteProject(DeleteProjectRequest) returns (DeleteProjectResponse) {
+    option (google.api.http) = {
+      delete: "/v1/organizations/{organization_id}/projects/{id}"
+    };
+  }
+
+  rpc CreateProjectUser(CreateProjectUserRequest) returns (ProjectUser) {
+    option (google.api.http) = {
+      post: "/v1/organizations/{organization_id}/projects/{project_id}/users"
+      body: "*"
+    };
+  }
+  rpc ListProjectUsers(ListProjectUsersRequest) returns (ListProjectUsersResponse) {
+    option (google.api.http) = {
+      get: "/v1/organizations/{organization_id}/projects/{project_id}/users"
+    };
+  }
+  rpc DeleteProjectUser(DeleteProjectUserRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1/organizations/{organization_id}/projects/{project_id}/users/{user_id}"
+    };
+  }
+
 }
 
 service UsersInternalService {
@@ -174,5 +286,9 @@ service UsersInternalService {
   rpc ListOrganizations(ListOrganizationsRequest) returns (ListOrganizationsResponse) {
   }
   rpc ListOrganizationUsers(ListOrganizationUsersRequest) returns (ListOrganizationUsersResponse) {
+  }
+  rpc ListProjects(ListProjectsRequest) returns (ListProjectsResponse) {
+  }
+  rpc ListProjectUsers(ListProjectUsersRequest) returns (ListProjectUsersResponse) {
   }
 }
