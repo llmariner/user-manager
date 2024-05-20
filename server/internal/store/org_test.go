@@ -62,6 +62,21 @@ func TestOrganization(t *testing.T) {
 	assert.Nil(t, gotOrg)
 }
 
+func TestListAllOrganizations(t *testing.T) {
+	s, tearDown := NewTest(t)
+	defer tearDown()
+
+	_, err := s.CreateOrganization("t0", "o0", "Test Organization 0", "ns")
+	assert.NoError(t, err)
+
+	_, err = s.CreateOrganization("t1", "o1", "Test Organization 1", "ns")
+	assert.NoError(t, err)
+
+	gotOrgs, err := s.ListAllOrganizations()
+	assert.NoError(t, err)
+	assert.Len(t, gotOrgs, 2)
+}
+
 func TestOrganization_UniqueConstraint(t *testing.T) {
 	s, tearDown := NewTest(t)
 	defer tearDown()
