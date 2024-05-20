@@ -101,14 +101,14 @@
         ]
       }
     },
-    "/v1/organizations/{user.organizationId}/users:addUser": {
+    "/v1/organizations/{organizationId}/users": {
       "post": {
-        "operationId": "UsersService_AddUserToOrganization",
+        "operationId": "UsersService_CreateOrganizationUser",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1AddUserToOrganizationResponse"
+              "$ref": "#/definitions/v1OrganizationUser"
             }
           },
           "default": {
@@ -120,7 +120,7 @@
         },
         "parameters": [
           {
-            "name": "user.organizationId",
+            "name": "organizationId",
             "in": "path",
             "required": true,
             "type": "string"
@@ -130,7 +130,15 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/UsersServiceAddUserToOrganizationBody"
+              "type": "object",
+              "properties": {
+                "userId": {
+                  "type": "string"
+                },
+                "role": {
+                  "$ref": "#/definitions/v1Role"
+                }
+              }
             }
           }
         ],
@@ -223,22 +231,6 @@
     }
   },
   "definitions": {
-    "UsersServiceAddUserToOrganizationBody": {
-      "type": "object",
-      "properties": {
-        "user": {
-          "type": "object",
-          "properties": {
-            "userId": {
-              "type": "string"
-            },
-            "role": {
-              "$ref": "#/definitions/v1Role"
-            }
-          }
-        }
-      }
-    },
     "protobufAny": {
       "type": "object",
       "properties": {
@@ -261,7 +253,6 @@
         "details": {
           "type": "array",
           "items": {
-            "type": "object",
             "$ref": "#/definitions/protobufAny"
           }
         }
@@ -294,9 +285,6 @@
           "$ref": "#/definitions/v1Organization"
         }
       }
-    },
-    "v1AddUserToOrganizationResponse": {
-      "type": "object"
     },
     "v1CreateAPIKeyRequest": {
       "type": "object",
@@ -340,7 +328,6 @@
         "data": {
           "type": "array",
           "items": {
-            "type": "object",
             "$ref": "#/definitions/v1APIKey"
           }
         }
@@ -352,7 +339,6 @@
         "users": {
           "type": "array",
           "items": {
-            "type": "object",
             "$ref": "#/definitions/v1OrganizationUser"
           }
         }
@@ -364,7 +350,6 @@
         "organizations": {
           "type": "array",
           "items": {
-            "type": "object",
             "$ref": "#/definitions/v1Organization"
           }
         }
