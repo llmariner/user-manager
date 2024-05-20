@@ -456,11 +456,11 @@
     "v1OrganizationRole": {
       "type": "string",
       "enum": [
-        "UNSPECIFIED",
-        "OWNER",
-        "READER"
+        "ORGANIZATION_ROLE_UNSPECIFIED",
+        "ORGANIZATION_ROLE_OWNER",
+        "ORGANIZATION_ROLE_READER"
       ],
-      "default": "UNSPECIFIED"
+      "default": "ORGANIZATION_ROLE_UNSPECIFIED"
     },
     "v1OrganizationUser": {
       "type": "object",
