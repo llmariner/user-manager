@@ -86,7 +86,7 @@ func (s *S) CreateOrganizationUser(ctx context.Context, req *v1.CreateOrganizati
 	if req.UserId == "" {
 		return nil, status.Error(codes.InvalidArgument, "user id is required")
 	}
-	if req.Role == v1.Role_UNSPECIFIED {
+	if req.Role == v1.OrganizationRole_UNSPECIFIED {
 		return nil, status.Error(codes.InvalidArgument, "role is required")
 	}
 
@@ -192,7 +192,7 @@ func (s *S) CreateDefaultOrganization(ctx context.Context, c *config.DefaultOrga
 		if _, err := s.CreateOrganizationUser(ctx, &v1.CreateOrganizationUserRequest{
 			OrganizationId: org.Id,
 			UserId:         uid,
-			Role:           v1.Role_OWNER,
+			Role:           v1.OrganizationRole_OWNER,
 		}); err != nil {
 			return err
 		}

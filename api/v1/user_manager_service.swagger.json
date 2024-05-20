@@ -165,7 +165,7 @@
                   "type": "string"
                 },
                 "role": {
-                  "$ref": "#/definitions/v1Role"
+                  "$ref": "#/definitions/v1OrganizationRole"
                 }
               }
             }
@@ -453,6 +453,15 @@
         }
       }
     },
+    "v1OrganizationRole": {
+      "type": "string",
+      "enum": [
+        "UNSPECIFIED",
+        "OWNER",
+        "READER"
+      ],
+      "default": "UNSPECIFIED"
+    },
     "v1OrganizationUser": {
       "type": "object",
       "properties": {
@@ -463,18 +472,9 @@
           "type": "string"
         },
         "role": {
-          "$ref": "#/definitions/v1Role"
+          "$ref": "#/definitions/v1OrganizationRole"
         }
       }
-    },
-    "v1Role": {
-      "type": "string",
-      "enum": [
-        "UNSPECIFIED",
-        "OWNER",
-        "READER"
-      ],
-      "default": "UNSPECIFIED"
     },
     "v1User": {
       "type": "object",

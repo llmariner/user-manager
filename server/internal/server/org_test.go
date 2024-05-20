@@ -32,7 +32,7 @@ func TestOrganization(t *testing.T) {
 		_, err = srv.CreateOrganizationUser(ctx, &v1.CreateOrganizationUserRequest{
 			OrganizationId: cresp.Id,
 			UserId:         "user 1",
-			Role:           v1.Role_OWNER,
+			Role:           v1.OrganizationRole_OWNER,
 		})
 		assert.NoError(t, err)
 	}
@@ -93,7 +93,7 @@ func TestListOrganizationUsers(t *testing.T) {
 		_, err = srv.CreateOrganizationUser(ctx, &v1.CreateOrganizationUserRequest{
 			OrganizationId: org.Id,
 			UserId:         fmt.Sprintf("user %d", i),
-			Role:           v1.Role_OWNER,
+			Role:           v1.OrganizationRole_OWNER,
 		})
 		assert.NoError(t, err)
 	}
@@ -130,7 +130,7 @@ func TestCreateDefaultOrganization(t *testing.T) {
 	u := users[0]
 	assert.Equal(t, o.OrganizationID, u.OrganizationID)
 	assert.Equal(t, "admin", u.UserID)
-	assert.Equal(t, v1.Role_OWNER.String(), u.Role)
+	assert.Equal(t, v1.OrganizationRole_OWNER.String(), u.Role)
 
 	// Calling again is no-op.
 	err = srv.CreateDefaultOrganization(context.Background(), c)
