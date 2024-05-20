@@ -57,6 +57,16 @@ func TestOrganization(t *testing.T) {
 	laresp2, err := isrv.ListOrganizationUsers(ctx, &v1.ListOrganizationUsersRequest{})
 	assert.NoError(t, err)
 	assert.Len(t, laresp2.Users, 1)
+
+	_, err = srv.DeleteOrganizationUser(ctx, &v1.DeleteOrganizationUserRequest{
+		OrganizationId: lresp2.Organizations[0].Id,
+		UserId:         "user 1",
+	})
+	assert.NoError(t, err)
+
+	laresp3, err := isrv.ListOrganizationUsers(ctx, &v1.ListOrganizationUsersRequest{})
+	assert.NoError(t, err)
+	assert.Empty(t, laresp3.Users)
 }
 
 func TestListOrganizationUsers(t *testing.T) {

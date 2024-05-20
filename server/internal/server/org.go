@@ -11,6 +11,7 @@ import (
 	"github.com/llm-operator/user-manager/server/internal/config"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"gorm.io/gorm"
 )
 
@@ -113,6 +114,31 @@ func (s *S) ListOrganizationUsers(ctx context.Context, req *v1.ListOrganizationU
 	return &v1.ListOrganizationUsersResponse{
 		Users: userProtos,
 	}, nil
+}
+
+// DeleteOrganizationUser deletes an organization user.
+func (s *S) DeleteOrganizationUser(ctx context.Context, req *v1.DeleteOrganizationUserRequest) (*emptypb.Empty, error) {
+	if req.OrganizationId == "" {
+		return nil, status.Error(codes.InvalidArgument, "organization id is required")
+	}
+	if req.UserId == "" {
+		return nil, status.Error(codes.InvalidArgument, "user id is required")
+	}
+
+	if err := s.validateOrgID(req.OrganizationId); err != nil {
+		return nil, err
+	}
+
+	// TODO(kenji): Validate the user ID.
+
+	if err := s.store.DeleteOrganizationUser(req.OrganizationId, req.UserId); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, status.Errorf(codes.NotFound, "organization user not found")
+		}
+		return nil, status.Errorf(codes.Internal, "delete organization user: %s", err)
+	}
+
+	return &emptypb.Empty{}, nil
 }
 
 func (s *S) validateOrgID(orgID string) error {
