@@ -22,7 +22,7 @@ message User {
   string id = 1;
 }
 
-enum Role {
+enum OrganizationRole {
   UNSPECIFIED = 0;
   OWNER = 1;
   READER = 2;
@@ -31,7 +31,7 @@ enum Role {
 message OrganizationUser {
   string user_id = 1;
   string organization_id = 2;
-  Role role = 3;
+  OrganizationRole role = 3;
 }
 
 message Organization {
@@ -89,7 +89,7 @@ message DeleteOrganizationResponse {
 message CreateOrganizationUserRequest {
   string organization_id = 1;
   string user_id = 2;
-  Role role = 3;
+  OrganizationRole role = 3;
 }
 
 message ListOrganizationUsersRequest {

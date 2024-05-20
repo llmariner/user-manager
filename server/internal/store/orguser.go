@@ -20,7 +20,7 @@ func (o *OrganizationUser) ToProto() *v1.OrganizationUser {
 	return &v1.OrganizationUser{
 		OrganizationId: o.OrganizationID,
 		UserId:         o.UserID,
-		Role:           v1.Role(v1.Role_value[o.Role]),
+		Role:           v1.OrganizationRole(v1.OrganizationRole_value[o.Role]),
 	}
 }
 
