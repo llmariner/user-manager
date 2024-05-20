@@ -10,14 +10,29 @@ func TestOrganizationUser(t *testing.T) {
 	s, tearDown := NewTest(t)
 	defer tearDown()
 
-	_, err := s.CreateOrganization("t1", "o1", "Test Organization")
-	assert.NoError(t, err)
-
-	userOrg, err := s.CreateOrganizationUser("t1", "o1", "user1", "r1")
+	userOrg, err := s.CreateOrganizationUser("o1", "user1", "r1")
 	assert.NoError(t, err)
 	assert.NotNil(t, userOrg)
 
 	users, err := s.ListAllOrganizationUsers()
 	assert.NoError(t, err)
 	assert.Len(t, users, 1)
+
+	userOrg, err = s.CreateOrganizationUser("o2", "user2", "r1")
+	assert.NoError(t, err)
+	assert.NotNil(t, userOrg)
+
+	users, err = s.ListAllOrganizationUsers()
+	assert.NoError(t, err)
+	assert.Len(t, users, 2)
+
+	users, err = s.ListOrganizationUsersByOrganizationID("o1")
+	assert.NoError(t, err)
+	assert.Len(t, users, 1)
+	assert.Equal(t, "user1", users[0].UserID)
+
+	users, err = s.ListOrganizationUsersByOrganizationID("o2")
+	assert.NoError(t, err)
+	assert.Len(t, users, 1)
+	assert.Equal(t, "user2", users[0].UserID)
 }

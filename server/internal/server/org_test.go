@@ -59,6 +59,37 @@ func TestOrganization(t *testing.T) {
 	assert.Len(t, laresp2.Users, 1)
 }
 
+func TestListOrganizationUsers(t *testing.T) {
+	st, tearDown := store.NewTest(t)
+	defer tearDown()
+
+	srv := New(st)
+	ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs("Authorization", "dummy"))
+
+	var orgs []*v1.Organization
+	for i := 0; i < 2; i++ {
+		org, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
+			Title: fmt.Sprintf("title %d", i),
+		})
+		assert.NoError(t, err)
+		orgs = append(orgs, org)
+
+		_, err = srv.CreateOrganizationUser(ctx, &v1.CreateOrganizationUserRequest{
+			OrganizationId: org.Id,
+			UserId:         fmt.Sprintf("user %d", i),
+			Role:           v1.Role_OWNER,
+		})
+		assert.NoError(t, err)
+	}
+
+	for i := 0; i < 2; i++ {
+		resp, err := srv.ListOrganizationUsers(ctx, &v1.ListOrganizationUsersRequest{OrganizationId: orgs[i].Id})
+		assert.NoError(t, err)
+		assert.Len(t, resp.Users, 1)
+		assert.Equal(t, fmt.Sprintf("user %d", i), resp.Users[0].UserId)
+	}
+}
+
 func TestCreateDefaultOrganization(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()

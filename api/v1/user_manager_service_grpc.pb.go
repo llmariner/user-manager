@@ -25,6 +25,7 @@ type UsersServiceClient interface {
 	ListOrganizations(ctx context.Context, in *ListOrganizationsRequest, opts ...grpc.CallOption) (*ListOrganizationsResponse, error)
 	DeleteOrganization(ctx context.Context, in *DeleteOrganizationRequest, opts ...grpc.CallOption) (*DeleteOrganizationResponse, error)
 	CreateOrganizationUser(ctx context.Context, in *CreateOrganizationUserRequest, opts ...grpc.CallOption) (*OrganizationUser, error)
+	ListOrganizationUsers(ctx context.Context, in *ListOrganizationUsersRequest, opts ...grpc.CallOption) (*ListOrganizationUsersResponse, error)
 }
 
 type usersServiceClient struct {
@@ -98,6 +99,15 @@ func (c *usersServiceClient) CreateOrganizationUser(ctx context.Context, in *Cre
 	return out, nil
 }
 
+func (c *usersServiceClient) ListOrganizationUsers(ctx context.Context, in *ListOrganizationUsersRequest, opts ...grpc.CallOption) (*ListOrganizationUsersResponse, error) {
+	out := new(ListOrganizationUsersResponse)
+	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersService/ListOrganizationUsers", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UsersServiceServer is the server API for UsersService service.
 // All implementations must embed UnimplementedUsersServiceServer
 // for forward compatibility
@@ -109,6 +119,7 @@ type UsersServiceServer interface {
 	ListOrganizations(context.Context, *ListOrganizationsRequest) (*ListOrganizationsResponse, error)
 	DeleteOrganization(context.Context, *DeleteOrganizationRequest) (*DeleteOrganizationResponse, error)
 	CreateOrganizationUser(context.Context, *CreateOrganizationUserRequest) (*OrganizationUser, error)
+	ListOrganizationUsers(context.Context, *ListOrganizationUsersRequest) (*ListOrganizationUsersResponse, error)
 	mustEmbedUnimplementedUsersServiceServer()
 }
 
@@ -136,6 +147,9 @@ func (UnimplementedUsersServiceServer) DeleteOrganization(context.Context, *Dele
 }
 func (UnimplementedUsersServiceServer) CreateOrganizationUser(context.Context, *CreateOrganizationUserRequest) (*OrganizationUser, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateOrganizationUser not implemented")
+}
+func (UnimplementedUsersServiceServer) ListOrganizationUsers(context.Context, *ListOrganizationUsersRequest) (*ListOrganizationUsersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListOrganizationUsers not implemented")
 }
 func (UnimplementedUsersServiceServer) mustEmbedUnimplementedUsersServiceServer() {}
 
@@ -276,6 +290,24 @@ func _UsersService_CreateOrganizationUser_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UsersService_ListOrganizationUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListOrganizationUsersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServiceServer).ListOrganizationUsers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/llmoperator.users.server.v1.UsersService/ListOrganizationUsers",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServiceServer).ListOrganizationUsers(ctx, req.(*ListOrganizationUsersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UsersService_ServiceDesc is the grpc.ServiceDesc for UsersService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -310,6 +342,10 @@ var UsersService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateOrganizationUser",
 			Handler:    _UsersService_CreateOrganizationUser_Handler,
+		},
+		{
+			MethodName: "ListOrganizationUsers",
+			Handler:    _UsersService_ListOrganizationUsers_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
