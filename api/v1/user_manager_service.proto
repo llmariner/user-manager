@@ -44,9 +44,7 @@ message OrganizationUser {
 message Organization {
   string id = 1;
   string title = 2;
-  // TODO(kenji): Remove this.
-  string kubernetes_namespace = 3;
-  int64 created_at = 4;
+  int64 created_at = 3;
 }
 
 message ProjectUser {
@@ -59,6 +57,7 @@ message ProjectUser {
 message Project {
   string id = 1;
   string title = 2;
+  // kubernetes_namespace is the namespace where the fine-tuning jobs for the project run.
   string kubernetes_namespace = 3;
   string organization_id = 4;
   int64 created_at = 5;
@@ -88,9 +87,6 @@ message DeleteAPIKeyResponse {
 
 message CreateOrganizationRequest {
   string title = 1;
-  // kubernetes_namespace is the namespace where the fine-tuning jobs for the organization run.
-  // TODO(kenji): Remove this.
-  string kubernetes_namespace = 2;
 }
 
 message ListOrganizationsRequest {
