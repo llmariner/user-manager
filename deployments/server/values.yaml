@@ -23,7 +23,8 @@ database:
   database: user_manager
 
 defaultOrganization:
-  title: default
+  title: Default
+  kubernetesNamespace: default
   userIds:
   - admin@example.com
 

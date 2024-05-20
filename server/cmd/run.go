@@ -93,11 +93,8 @@ func run(ctx context.Context, c *config.Config) error {
 		errCh <- s.Run(ctx, c.GRPCPort, c.AuthConfig)
 	}()
 
-	if do := &c.DefaultOrganization; do.Title != "" {
-		log.Printf("Creating default org %q", do.Title)
-		if err := s.CreateDefaultOrganization(ctx, do); err != nil {
-			return err
-		}
+	if err := s.CreateDefaultOrganization(ctx, &c.DefaultOrganization); err != nil {
+		return err
 	}
 
 	go func() {
