@@ -81,6 +81,9 @@ message DeleteOrganizationRequest {
 }
 
 message DeleteOrganizationResponse {
+  string id = 1;
+  string object = 2;
+  bool deleted = 3;
 }
 
 message CreateOrganizationUserRequest {

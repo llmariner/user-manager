@@ -71,7 +71,11 @@ func (s *S) DeleteOrganization(ctx context.Context, req *v1.DeleteOrganizationRe
 		return nil, status.Errorf(codes.Internal, "delete organization: %s", err)
 	}
 
-	return &v1.DeleteOrganizationResponse{}, nil
+	return &v1.DeleteOrganizationResponse{
+		Id:      req.Id,
+		Object:  "organization",
+		Deleted: true,
+	}, nil
 }
 
 // CreateOrganizationUser adds a user to an organization.
