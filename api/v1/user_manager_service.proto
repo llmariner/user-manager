@@ -86,6 +86,8 @@ message CreateOrganizationUserRequest {
 }
 
 message ListOrganizationUsersRequest {
+  // organization_id must be set for UsersService. It is no-op for UsersInternalService.
+  string organization_id = 1;
 }
 
 message ListOrganizationUsersResponse {
@@ -133,6 +135,12 @@ service UsersService {
     option (google.api.http) = {
       post: "/v1/organizations/{organization_id}/users"
       body: "*"
+    };
+  }
+
+  rpc ListOrganizationUsers(ListOrganizationUsersRequest) returns (ListOrganizationUsersResponse) {
+    option (google.api.http) = {
+      get: "/v1/organizations/{organization_id}/users"
     };
   }
 }

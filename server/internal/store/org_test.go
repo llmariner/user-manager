@@ -26,7 +26,7 @@ func TestOrganization(t *testing.T) {
 	assert.Equal(t, org.OrganizationID, gotOrg.OrganizationID)
 	assert.Equal(t, org.Title, gotOrg.Title)
 
-	gotOrg, err = s.GetOrganization(org.OrganizationID)
+	gotOrg, err = s.GetOrganizationByTenantIDAndOrgID(org.TenantID, org.OrganizationID)
 	assert.NoError(t, err)
 	assert.NotNil(t, gotOrg)
 	assert.Equal(t, org.TenantID, gotOrg.TenantID)
@@ -56,7 +56,7 @@ func TestOrganization(t *testing.T) {
 
 	err = s.DeleteOrganization(org.TenantID, org.OrganizationID)
 	assert.NoError(t, err)
-	gotOrg, err = s.GetOrganization(org.OrganizationID)
+	gotOrg, err = s.GetOrganizationByTenantIDAndOrgID(org.TenantID, org.OrganizationID)
 	assert.Error(t, err)
 	assert.Nil(t, gotOrg)
 }

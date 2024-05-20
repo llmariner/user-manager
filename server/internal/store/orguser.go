@@ -25,17 +25,8 @@ func (o *OrganizationUser) ToProto() *v1.OrganizationUser {
 }
 
 // CreateOrganizationUser creates a organization user.
-func (s *S) CreateOrganizationUser(tenantID, orgID, userID, role string) (*OrganizationUser, error) {
-	org, err := s.GetOrganization(orgID)
-	if err != nil {
-		return nil, err
-	}
-	if org.TenantID != tenantID {
-		return nil, gorm.ErrRecordNotFound
-	}
-
+func (s *S) CreateOrganizationUser(orgID, userID, role string) (*OrganizationUser, error) {
 	// TODO(aya): rethink user validation: retrieving user information from dex?
-
 	orgusr := &OrganizationUser{
 		OrganizationID: orgID,
 		UserID:         userID,
@@ -45,6 +36,15 @@ func (s *S) CreateOrganizationUser(tenantID, orgID, userID, role string) (*Organ
 		return nil, err
 	}
 	return orgusr, nil
+}
+
+// ListOrganizationUsersByOrganizationID lists organization users in the specified organization.
+func (s *S) ListOrganizationUsersByOrganizationID(orgID string) ([]OrganizationUser, error) {
+	var users []OrganizationUser
+	if err := s.db.Where("organization_id = ?", orgID).Find(&users).Error; err != nil {
+		return nil, err
+	}
+	return users, nil
 }
 
 // ListAllOrganizationUsers lists all organization users.

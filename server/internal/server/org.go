@@ -76,7 +76,11 @@ func (s *S) CreateOrganizationUser(ctx context.Context, req *v1.CreateOrganizati
 		return nil, status.Error(codes.InvalidArgument, "role is required")
 	}
 
-	ou, err := s.store.CreateOrganizationUser(fakeTenantID, req.OrganizationId, req.UserId, req.Role.String())
+	if err := s.validateOrgID(req.OrganizationId); err != nil {
+		return nil, err
+	}
+
+	ou, err := s.store.CreateOrganizationUser(req.OrganizationId, req.UserId, req.Role.String())
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Errorf(codes.FailedPrecondition, "organization %q not found", req.OrganizationId)
@@ -85,6 +89,41 @@ func (s *S) CreateOrganizationUser(ctx context.Context, req *v1.CreateOrganizati
 	}
 
 	return ou.ToProto(), nil
+}
+
+// ListOrganizationUsers lists organization users for the specified organization.
+func (s *S) ListOrganizationUsers(ctx context.Context, req *v1.ListOrganizationUsersRequest) (*v1.ListOrganizationUsersResponse, error) {
+	if req.OrganizationId == "" {
+		return nil, status.Error(codes.InvalidArgument, "organization id is required")
+	}
+
+	if err := s.validateOrgID(req.OrganizationId); err != nil {
+		return nil, err
+	}
+
+	users, err := s.store.ListOrganizationUsersByOrganizationID(req.OrganizationId)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "list organization users: %s", err)
+	}
+
+	var userProtos []*v1.OrganizationUser
+	for _, user := range users {
+		userProtos = append(userProtos, user.ToProto())
+	}
+	return &v1.ListOrganizationUsersResponse{
+		Users: userProtos,
+	}, nil
+}
+
+func (s *S) validateOrgID(orgID string) error {
+	if _, err := s.store.GetOrganizationByTenantIDAndOrgID(fakeTenantID, orgID); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return status.Errorf(codes.FailedPrecondition, "organization %q not found", orgID)
+		}
+		return status.Errorf(codes.Internal, "get organization: %s", err)
+	}
+
+	return nil
 }
 
 // CreateDefaultOrganization creates the default org.
@@ -118,7 +157,7 @@ func (s *S) CreateDefaultOrganization(ctx context.Context, c *config.DefaultOrga
 	return nil
 }
 
-// ListOrganizationUsers lists organization users.
+// ListOrganizationUsers lists organization users for all organizations.
 func (s *IS) ListOrganizationUsers(ctx context.Context, req *v1.ListOrganizationUsersRequest) (*v1.ListOrganizationUsersResponse, error) {
 	users, err := s.store.ListAllOrganizationUsers()
 	if err != nil {

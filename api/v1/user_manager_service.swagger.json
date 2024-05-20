@@ -102,6 +102,35 @@
       }
     },
     "/v1/organizations/{organizationId}/users": {
+      "get": {
+        "operationId": "UsersService_ListOrganizationUsers",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListOrganizationUsersResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "organizationId",
+            "description": "organization_id must be set for UsersService. It is no-op for UsersInternalService.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "UsersService"
+        ]
+      },
       "post": {
         "operationId": "UsersService_CreateOrganizationUser",
         "responses": {

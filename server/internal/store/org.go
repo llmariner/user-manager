@@ -37,10 +37,10 @@ func (s *S) CreateOrganization(tenantID, orgID, title string) (*Organization, er
 	return org, nil
 }
 
-// GetOrganization gets an organization.
-func (s *S) GetOrganization(orgID string) (*Organization, error) {
+// GetOrganizationByTenantIDAndOrgID gets an organization.
+func (s *S) GetOrganizationByTenantIDAndOrgID(tenantID, orgID string) (*Organization, error) {
 	var org Organization
-	if err := s.db.Where("organization_id = ?", orgID).First(&org).Error; err != nil {
+	if err := s.db.Where("tenant_id = ? AND organization_id = ?", tenantID, orgID).First(&org).Error; err != nil {
 		return nil, err
 	}
 	return &org, nil
