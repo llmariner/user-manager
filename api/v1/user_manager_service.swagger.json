@@ -386,7 +386,18 @@
       }
     },
     "v1DeleteOrganizationResponse": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object": {
+          "type": "string"
+        },
+        "deleted": {
+          "type": "boolean"
+        }
+      }
     },
     "v1ListAPIKeysResponse": {
       "type": "object",
