@@ -23,9 +23,9 @@ message User {
 }
 
 enum OrganizationRole {
-  UNSPECIFIED = 0;
-  OWNER = 1;
-  READER = 2;
+  ORGANIZATION_ROLE_UNSPECIFIED = 0;
+  ORGANIZATION_ROLE_OWNER = 1;
+  ORGANIZATION_ROLE_READER = 2;
 }
 
 message OrganizationUser {
