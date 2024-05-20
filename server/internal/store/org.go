@@ -9,10 +9,10 @@ import (
 type Organization struct {
 	gorm.Model
 
-	TenantID       string `gorm:"index;uniqueIndex:idx_orgs_tenant_id_title"`
+	TenantID       string `gorm:"index;uniqueIndex:idx_orgs_tenant_id_name"`
 	OrganizationID string `gorm:"uniqueIndex"`
 
-	Title string `gorm:"uniqueIndex:idx_orgs_tenant_id_title"`
+	Name string `gorm:"uniqueIndex:idx_orgs_tenant_id_name"`
 
 	// KubernetesNamespace is the namespace where the fine-tuning jobs for the organization run.
 	// TODO(kenji): Currently we don't set the unique constraint so that multiple orgs can use the same namespace,
@@ -24,18 +24,18 @@ type Organization struct {
 func (o *Organization) ToProto() *v1.Organization {
 	return &v1.Organization{
 		Id:                  o.OrganizationID,
-		Title:               o.Title,
+		Name:                o.Name,
 		KubernetesNamespace: o.KubernetesNamespace,
 		CreatedAt:           o.CreatedAt.UTC().Unix(),
 	}
 }
 
 // CreateOrganization creates a new organization.
-func (s *S) CreateOrganization(tenantID, orgID, title, ns string) (*Organization, error) {
+func (s *S) CreateOrganization(tenantID, orgID, name, ns string) (*Organization, error) {
 	org := &Organization{
 		TenantID:            tenantID,
 		OrganizationID:      orgID,
-		Title:               title,
+		Name:                name,
 		KubernetesNamespace: ns,
 	}
 	if err := s.db.Create(org).Error; err != nil {
@@ -53,10 +53,10 @@ func (s *S) GetOrganizationByTenantIDAndOrgID(tenantID, orgID string) (*Organiza
 	return &org, nil
 }
 
-// GetOrganizationByTenantIDAndTitle gets an organization ID and a title.
-func (s *S) GetOrganizationByTenantIDAndTitle(tenantID, title string) (*Organization, error) {
+// GetOrganizationByTenantIDAndName gets an organization ID and a name.
+func (s *S) GetOrganizationByTenantIDAndName(tenantID, name string) (*Organization, error) {
 	var org Organization
-	if err := s.db.Where("tenant_id = ? AND title = ?", tenantID, title).First(&org).Error; err != nil {
+	if err := s.db.Where("tenant_id = ? AND name = ?", tenantID, name).First(&org).Error; err != nil {
 		return nil, err
 	}
 	return &org, nil

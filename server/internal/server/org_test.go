@@ -21,13 +21,13 @@ func TestOrganization(t *testing.T) {
 	ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs("Authorization", "dummy"))
 
 	for i := 0; i < 2; i++ {
-		title := fmt.Sprintf("test %d", i)
+		name := fmt.Sprintf("test %d", i)
 		cresp, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
-			Title:               title,
+			Name:                name,
 			KubernetesNamespace: fmt.Sprintf("namespace%d", i),
 		})
 		assert.NoError(t, err)
-		assert.Equal(t, title, cresp.Title)
+		assert.Equal(t, name, cresp.Name)
 
 		_, err = srv.CreateOrganizationUser(ctx, &v1.CreateOrganizationUserRequest{
 			OrganizationId: cresp.Id,
@@ -84,7 +84,7 @@ func TestListOrganizationUsers(t *testing.T) {
 	var orgs []*v1.Organization
 	for i := 0; i < 2; i++ {
 		org, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
-			Title:               fmt.Sprintf("title %d", i),
+			Name:                fmt.Sprintf("name %d", i),
 			KubernetesNamespace: fmt.Sprintf("namespace%d", i),
 		})
 		assert.NoError(t, err)
@@ -112,7 +112,7 @@ func TestCreateDefaultOrganization(t *testing.T) {
 
 	srv := New(st)
 	c := &config.DefaultOrganizationConfig{
-		Title:               "default",
+		Name:                "default",
 		KubernetesNamespace: "default",
 		UserIDs: []string{
 			"admin",
@@ -121,7 +121,7 @@ func TestCreateDefaultOrganization(t *testing.T) {
 	err := srv.CreateDefaultOrganization(context.Background(), c)
 	assert.NoError(t, err)
 
-	o, err := st.GetOrganizationByTenantIDAndTitle(fakeTenantID, "default")
+	o, err := st.GetOrganizationByTenantIDAndName(fakeTenantID, "default")
 	assert.NoError(t, err)
 
 	users, err := st.ListAllOrganizationUsers()
