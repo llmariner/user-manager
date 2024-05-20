@@ -19,8 +19,8 @@ import (
 
 // CreateOrganization creates a new organization.
 func (s *S) CreateOrganization(ctx context.Context, req *v1.CreateOrganizationRequest) (*v1.Organization, error) {
-	if req.Title == "" {
-		return nil, status.Error(codes.InvalidArgument, "title is required")
+	if req.Name == "" {
+		return nil, status.Error(codes.InvalidArgument, "name is required")
 	}
 	if req.KubernetesNamespace == "" {
 		return nil, status.Error(codes.InvalidArgument, "kubernetes namespace is required")
@@ -34,7 +34,7 @@ func (s *S) CreateOrganization(ctx context.Context, req *v1.CreateOrganizationRe
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "generate organization id: %s", err)
 	}
-	org, err := s.store.CreateOrganization(fakeTenantID, orgID, req.Title, req.KubernetesNamespace)
+	org, err := s.store.CreateOrganization(fakeTenantID, orgID, req.Name, req.KubernetesNamespace)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "create organization: %s", err)
 	}
@@ -169,8 +169,8 @@ func (s *S) validateOrgID(orgID string) error {
 // TODO(kenji): This is not the best place for this function as there is nothing related to
 // the server itself.
 func (s *S) CreateDefaultOrganization(ctx context.Context, c *config.DefaultOrganizationConfig) error {
-	log.Printf("Creating default org %q", c.Title)
-	_, err := s.store.GetOrganizationByTenantIDAndTitle(fakeTenantID, c.Title)
+	log.Printf("Creating default org %q", c.Name)
+	_, err := s.store.GetOrganizationByTenantIDAndName(fakeTenantID, c.Name)
 	if err == nil {
 		// Do nothing.
 		return nil
@@ -181,7 +181,7 @@ func (s *S) CreateDefaultOrganization(ctx context.Context, c *config.DefaultOrga
 	}
 
 	org, err := s.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
-		Title:               c.Title,
+		Name:                c.Name,
 		KubernetesNamespace: c.KubernetesNamespace,
 	})
 	if err != nil {

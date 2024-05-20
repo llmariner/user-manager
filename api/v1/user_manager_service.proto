@@ -36,7 +36,7 @@ message OrganizationUser {
 
 message Organization {
   string id = 1;
-  string title = 2;
+  string name = 2;
   string kubernetes_namespace = 3;
   int64 created_at = 4;
 }
@@ -64,7 +64,7 @@ message DeleteAPIKeyResponse {
 }
 
 message CreateOrganizationRequest {
-  string title = 1;
+  string name = 1;
   // kubernetes_namespace is the namespace where the fine-tuning jobs for the organization run.
   string kubernetes_namespace = 2;
 }

@@ -3,7 +3,7 @@ grpcPort: 8081
 internalGrpcPort: 8082
 
 defaultOrganization:
-  title: Default
+  name: Default
   kubernetesNamespace: default
   userIds:
   - admin@example.com

@@ -16,36 +16,36 @@ func TestOrganization(t *testing.T) {
 	org := &Organization{
 		TenantID:            "t1",
 		OrganizationID:      "o1",
-		Title:               "Test Organization",
+		Name:                "Test Organization",
 		KubernetesNamespace: "test-namespace",
 	}
 
-	gotOrg, err := s.CreateOrganization(org.TenantID, org.OrganizationID, org.Title, org.KubernetesNamespace)
+	gotOrg, err := s.CreateOrganization(org.TenantID, org.OrganizationID, org.Name, org.KubernetesNamespace)
 	assert.NoError(t, err)
 	assert.NotNil(t, gotOrg)
 	assert.Equal(t, org.TenantID, gotOrg.TenantID)
 	assert.Equal(t, org.OrganizationID, gotOrg.OrganizationID)
-	assert.Equal(t, org.Title, gotOrg.Title)
+	assert.Equal(t, org.Name, gotOrg.Name)
 
 	gotOrg, err = s.GetOrganizationByTenantIDAndOrgID(org.TenantID, org.OrganizationID)
 	assert.NoError(t, err)
 	assert.NotNil(t, gotOrg)
 	assert.Equal(t, org.TenantID, gotOrg.TenantID)
 	assert.Equal(t, org.OrganizationID, gotOrg.OrganizationID)
-	assert.Equal(t, org.Title, gotOrg.Title)
+	assert.Equal(t, org.Name, gotOrg.Name)
 
-	gotOrg, err = s.GetOrganizationByTenantIDAndTitle(org.TenantID, org.Title)
+	gotOrg, err = s.GetOrganizationByTenantIDAndName(org.TenantID, org.Name)
 	assert.NoError(t, err)
 	assert.NotNil(t, gotOrg)
 	assert.Equal(t, org.TenantID, gotOrg.TenantID)
 	assert.Equal(t, org.OrganizationID, gotOrg.OrganizationID)
-	assert.Equal(t, org.Title, gotOrg.Title)
+	assert.Equal(t, org.Name, gotOrg.Name)
 
-	_, err = s.GetOrganizationByTenantIDAndTitle("different", org.Title)
+	_, err = s.GetOrganizationByTenantIDAndName("different", org.Name)
 	assert.Error(t, err)
 	assert.True(t, errors.Is(err, gorm.ErrRecordNotFound))
 
-	_, err = s.GetOrganizationByTenantIDAndTitle(org.TenantID, "different")
+	_, err = s.GetOrganizationByTenantIDAndName(org.TenantID, "different")
 	assert.Error(t, err)
 	assert.True(t, errors.Is(err, gorm.ErrRecordNotFound))
 

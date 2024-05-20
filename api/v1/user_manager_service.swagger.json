@@ -362,7 +362,7 @@
     "v1CreateOrganizationRequest": {
       "type": "object",
       "properties": {
-        "title": {
+        "name": {
           "type": "string"
         },
         "kubernetesNamespace": {
@@ -441,7 +441,7 @@
         "id": {
           "type": "string"
         },
-        "title": {
+        "name": {
           "type": "string"
         },
         "kubernetesNamespace": {

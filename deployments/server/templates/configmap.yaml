@@ -10,7 +10,7 @@ data:
     grpcPort: {{ .Values.grpcPort }}
     internalGrpcPort: {{ .Values.internalGrpcPort }}
     defaultOrganization:
-      title: {{ .Values.defaultOrganization.title }}
+      name: {{ .Values.defaultOrganization.name }}
       kubernetesNamespace: {{ .Values.defaultOrganization.kubernetesNamespace }}
       userIds:
       {{- toYaml .Values.defaultOrganization.userIds | nindent 6 }}

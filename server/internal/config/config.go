@@ -10,15 +10,15 @@ import (
 
 // DefaultOrganizationConfig is the default organization configuration.
 type DefaultOrganizationConfig struct {
-	Title               string   `yaml:"title"`
+	Name                string   `yaml:"name"`
 	KubernetesNamespace string   `yaml:"kubernetesNamespace"`
 	UserIDs             []string `yaml:"userIds"`
 }
 
 // validate validates the configuration.
 func (c *DefaultOrganizationConfig) validate() error {
-	if c.Title == "" {
-		return fmt.Errorf("title must be set")
+	if c.Name == "" {
+		return fmt.Errorf("name must be set")
 	}
 	if c.KubernetesNamespace == "" {
 		return fmt.Errorf("kubernetes namespace must be set")
