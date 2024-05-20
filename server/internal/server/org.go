@@ -196,6 +196,22 @@ func (s *S) CreateDefaultOrganization(ctx context.Context, c *config.DefaultOrga
 	return nil
 }
 
+// ListOrganizations lists all organizations.
+func (s *IS) ListOrganizations(ctx context.Context, req *v1.ListOrganizationsRequest) (*v1.ListOrganizationsResponse, error) {
+	orgs, err := s.store.ListAllOrganizations()
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "list organizations: %s", err)
+	}
+
+	var orgProtos []*v1.Organization
+	for _, org := range orgs {
+		orgProtos = append(orgProtos, org.ToProto())
+	}
+	return &v1.ListOrganizationsResponse{
+		Organizations: orgProtos,
+	}, nil
+}
+
 // ListOrganizationUsers lists organization users for all organizations.
 func (s *IS) ListOrganizationUsers(ctx context.Context, req *v1.ListOrganizationUsersRequest) (*v1.ListOrganizationUsersResponse, error) {
 	users, err := s.store.ListAllOrganizationUsers()

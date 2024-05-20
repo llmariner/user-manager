@@ -168,6 +168,8 @@ service UsersService {
 service UsersInternalService {
   rpc ListAPIKeys(ListAPIKeysRequest) returns (ListAPIKeysResponse) {
   }
+  rpc ListOrganizations(ListOrganizationsRequest) returns (ListOrganizationsResponse) {
+  }
   rpc ListOrganizationUsers(ListOrganizationUsersRequest) returns (ListOrganizationUsersResponse) {
   }
 }

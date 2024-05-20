@@ -71,6 +71,15 @@ func (s *S) ListOrganizations(tenantID string) ([]*Organization, error) {
 	return orgs, nil
 }
 
+// ListAllOrganizations lists all organizations.
+func (s *S) ListAllOrganizations() ([]*Organization, error) {
+	var orgs []*Organization
+	if err := s.db.Find(&orgs).Error; err != nil {
+		return nil, err
+	}
+	return orgs, nil
+}
+
 // DeleteOrganization deletes an organization.
 func (s *S) DeleteOrganization(tenantID, orgID string) error {
 	return s.db.Transaction(func(tx *gorm.DB) error {
