@@ -25,6 +25,24 @@ func (c *DefaultOrganizationConfig) validate() error {
 	return nil
 }
 
+// DefaultProjectConfig is the default project configuration.
+type DefaultProjectConfig struct {
+	Title               string   `yaml:"title"`
+	KubernetesNamespace string   `yaml:"kubernetesNamespace"`
+	UserIDs             []string `yaml:"userIds"`
+}
+
+// validate validates the configuration.
+func (c *DefaultProjectConfig) validate() error {
+	if c.Title == "" {
+		return fmt.Errorf("title must be set")
+	}
+	if len(c.UserIDs) == 0 {
+		return fmt.Errorf("userIds must be set")
+	}
+	return nil
+}
+
 // DebugConfig is the debug configuration.
 type DebugConfig struct {
 	Standalone bool   `yaml:"standalone"`
@@ -57,6 +75,7 @@ type Config struct {
 	Database db.Config `yaml:"database"`
 
 	DefaultOrganization DefaultOrganizationConfig `yaml:"defaultOrganization"`
+	DefaultProject      DefaultProjectConfig      `yaml:"defaultProject"`
 
 	Debug DebugConfig `yaml:"debug"`
 
@@ -86,6 +105,9 @@ func (c *Config) Validate() error {
 	}
 
 	if err := c.DefaultOrganization.validate(); err != nil {
+		return err
+	}
+	if err := c.DefaultProject.validate(); err != nil {
 		return err
 	}
 

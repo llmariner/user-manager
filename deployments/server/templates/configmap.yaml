@@ -13,6 +13,11 @@ data:
       title: {{ .Values.defaultOrganization.title }}
       userIds:
       {{- toYaml .Values.defaultOrganization.userIds | nindent 6 }}
+    defaultProject:
+      title: {{ .Values.defaultProject.title }}
+      kubernetesNamespace: {{ .Values.defaultProject.kubernetesNamespace }}
+      userIds:
+      {{- toYaml .Values.defaultProject.userIds | nindent 6 }}
     database:
       host: {{ .Values.global.database.host }}
       port: {{ .Values.global.database.port }}

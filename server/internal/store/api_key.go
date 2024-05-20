@@ -15,6 +15,7 @@ type APIKey struct {
 	TenantID string `gorm:"uniqueIndex:idx_api_key_api_key_id_tenant_id;uniqueIndex:idx_api_key_name_tenant_id"`
 
 	OrganizationID string
+	ProjectID      string
 	UserID         string
 
 	Secret string
@@ -27,6 +28,7 @@ type APIKeyKey struct {
 	APIKeyID       string
 	TenantID       string
 	OrganizationID string
+	ProjectID      string
 	UserID         string
 }
 
@@ -44,6 +46,7 @@ func (s *S) CreateAPIKey(spec APIKeySpec) (*APIKey, error) {
 		APIKeyID:       spec.Key.APIKeyID,
 		TenantID:       spec.Key.TenantID,
 		OrganizationID: spec.Key.OrganizationID,
+		ProjectID:      spec.Key.ProjectID,
 		UserID:         spec.Key.UserID,
 
 		Name:   spec.Name,

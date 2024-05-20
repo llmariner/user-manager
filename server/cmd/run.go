@@ -93,7 +93,11 @@ func run(ctx context.Context, c *config.Config) error {
 		errCh <- s.Run(ctx, c.GRPCPort, c.AuthConfig)
 	}()
 
-	if err := s.CreateDefaultOrganization(ctx, &c.DefaultOrganization); err != nil {
+	org, err := s.CreateDefaultOrganization(ctx, &c.DefaultOrganization)
+	if err != nil {
+		return err
+	}
+	if err := s.CreateDefaultProject(ctx, &c.DefaultProject, org.Id); err != nil {
 		return err
 	}
 
