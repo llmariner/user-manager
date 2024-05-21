@@ -14,7 +14,6 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"gorm.io/gorm"
-	"k8s.io/apimachinery/pkg/api/validation"
 )
 
 // CreateOrganization creates a new organization.
@@ -22,19 +21,12 @@ func (s *S) CreateOrganization(ctx context.Context, req *v1.CreateOrganizationRe
 	if req.Title == "" {
 		return nil, status.Error(codes.InvalidArgument, "title is required")
 	}
-	if req.KubernetesNamespace == "" {
-		return nil, status.Error(codes.InvalidArgument, "kubernetes namespace is required")
-	}
-
-	if errs := validation.ValidateNamespaceName(req.KubernetesNamespace, false); len(errs) != 0 {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid kubernetes namespace: %s", errs)
-	}
 
 	orgID, err := generateRandomString("org-", 22)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "generate organization id: %s", err)
 	}
-	org, err := s.store.CreateOrganization(fakeTenantID, orgID, req.Title, req.KubernetesNamespace)
+	org, err := s.store.CreateOrganization(fakeTenantID, orgID, req.Title)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "create organization: %s", err)
 	}
@@ -181,8 +173,7 @@ func (s *S) CreateDefaultOrganization(ctx context.Context, c *config.DefaultOrga
 	}
 
 	org, err := s.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
-		Title:               c.Title,
-		KubernetesNamespace: c.KubernetesNamespace,
+		Title: c.Title,
 	})
 	if err != nil {
 		return err

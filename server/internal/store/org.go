@@ -23,20 +23,18 @@ type Organization struct {
 // ToProto converts the organization to proto.
 func (o *Organization) ToProto() *v1.Organization {
 	return &v1.Organization{
-		Id:                  o.OrganizationID,
-		Title:               o.Title,
-		KubernetesNamespace: o.KubernetesNamespace,
-		CreatedAt:           o.CreatedAt.UTC().Unix(),
+		Id:        o.OrganizationID,
+		Title:     o.Title,
+		CreatedAt: o.CreatedAt.UTC().Unix(),
 	}
 }
 
 // CreateOrganization creates a new organization.
-func (s *S) CreateOrganization(tenantID, orgID, title, ns string) (*Organization, error) {
+func (s *S) CreateOrganization(tenantID, orgID, title string) (*Organization, error) {
 	org := &Organization{
-		TenantID:            tenantID,
-		OrganizationID:      orgID,
-		Title:               title,
-		KubernetesNamespace: ns,
+		TenantID:       tenantID,
+		OrganizationID: orgID,
+		Title:          title,
 	}
 	if err := s.db.Create(org).Error; err != nil {
 		return nil, err

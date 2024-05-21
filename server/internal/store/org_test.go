@@ -14,13 +14,12 @@ func TestOrganization(t *testing.T) {
 	defer tearDown()
 
 	org := &Organization{
-		TenantID:            "t1",
-		OrganizationID:      "o1",
-		Title:               "Test Organization",
-		KubernetesNamespace: "test-namespace",
+		TenantID:       "t1",
+		OrganizationID: "o1",
+		Title:          "Test Organization",
 	}
 
-	gotOrg, err := s.CreateOrganization(org.TenantID, org.OrganizationID, org.Title, org.KubernetesNamespace)
+	gotOrg, err := s.CreateOrganization(org.TenantID, org.OrganizationID, org.Title)
 	assert.NoError(t, err)
 	assert.NotNil(t, gotOrg)
 	assert.Equal(t, org.TenantID, gotOrg.TenantID)
@@ -49,7 +48,7 @@ func TestOrganization(t *testing.T) {
 	assert.Error(t, err)
 	assert.True(t, errors.Is(err, gorm.ErrRecordNotFound))
 
-	_, err = s.CreateOrganization(org.TenantID, "o2", "Test Organization 2", "ns")
+	_, err = s.CreateOrganization(org.TenantID, "o2", "Test Organization 2")
 	assert.NoError(t, err)
 	gotOrgs, err := s.ListOrganizations(org.TenantID)
 	assert.NoError(t, err)
@@ -66,10 +65,10 @@ func TestListAllOrganizations(t *testing.T) {
 	s, tearDown := NewTest(t)
 	defer tearDown()
 
-	_, err := s.CreateOrganization("t0", "o0", "Test Organization 0", "ns")
+	_, err := s.CreateOrganization("t0", "o0", "Test Organization 0")
 	assert.NoError(t, err)
 
-	_, err = s.CreateOrganization("t1", "o1", "Test Organization 1", "ns")
+	_, err = s.CreateOrganization("t1", "o1", "Test Organization 1")
 	assert.NoError(t, err)
 
 	gotOrgs, err := s.ListAllOrganizations()
@@ -81,13 +80,13 @@ func TestOrganization_UniqueConstraint(t *testing.T) {
 	s, tearDown := NewTest(t)
 	defer tearDown()
 
-	_, err := s.CreateOrganization("t1", "o1", "Test Organization", "ns")
+	_, err := s.CreateOrganization("t1", "o1", "Test Organization")
 	assert.NoError(t, err)
 
-	_, err = s.CreateOrganization("t1", "o2", "Test Organization", "ns")
+	_, err = s.CreateOrganization("t1", "o2", "Test Organization")
 	assert.Error(t, err)
 	assert.True(t, gerrors.IsUniqueConstraintViolation(err))
 
-	_, err = s.CreateOrganization("t2", "o3", "Test Organization", "ns")
+	_, err = s.CreateOrganization("t2", "o3", "Test Organization")
 	assert.NoError(t, err)
 }

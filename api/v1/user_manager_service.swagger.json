@@ -606,10 +606,6 @@
       "properties": {
         "title": {
           "type": "string"
-        },
-        "kubernetesNamespace": {
-          "type": "string",
-          "description": "kubernetes_namespace is the namespace where the fine-tuning jobs for the organization run.\nTODO(kenji): Remove this."
         }
       }
     },
@@ -722,10 +718,6 @@
         "title": {
           "type": "string"
         },
-        "kubernetesNamespace": {
-          "type": "string",
-          "description": "TODO(kenji): Remove this."
-        },
         "createdAt": {
           "type": "string",
           "format": "int64"
@@ -765,7 +757,8 @@
           "type": "string"
         },
         "kubernetesNamespace": {
-          "type": "string"
+          "type": "string",
+          "description": "kubernetes_namespace is the namespace where the fine-tuning jobs for the project run."
         },
         "organizationId": {
           "type": "string"

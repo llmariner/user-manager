@@ -23,8 +23,7 @@ func TestOrganization(t *testing.T) {
 	for i := 0; i < 2; i++ {
 		title := fmt.Sprintf("test %d", i)
 		cresp, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
-			Title:               title,
-			KubernetesNamespace: fmt.Sprintf("namespace%d", i),
+			Title: title,
 		})
 		assert.NoError(t, err)
 		assert.Equal(t, title, cresp.Title)
@@ -84,8 +83,7 @@ func TestListOrganizationUsers(t *testing.T) {
 	var orgs []*v1.Organization
 	for i := 0; i < 2; i++ {
 		org, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
-			Title:               fmt.Sprintf("title %d", i),
-			KubernetesNamespace: fmt.Sprintf("namespace%d", i),
+			Title: fmt.Sprintf("title %d", i),
 		})
 		assert.NoError(t, err)
 		orgs = append(orgs, org)
@@ -112,8 +110,7 @@ func TestCreateDefaultOrganization(t *testing.T) {
 
 	srv := New(st)
 	c := &config.DefaultOrganizationConfig{
-		Title:               "default",
-		KubernetesNamespace: "default",
+		Title: "default",
 		UserIDs: []string{
 			"admin",
 		},
