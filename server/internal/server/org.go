@@ -66,8 +66,12 @@ func (s *S) DeleteOrganization(ctx context.Context, req *v1.DeleteOrganizationRe
 		return nil, status.Error(codes.InvalidArgument, "organization id is required")
 	}
 
-	if err := s.validateOrgID(req.Id); err != nil {
+	o, err := s.validateOrgID(req.Id)
+	if err != nil {
 		return nil, err
+	}
+	if o.IsDefault {
+		return nil, status.Errorf(codes.InvalidArgument, "cannot delete a default org")
 	}
 
 	// CHeck if the org still has a project.
@@ -106,7 +110,7 @@ func (s *S) CreateOrganizationUser(ctx context.Context, req *v1.CreateOrganizati
 		return nil, status.Error(codes.InvalidArgument, "role is required")
 	}
 
-	if err := s.validateOrgID(req.OrganizationId); err != nil {
+	if _, err := s.validateOrgID(req.OrganizationId); err != nil {
 		return nil, err
 	}
 
@@ -127,7 +131,7 @@ func (s *S) ListOrganizationUsers(ctx context.Context, req *v1.ListOrganizationU
 		return nil, status.Error(codes.InvalidArgument, "organization id is required")
 	}
 
-	if err := s.validateOrgID(req.OrganizationId); err != nil {
+	if _, err := s.validateOrgID(req.OrganizationId); err != nil {
 		return nil, err
 	}
 
@@ -154,7 +158,7 @@ func (s *S) DeleteOrganizationUser(ctx context.Context, req *v1.DeleteOrganizati
 		return nil, status.Error(codes.InvalidArgument, "user id is required")
 	}
 
-	if err := s.validateOrgID(req.OrganizationId); err != nil {
+	if _, err := s.validateOrgID(req.OrganizationId); err != nil {
 		return nil, err
 	}
 
@@ -170,15 +174,16 @@ func (s *S) DeleteOrganizationUser(ctx context.Context, req *v1.DeleteOrganizati
 	return &emptypb.Empty{}, nil
 }
 
-func (s *S) validateOrgID(orgID string) error {
-	if _, err := s.store.GetOrganizationByTenantIDAndOrgID(fakeTenantID, orgID); err != nil {
+func (s *S) validateOrgID(orgID string) (*store.Organization, error) {
+	o, err := s.store.GetOrganizationByTenantIDAndOrgID(fakeTenantID, orgID)
+	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return status.Errorf(codes.FailedPrecondition, "organization %q not found", orgID)
+			return nil, status.Errorf(codes.FailedPrecondition, "organization %q not found", orgID)
 		}
-		return status.Errorf(codes.Internal, "get organization: %s", err)
+		return nil, status.Errorf(codes.Internal, "get organization: %s", err)
 	}
 
-	return nil
+	return o, nil
 }
 
 // CreateDefaultOrganization creates the default org.

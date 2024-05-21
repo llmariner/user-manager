@@ -10,7 +10,6 @@ import (
 	"github.com/llm-operator/user-manager/server/internal/store"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
@@ -20,7 +19,7 @@ func TestOrganization(t *testing.T) {
 
 	srv := New(st)
 	isrv := NewInternal(st)
-	ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs("Authorization", "dummy"))
+	ctx := context.Background()
 
 	for i := 0; i < 2; i++ {
 		title := fmt.Sprintf("test %d", i)
@@ -80,7 +79,7 @@ func TestDeleteOrganization(t *testing.T) {
 	defer tearDown()
 
 	srv := New(st)
-	ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs("Authorization", "dummy"))
+	ctx := context.Background()
 
 	org, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
 		Title: "Test organization",
@@ -118,7 +117,7 @@ func TestListOrganizationUsers(t *testing.T) {
 	defer tearDown()
 
 	srv := New(st)
-	ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs("Authorization", "dummy"))
+	ctx := context.Background()
 
 	var orgs []*v1.Organization
 	for i := 0; i < 2; i++ {
@@ -174,4 +173,11 @@ func TestCreateDefaultOrganization(t *testing.T) {
 	// Calling again is no-op.
 	_, err = srv.CreateDefaultOrganization(context.Background(), c)
 	assert.NoError(t, err)
+
+	// Default org cannot be deleted.
+	_, err = srv.DeleteOrganization(context.Background(), &v1.DeleteOrganizationRequest{
+		Id: o.OrganizationID,
+	})
+	assert.Error(t, err)
+	assert.Equal(t, codes.InvalidArgument, status.Code(err))
 }
