@@ -9,7 +9,9 @@ import (
 	"github.com/llm-operator/user-manager/server/internal/config"
 	"github.com/llm-operator/user-manager/server/internal/store"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 )
 
 func TestOrganization(t *testing.T) {
@@ -71,6 +73,44 @@ func TestOrganization(t *testing.T) {
 	laresp3, err := isrv.ListOrganizationUsers(ctx, &v1.ListOrganizationUsersRequest{})
 	assert.NoError(t, err)
 	assert.Empty(t, laresp3.Users)
+}
+
+func TestDeleteOrganization(t *testing.T) {
+	st, tearDown := store.NewTest(t)
+	defer tearDown()
+
+	srv := New(st)
+	ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs("Authorization", "dummy"))
+
+	org, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
+		Title: "Test organization",
+	})
+	assert.NoError(t, err)
+
+	proj, err := srv.CreateProject(ctx, &v1.CreateProjectRequest{
+		Title:               "Test project",
+		OrganizationId:      org.Id,
+		KubernetesNamespace: "test",
+	})
+	assert.NoError(t, err)
+
+	_, err = srv.DeleteOrganization(ctx, &v1.DeleteOrganizationRequest{
+		Id: org.Id,
+	})
+	assert.Error(t, err)
+	assert.Equal(t, codes.FailedPrecondition, status.Code(err))
+
+	// Delete the project and try again.
+	_, err = srv.DeleteProject(ctx, &v1.DeleteProjectRequest{
+		Id:             proj.Id,
+		OrganizationId: org.Id,
+	})
+	assert.NoError(t, err)
+
+	_, err = srv.DeleteOrganization(ctx, &v1.DeleteOrganizationRequest{
+		Id: org.Id,
+	})
+	assert.NoError(t, err)
 }
 
 func TestListOrganizationUsers(t *testing.T) {

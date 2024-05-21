@@ -92,14 +92,6 @@ func (s *S) DeleteOrganization(tenantID, orgID string) error {
 			return err
 		}
 
-		if err := tx.Unscoped().Where("organization_id = ?", orgID).Delete(&Project{}).Error; err != nil {
-			return err
-		}
-
-		if err := tx.Unscoped().Where("organization_id = ?", orgID).Delete(&ProjectUser{}).Error; err != nil {
-			return err
-		}
-
 		return nil
 	})
 }
