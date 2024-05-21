@@ -56,10 +56,24 @@ func (s *S) DeleteOrganization(ctx context.Context, req *v1.DeleteOrganizationRe
 		return nil, status.Error(codes.InvalidArgument, "organization id is required")
 	}
 
-	if err := s.store.DeleteOrganization(fakeTenantID, req.Id); err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, status.Errorf(codes.NotFound, "organization %q not found", req.Id)
+	if err := s.validateOrgID(req.Id); err != nil {
+		return nil, err
+	}
+
+	// CHeck if the org still has a project.
+	ps, err := s.store.ListProjectsByTenantIDAndOrganizationID(fakeTenantID, req.Id)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "list projects: %s", err)
+	}
+	if len(ps) > 0 {
+		var s []string
+		for _, p := range ps {
+			s = append(s, p.Title)
 		}
+		return nil, status.Errorf(codes.FailedPrecondition, "organization %q still has projects: %q", req.Id, strings.Join(s, ", "))
+	}
+
+	if err := s.store.DeleteOrganization(fakeTenantID, req.Id); err != nil {
 		return nil, status.Errorf(codes.Internal, "delete organization: %s", err)
 	}
 
