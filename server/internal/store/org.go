@@ -13,11 +13,6 @@ type Organization struct {
 	OrganizationID string `gorm:"uniqueIndex"`
 
 	Title string `gorm:"uniqueIndex:idx_orgs_tenant_id_title"`
-
-	// KubernetesNamespace is the namespace where the fine-tuning jobs for the organization run.
-	// TODO(kenji): Currently we don't set the unique constraint so that multiple orgs can use the same namespace,
-	// but revisit the design.
-	KubernetesNamespace string
 }
 
 // ToProto converts the organization to proto.
