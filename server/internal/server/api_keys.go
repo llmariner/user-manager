@@ -58,6 +58,7 @@ func (s *S) CreateAPIKey(
 			APIKeyID:       trackID,
 			TenantID:       fakeTenantID,
 			OrganizationID: userInfo.OrganizationID,
+			ProjectID:      userInfo.ProjectID,
 			UserID:         userInfo.UserID,
 		},
 		Name:   req.Name,
@@ -146,6 +147,9 @@ func toAPIKeyProto(k *store.APIKey, includeSecret bool) *v1.APIKey {
 		},
 		Organization: &v1.Organization{
 			Id: k.OrganizationID,
+		},
+		Project: &v1.Project{
+			Id: k.ProjectID,
 		},
 	}
 	if includeSecret {

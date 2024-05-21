@@ -115,7 +115,7 @@ func TestCreateDefaultOrganization(t *testing.T) {
 			"admin",
 		},
 	}
-	err := srv.CreateDefaultOrganization(context.Background(), c)
+	_, err := srv.CreateDefaultOrganization(context.Background(), c)
 	assert.NoError(t, err)
 
 	o, err := st.GetOrganizationByTenantIDAndTitle(fakeTenantID, "default")
@@ -130,6 +130,6 @@ func TestCreateDefaultOrganization(t *testing.T) {
 	assert.Equal(t, v1.OrganizationRole_ORGANIZATION_ROLE_OWNER.String(), u.Role)
 
 	// Calling again is no-op.
-	err = srv.CreateDefaultOrganization(context.Background(), c)
+	_, err = srv.CreateDefaultOrganization(context.Background(), c)
 	assert.NoError(t, err)
 }

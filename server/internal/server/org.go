@@ -160,23 +160,23 @@ func (s *S) validateOrgID(orgID string) error {
 // CreateDefaultOrganization creates the default org.
 // TODO(kenji): This is not the best place for this function as there is nothing related to
 // the server itself.
-func (s *S) CreateDefaultOrganization(ctx context.Context, c *config.DefaultOrganizationConfig) error {
+func (s *S) CreateDefaultOrganization(ctx context.Context, c *config.DefaultOrganizationConfig) (*v1.Organization, error) {
 	log.Printf("Creating default org %q", c.Title)
-	_, err := s.store.GetOrganizationByTenantIDAndTitle(fakeTenantID, c.Title)
+	existing, err := s.store.GetOrganizationByTenantIDAndTitle(fakeTenantID, c.Title)
 	if err == nil {
 		// Do nothing.
-		return nil
+		return existing.ToProto(), nil
 	}
 
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
-		return err
+		return nil, err
 	}
 
 	org, err := s.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
 		Title: c.Title,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	for _, uid := range c.UserIDs {
@@ -185,10 +185,10 @@ func (s *S) CreateDefaultOrganization(ctx context.Context, c *config.DefaultOrga
 			UserId:         uid,
 			Role:           v1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
 		}); err != nil {
-			return err
+			return nil, err
 		}
 	}
-	return nil
+	return org, nil
 }
 
 // ListOrganizations lists all organizations.

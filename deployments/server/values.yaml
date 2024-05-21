@@ -27,6 +27,12 @@ defaultOrganization:
   userIds:
   - admin@example.com
 
+defaultProject:
+  title: Default Project
+  kubernetesNamespace: default
+  userIds:
+  - admin@example.com
+
 replicaCount: 1
 image:
   repository: public.ecr.aws/v8n3t7y5/llm-operator/user-manager-server
