@@ -162,4 +162,5 @@ func TestCreateDefaultProject(t *testing.T) {
 	p, err := st.GetProjectByTenantIDAndTitle(fakeTenantID, c.Title)
 	assert.NoError(t, err)
 	assert.Equal(t, c.KubernetesNamespace, p.KubernetesNamespace)
+	assert.True(t, p.IsDefault)
 }

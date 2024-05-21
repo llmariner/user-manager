@@ -27,11 +27,26 @@ func (s *S) CreateProject(ctx context.Context, req *v1.CreateProjectRequest) (*v
 		return nil, status.Error(codes.InvalidArgument, "kubernetes namespace is required")
 	}
 
-	if err := s.validateOrgID(req.OrganizationId); err != nil {
+	return s.createProject(ctx,
+		req.Title,
+		req.OrganizationId,
+		req.KubernetesNamespace,
+		false,
+	)
+}
+
+func (s *S) createProject(
+	ctx context.Context,
+	title string,
+	organizationID string,
+	kubernetesNamespace string,
+	isDefault bool,
+) (*v1.Project, error) {
+	if err := s.validateOrgID(organizationID); err != nil {
 		return nil, err
 	}
 
-	if errs := validation.ValidateNamespaceName(req.KubernetesNamespace, false); len(errs) != 0 {
+	if errs := validation.ValidateNamespaceName(kubernetesNamespace, false); len(errs) != 0 {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid kubernetes namespace: %s", errs)
 	}
 
@@ -42,9 +57,10 @@ func (s *S) CreateProject(ctx context.Context, req *v1.CreateProjectRequest) (*v
 	p, err := s.store.CreateProject(store.CreateProjectParams{
 		TenantID:            fakeTenantID,
 		ProjectID:           projectID,
-		OrganizationID:      req.OrganizationId,
-		Title:               req.Title,
-		KubernetesNamespace: req.KubernetesNamespace,
+		OrganizationID:      organizationID,
+		Title:               title,
+		KubernetesNamespace: kubernetesNamespace,
+		IsDefault:           isDefault,
 	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "create project: %s", err)
@@ -228,11 +244,12 @@ func (s *S) CreateDefaultProject(ctx context.Context, c *config.DefaultProjectCo
 		return err
 	}
 
-	project, err := s.CreateProject(ctx, &v1.CreateProjectRequest{
-		Title:               c.Title,
-		OrganizationId:      orgID,
-		KubernetesNamespace: c.KubernetesNamespace,
-	})
+	project, err := s.createProject(ctx,
+		c.Title,
+		orgID,
+		c.KubernetesNamespace,
+		true,
+	)
 	if err != nil {
 		return err
 	}
