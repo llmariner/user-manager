@@ -26,7 +26,7 @@ func (s *S) CreateOrganization(ctx context.Context, req *v1.CreateOrganizationRe
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "generate organization id: %s", err)
 	}
-	org, err := s.store.CreateOrganization(fakeTenantID, orgID, req.Title)
+	org, err := s.store.CreateOrganization(fakeTenantID, orgID, req.Title, false)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "create organization: %s", err)
 	}
