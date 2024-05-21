@@ -9,7 +9,9 @@ import (
 	"github.com/llm-operator/user-manager/server/internal/config"
 	"github.com/llm-operator/user-manager/server/internal/store"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 )
 
 func TestProject(t *testing.T) {
@@ -18,7 +20,7 @@ func TestProject(t *testing.T) {
 
 	srv := New(st)
 	isrv := NewInternal(st)
-	ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs("Authorization", "dummy"))
+	ctx := context.Background()
 
 	var orgs []*v1.Organization
 	var projs []*v1.Project
@@ -145,7 +147,7 @@ func TestCreateDefaultProject(t *testing.T) {
 	defer tearDown()
 
 	srv := New(st)
-	ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs("Authorization", "dummy"))
+	ctx := context.Background()
 
 	org, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
 		Title: "Test organization",
@@ -163,4 +165,12 @@ func TestCreateDefaultProject(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, c.KubernetesNamespace, p.KubernetesNamespace)
 	assert.True(t, p.IsDefault)
+
+	// Default project cannot be deleted.
+	_, err = srv.DeleteProject(context.Background(), &v1.DeleteProjectRequest{
+		Id:             p.ProjectID,
+		OrganizationId: org.Id,
+	})
+	assert.Error(t, err)
+	assert.Equal(t, codes.InvalidArgument, status.Code(err))
 }

@@ -42,7 +42,7 @@ func (s *S) createProject(
 	kubernetesNamespace string,
 	isDefault bool,
 ) (*v1.Project, error) {
-	if err := s.validateOrgID(organizationID); err != nil {
+	if _, err := s.validateOrgID(organizationID); err != nil {
 		return nil, err
 	}
 
@@ -75,7 +75,7 @@ func (s *S) ListProjects(ctx context.Context, req *v1.ListProjectsRequest) (*v1.
 		return nil, status.Error(codes.InvalidArgument, "organization id is required")
 	}
 
-	if err := s.validateOrgID(req.OrganizationId); err != nil {
+	if _, err := s.validateOrgID(req.OrganizationId); err != nil {
 		return nil, err
 	}
 
@@ -102,8 +102,12 @@ func (s *S) DeleteProject(ctx context.Context, req *v1.DeleteProjectRequest) (*v
 		return nil, status.Error(codes.InvalidArgument, "project id is required")
 	}
 
-	if err := s.validateProjectID(req.Id, req.OrganizationId); err != nil {
+	p, err := s.validateProjectID(req.Id, req.OrganizationId)
+	if err != nil {
 		return nil, err
+	}
+	if p.IsDefault {
+		return nil, status.Errorf(codes.InvalidArgument, "cannot delete a default project")
 	}
 
 	if err := s.store.DeleteProject(fakeTenantID, req.Id); err != nil {
@@ -135,7 +139,7 @@ func (s *S) CreateProjectUser(ctx context.Context, req *v1.CreateProjectUserRequ
 		return nil, status.Error(codes.InvalidArgument, "role is required")
 	}
 
-	if err := s.validateProjectID(req.ProjectId, req.OrganizationId); err != nil {
+	if _, err := s.validateProjectID(req.ProjectId, req.OrganizationId); err != nil {
 		return nil, err
 	}
 
@@ -164,7 +168,7 @@ func (s *S) ListProjectUsers(ctx context.Context, req *v1.ListProjectUsersReques
 		return nil, status.Error(codes.InvalidArgument, "organization id is required")
 	}
 
-	if err := s.validateProjectID(req.ProjectId, req.OrganizationId); err != nil {
+	if _, err := s.validateProjectID(req.ProjectId, req.OrganizationId); err != nil {
 		return nil, err
 	}
 
@@ -194,7 +198,7 @@ func (s *S) DeleteProjectUser(ctx context.Context, req *v1.DeleteProjectUserRequ
 		return nil, status.Error(codes.InvalidArgument, "user id is required")
 	}
 
-	if err := s.validateProjectID(req.ProjectId, req.OrganizationId); err != nil {
+	if _, err := s.validateProjectID(req.ProjectId, req.OrganizationId); err != nil {
 		return nil, err
 	}
 
@@ -210,23 +214,24 @@ func (s *S) DeleteProjectUser(ctx context.Context, req *v1.DeleteProjectUserRequ
 	return &emptypb.Empty{}, nil
 }
 
-func (s *S) validateProjectID(projectID, orgID string) error {
-	if err := s.validateOrgID(orgID); err != nil {
-		return err
+func (s *S) validateProjectID(projectID, orgID string) (*store.Project, error) {
+	if _, err := s.validateOrgID(orgID); err != nil {
+		return nil, err
 	}
 
-	if _, err := s.store.GetProject(store.GetProjectParams{
+	p, err := s.store.GetProject(store.GetProjectParams{
 		TenantID:       fakeTenantID,
 		OrganizationID: orgID,
 		ProjectID:      projectID,
-	}); err != nil {
+	})
+	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return status.Errorf(codes.FailedPrecondition, "project %q not found", orgID)
+			return nil, status.Errorf(codes.FailedPrecondition, "project %q not found", orgID)
 		}
-		return status.Errorf(codes.Internal, "get project: %s", err)
+		return nil, status.Errorf(codes.Internal, "get project: %s", err)
 	}
 
-	return nil
+	return p, nil
 }
 
 // CreateDefaultProject creates the default org.
