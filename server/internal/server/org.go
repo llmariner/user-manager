@@ -5,11 +5,13 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"log"
 	"strings"
 
 	v1 "github.com/llm-operator/user-manager/api/v1"
 	"github.com/llm-operator/user-manager/server/internal/config"
+	"github.com/llm-operator/user-manager/server/internal/store"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -22,16 +24,24 @@ func (s *S) CreateOrganization(ctx context.Context, req *v1.CreateOrganizationRe
 		return nil, status.Error(codes.InvalidArgument, "title is required")
 	}
 
-	orgID, err := generateRandomString("org-", 22)
+	org, err := s.createOrganization(ctx, req.Title, false)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "generate organization id: %s", err)
-	}
-	org, err := s.store.CreateOrganization(fakeTenantID, orgID, req.Title)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "create organization: %s", err)
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	return org.ToProto(), nil
+}
+
+func (s *S) createOrganization(ctx context.Context, title string, isDefault bool) (*store.Organization, error) {
+	orgID, err := generateRandomString("org-", 22)
+	if err != nil {
+		return nil, fmt.Errorf("generate organization id: %s", err)
+	}
+	org, err := s.store.CreateOrganization(fakeTenantID, orgID, title, isDefault)
+	if err != nil {
+		return nil, fmt.Errorf("create organization: %s", err)
+	}
+	return org, nil
 }
 
 // ListOrganizations lists all organizations.
@@ -174,28 +184,26 @@ func (s *S) validateOrgID(orgID string) error {
 // CreateDefaultOrganization creates the default org.
 // TODO(kenji): This is not the best place for this function as there is nothing related to
 // the server itself.
-func (s *S) CreateDefaultOrganization(ctx context.Context, c *config.DefaultOrganizationConfig) (*v1.Organization, error) {
+func (s *S) CreateDefaultOrganization(ctx context.Context, c *config.DefaultOrganizationConfig) (*store.Organization, error) {
 	log.Printf("Creating default org %q", c.Title)
 	existing, err := s.store.GetOrganizationByTenantIDAndTitle(fakeTenantID, c.Title)
 	if err == nil {
 		// Do nothing.
-		return existing.ToProto(), nil
+		return existing, nil
 	}
 
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
 
-	org, err := s.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
-		Title: c.Title,
-	})
+	org, err := s.createOrganization(ctx, c.Title, true)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, uid := range c.UserIDs {
 		if _, err := s.CreateOrganizationUser(ctx, &v1.CreateOrganizationUserRequest{
-			OrganizationId: org.Id,
+			OrganizationId: org.OrganizationID,
 			UserId:         uid,
 			Role:           v1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
 		}); err != nil {

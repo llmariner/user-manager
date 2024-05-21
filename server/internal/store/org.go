@@ -13,6 +13,8 @@ type Organization struct {
 	OrganizationID string `gorm:"uniqueIndex"`
 
 	Title string `gorm:"uniqueIndex:idx_orgs_tenant_id_title"`
+
+	IsDefault bool
 }
 
 // ToProto converts the organization to proto.
@@ -25,11 +27,12 @@ func (o *Organization) ToProto() *v1.Organization {
 }
 
 // CreateOrganization creates a new organization.
-func (s *S) CreateOrganization(tenantID, orgID, title string) (*Organization, error) {
+func (s *S) CreateOrganization(tenantID, orgID, title string, isDefault bool) (*Organization, error) {
 	org := &Organization{
 		TenantID:       tenantID,
 		OrganizationID: orgID,
 		Title:          title,
+		IsDefault:      isDefault,
 	}
 	if err := s.db.Create(org).Error; err != nil {
 		return nil, err

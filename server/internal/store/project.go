@@ -15,6 +15,8 @@ type Project struct {
 	TenantID string `gorm:"index;uniqueIndex:idx_projects_tenant_id_title"`
 	Title    string `gorm:"uniqueIndex:idx_projects_tenant_id_title"`
 
+	IsDefault bool
+
 	// KubernetesNamespace is the namespace where the fine-tuning jobs for the organization run.
 	// TODO(kenji): Currently we don't set the unique constraint so that multiple orgs can use the same namespace,
 	// but revisit the design.
@@ -39,6 +41,7 @@ type CreateProjectParams struct {
 	TenantID            string
 	Title               string
 	KubernetesNamespace string
+	IsDefault           bool
 }
 
 // CreateProject creates a new project.
@@ -49,6 +52,7 @@ func (s *S) CreateProject(p CreateProjectParams) (*Project, error) {
 		TenantID:            p.TenantID,
 		Title:               p.Title,
 		KubernetesNamespace: p.KubernetesNamespace,
+		IsDefault:           p.IsDefault,
 	}
 	if err := s.db.Create(project).Error; err != nil {
 		return nil, err
