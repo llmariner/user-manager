@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	"github.com/llm-operator/common/pkg/id"
-	"github.com/llm-operator/rbac-manager/pkg/auth"
 	v1 "github.com/llm-operator/user-manager/api/v1"
 	"github.com/llm-operator/user-manager/server/internal/store"
 	"google.golang.org/grpc/codes"
@@ -22,13 +21,9 @@ func (s *S) CreateAPIKey(
 	ctx context.Context,
 	req *v1.CreateAPIKeyRequest,
 ) (*v1.APIKey, error) {
-	var userInfo auth.UserInfo
-	if s.enableAuth {
-		i, ok := auth.ExtractUserInfoFromContext(ctx)
-		if !ok {
-			return nil, status.Error(codes.Unauthenticated, "user info not found")
-		}
-		userInfo = *i
+	userInfo, err := s.extractUserInfoFromContext(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	if req.Name == "" {
@@ -36,7 +31,7 @@ func (s *S) CreateAPIKey(
 	}
 
 	// Check if the name is already taken.
-	if _, err := s.store.GetAPIKeyByNameAndTenantID(req.Name, fakeTenantID); err != nil {
+	if _, err := s.store.GetAPIKeyByNameAndProjectID(req.Name, userInfo.ProjectID); err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Errorf(codes.Internal, "get api key: %s", err)
 		}
@@ -56,15 +51,13 @@ func (s *S) CreateAPIKey(
 	}
 
 	spec := store.APIKeySpec{
-		Key: store.APIKeyKey{
-			APIKeyID:       trackID,
-			TenantID:       fakeTenantID,
-			OrganizationID: userInfo.OrganizationID,
-			ProjectID:      userInfo.ProjectID,
-			UserID:         userInfo.UserID,
-		},
-		Name:   req.Name,
-		Secret: secKey,
+		APIKeyID:       trackID,
+		TenantID:       fakeTenantID,
+		OrganizationID: userInfo.OrganizationID,
+		ProjectID:      userInfo.ProjectID,
+		UserID:         userInfo.UserID,
+		Name:           req.Name,
+		Secret:         secKey,
 	}
 	k, err := s.store.CreateAPIKey(spec)
 	if err != nil {
@@ -78,7 +71,12 @@ func (s *S) ListAPIKeys(
 	ctx context.Context,
 	req *v1.ListAPIKeysRequest,
 ) (*v1.ListAPIKeysResponse, error) {
-	ks, err := s.store.ListAPIKeysByTenantID(fakeTenantID)
+	userInfo, err := s.extractUserInfoFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	ks, err := s.store.ListAPIKeysByProjectID(userInfo.ProjectID)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "list api keys: %s", err)
 	}
@@ -98,14 +96,16 @@ func (s *S) DeleteAPIKey(
 	ctx context.Context,
 	req *v1.DeleteAPIKeyRequest,
 ) (*v1.DeleteAPIKeyResponse, error) {
+	userInfo, err := s.extractUserInfoFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	if req.Id == "" {
 		return nil, status.Error(codes.InvalidArgument, "id is required")
 	}
 
-	if err := s.store.DeleteAPIKey(store.APIKeyKey{
-		APIKeyID: req.Id,
-		TenantID: fakeTenantID,
-	}); err != nil {
+	if err := s.store.DeleteAPIKey(req.Id, userInfo.ProjectID); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Errorf(codes.NotFound, "api key %q not found", req.Id)
 		}
