@@ -8,11 +8,11 @@ import (
 type APIKey struct {
 	gorm.Model
 
-	APIKeyID string `gorm:"uniqueIndex:idx_api_key_api_key_id_tenant_id"`
+	APIKeyID string `gorm:"uniqueIndex"`
 
 	Name string `gorm:"uniqueIndex:idx_api_key_name_tenant_id"`
 
-	TenantID string `gorm:"uniqueIndex:idx_api_key_api_key_id_tenant_id;uniqueIndex:idx_api_key_name_tenant_id"`
+	TenantID string `gorm:"uniqueIndex:idx_api_key_name_tenant_id"`
 
 	OrganizationID string
 	ProjectID      string
