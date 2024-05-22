@@ -23,18 +23,13 @@ type APIKey struct {
 	// TODO(kenji): Associate roles.
 }
 
-// APIKeyKey represents a key of an API key.
-type APIKeyKey struct {
+// APIKeySpec is a spec of the API key.
+type APIKeySpec struct {
 	APIKeyID       string
 	TenantID       string
 	OrganizationID string
 	ProjectID      string
 	UserID         string
-}
-
-// APIKeySpec is a spec of the API key.
-type APIKeySpec struct {
-	Key APIKeyKey
 
 	Name   string
 	Secret string
@@ -43,11 +38,11 @@ type APIKeySpec struct {
 // CreateAPIKey creates a new API key.
 func (s *S) CreateAPIKey(spec APIKeySpec) (*APIKey, error) {
 	k := &APIKey{
-		APIKeyID:       spec.Key.APIKeyID,
-		TenantID:       spec.Key.TenantID,
-		OrganizationID: spec.Key.OrganizationID,
-		ProjectID:      spec.Key.ProjectID,
-		UserID:         spec.Key.UserID,
+		APIKeyID:       spec.APIKeyID,
+		TenantID:       spec.TenantID,
+		OrganizationID: spec.OrganizationID,
+		ProjectID:      spec.ProjectID,
+		UserID:         spec.UserID,
 
 		Name:   spec.Name,
 		Secret: spec.Secret,
@@ -58,19 +53,19 @@ func (s *S) CreateAPIKey(spec APIKeySpec) (*APIKey, error) {
 	return k, nil
 }
 
-// ListAPIKeysByTenantID lists API keys by a tenant ID.
-func (s *S) ListAPIKeysByTenantID(tenantID string) ([]*APIKey, error) {
+// ListAPIKeysByProjectID lists API keys by a tenant ID.
+func (s *S) ListAPIKeysByProjectID(projectID string) ([]*APIKey, error) {
 	var ks []*APIKey
-	if err := s.db.Where("tenant_id = ?", tenantID).Find(&ks).Error; err != nil {
+	if err := s.db.Where("project_id = ?", projectID).Find(&ks).Error; err != nil {
 		return nil, err
 	}
 	return ks, nil
 }
 
-// GetAPIKeyByNameAndTenantID gets an API key by its name and tenant ID.
-func (s *S) GetAPIKeyByNameAndTenantID(name, tenantID string) (*APIKey, error) {
+// GetAPIKeyByNameAndProjectID gets an API key by its name and tenant ID.
+func (s *S) GetAPIKeyByNameAndProjectID(name, projectID string) (*APIKey, error) {
 	var k APIKey
-	if err := s.db.Where("name = ? AND tenant_id = ?", name, tenantID).Take(&k).Error; err != nil {
+	if err := s.db.Where("name = ? AND project_id = ?", name, projectID).Take(&k).Error; err != nil {
 		return nil, err
 	}
 	return &k, nil
@@ -86,8 +81,8 @@ func (s *S) ListAllAPIKeys() ([]*APIKey, error) {
 }
 
 // DeleteAPIKey deletes an APIKey by APIKey ID and tenant ID.
-func (s *S) DeleteAPIKey(k APIKeyKey) error {
-	res := s.db.Unscoped().Where("api_key_id = ? AND tenant_id = ?", k.APIKeyID, k.TenantID).Delete(&APIKey{})
+func (s *S) DeleteAPIKey(apiKeyID, projectID string) error {
+	res := s.db.Unscoped().Where("api_key_id = ? AND project_id = ?", apiKeyID, projectID).Delete(&APIKey{})
 	if err := res.Error; err != nil {
 		return err
 	}

@@ -11,7 +11,13 @@ import (
 	"github.com/llm-operator/user-manager/server/internal/config"
 	"github.com/llm-operator/user-manager/server/internal/store"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/status"
+)
+
+const (
+	defaultProjectID = "default"
 )
 
 // New creates a server.
@@ -39,7 +45,10 @@ func (s *S) Run(ctx context.Context, port int, authConfig config.AuthConfig) err
 	var opts []grpc.ServerOption
 	if authConfig.Enable {
 		// TODO(kenji): Change the scope depending on RPC methods.
-		ai, err := auth.NewInterceptor(ctx, authConfig.RBACInternalServerAddr, "api.users.api_keys")
+		ai, err := auth.NewInterceptor(ctx, auth.Config{
+			RBACServerAddr: authConfig.RBACInternalServerAddr,
+			AccessResource: "api.users.api_keys",
+		})
 		if err != nil {
 			return err
 		}
@@ -66,4 +75,20 @@ func (s *S) Run(ctx context.Context, port int, authConfig config.AuthConfig) err
 // Stop stops the gRPC server.
 func (s *S) Stop() {
 	s.srv.Stop()
+}
+
+func (s *S) extractUserInfoFromContext(ctx context.Context) (*auth.UserInfo, error) {
+	if !s.enableAuth {
+		return &auth.UserInfo{
+			OrganizationID:      "default",
+			ProjectID:           defaultProjectID,
+			KubernetesNamespace: "default",
+		}, nil
+	}
+	var ok bool
+	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "user info not found")
+	}
+	return userInfo, nil
 }
