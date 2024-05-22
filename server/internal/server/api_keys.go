@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/llm-operator/common/pkg/id"
 	"github.com/llm-operator/rbac-manager/pkg/auth"
 	v1 "github.com/llm-operator/user-manager/api/v1"
 	"github.com/llm-operator/user-manager/server/internal/store"
@@ -44,11 +45,12 @@ func (s *S) CreateAPIKey(
 		return nil, status.Errorf(codes.AlreadyExists, "api key %q already exists", req.Name)
 	}
 
-	trackID, err := generateRandomString("key_", 16)
+	trackID, err := id.GenerateID("key_", 16)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "generate api key id: %s", err)
 	}
-	secKey, err := generateRandomString("sk-", 48)
+	// TODO(kenji): Make sure this gives sufficient randomness.
+	secKey, err := id.GenerateID("sk-", 48)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "generate secret key: %s", err)
 	}
