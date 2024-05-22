@@ -9,6 +9,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/llm-operator/common/pkg/id"
 	v1 "github.com/llm-operator/user-manager/api/v1"
 	"github.com/llm-operator/user-manager/server/internal/config"
 	"github.com/llm-operator/user-manager/server/internal/store"
@@ -33,7 +34,7 @@ func (s *S) CreateOrganization(ctx context.Context, req *v1.CreateOrganizationRe
 }
 
 func (s *S) createOrganization(ctx context.Context, title string, isDefault bool) (*store.Organization, error) {
-	orgID, err := generateRandomString("org-", 22)
+	orgID, err := id.GenerateID("org-", 22)
 	if err != nil {
 		return nil, fmt.Errorf("generate organization id: %s", err)
 	}

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 
+	"github.com/llm-operator/common/pkg/id"
 	v1 "github.com/llm-operator/user-manager/api/v1"
 	"github.com/llm-operator/user-manager/server/internal/config"
 	"github.com/llm-operator/user-manager/server/internal/store"
@@ -50,7 +51,7 @@ func (s *S) createProject(
 		return nil, status.Errorf(codes.InvalidArgument, "invalid kubernetes namespace: %s", errs)
 	}
 
-	projectID, err := generateRandomString("proj_", 24)
+	projectID, err := id.GenerateID("proj_", 24)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "generate project id: %s", err)
 	}
