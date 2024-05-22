@@ -12,7 +12,7 @@ type Project struct {
 	ProjectID      string `gorm:"uniqueIndex"`
 	OrganizationID string
 
-	TenantID string `gorm:"index;uniqueIndex:idx_projects_tenant_id_title"`
+	TenantID string `gorm:"uniqueIndex:idx_projects_tenant_id_title"`
 	Title    string `gorm:"uniqueIndex:idx_projects_tenant_id_title"`
 
 	IsDefault bool

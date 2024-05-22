@@ -9,10 +9,10 @@ import (
 type Organization struct {
 	gorm.Model
 
-	TenantID       string `gorm:"index;uniqueIndex:idx_orgs_tenant_id_title"`
 	OrganizationID string `gorm:"uniqueIndex"`
 
-	Title string `gorm:"uniqueIndex:idx_orgs_tenant_id_title"`
+	TenantID string `gorm:"uniqueIndex:idx_orgs_tenant_id_title"`
+	Title    string `gorm:"uniqueIndex:idx_orgs_tenant_id_title"`
 
 	IsDefault bool
 }
