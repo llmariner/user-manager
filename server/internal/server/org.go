@@ -212,11 +212,7 @@ func (s *S) CreateDefaultOrganization(ctx context.Context, c *config.DefaultOrga
 	}
 
 	for _, uid := range c.UserIDs {
-		if _, err := s.CreateOrganizationUser(ctx, &v1.CreateOrganizationUserRequest{
-			OrganizationId: org.OrganizationID,
-			UserId:         uid,
-			Role:           v1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
-		}); err != nil {
+		if _, err := s.store.CreateOrganizationUser(org.OrganizationID, uid, v1.OrganizationRole_ORGANIZATION_ROLE_OWNER.String()); err != nil {
 			return nil, err
 		}
 	}
