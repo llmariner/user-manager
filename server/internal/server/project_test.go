@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/llm-operator/rbac-manager/pkg/auth"
 	v1 "github.com/llm-operator/user-manager/api/v1"
 	"github.com/llm-operator/user-manager/server/internal/config"
 	"github.com/llm-operator/user-manager/server/internal/store"
@@ -270,4 +271,182 @@ func TestCreateDefaultProject(t *testing.T) {
 	})
 	assert.Error(t, err)
 	assert.Equal(t, codes.InvalidArgument, status.Code(err))
+}
+
+func TestCreateProject_EnableAuth(t *testing.T) {
+	st, tearDown := store.NewTest(t)
+	defer tearDown()
+
+	srv := New(st)
+	srv.enableAuth = true
+
+	o := createDefaultOrg(t, srv, "u0")
+
+	u0Ctx := auth.AppendUserInfoToContext(context.Background(), auth.UserInfo{
+		UserID: "u0",
+	})
+
+	u1Ctx := auth.AppendUserInfoToContext(context.Background(), auth.UserInfo{
+		UserID: "u1",
+	})
+
+	req := &v1.CreateProjectRequest{
+		Title:               "title",
+		OrganizationId:      o.OrganizationID,
+		KubernetesNamespace: "n0",
+	}
+
+	_, err := srv.CreateProject(u1Ctx, req)
+	assert.Error(t, err)
+	assert.Equal(t, codes.FailedPrecondition, status.Code(err))
+
+	_, err = srv.CreateProject(u0Ctx, req)
+	assert.NoError(t, err)
+}
+
+func TestListProjects_EnableAuth(t *testing.T) {
+	st, tearDown := store.NewTest(t)
+	defer tearDown()
+
+	srv := New(st)
+	srv.enableAuth = true
+
+	o := createDefaultOrg(t, srv, "u0")
+
+	u0Ctx := auth.AppendUserInfoToContext(context.Background(), auth.UserInfo{
+		UserID: "u0",
+	})
+	_, err := srv.CreateProject(u0Ctx, &v1.CreateProjectRequest{
+		Title:               "title",
+		OrganizationId:      o.OrganizationID,
+		KubernetesNamespace: "n0",
+	})
+	assert.NoError(t, err)
+
+	req := &v1.ListProjectsRequest{
+		OrganizationId: o.OrganizationID,
+	}
+	resp, err := srv.ListProjects(u0Ctx, req)
+	assert.NoError(t, err)
+	assert.Len(t, resp.Projects, 1)
+
+	u1Ctx := auth.AppendUserInfoToContext(context.Background(), auth.UserInfo{
+		UserID: "u1",
+	})
+	resp, err = srv.ListProjects(u1Ctx, req)
+	assert.NoError(t, err)
+	assert.Empty(t, 0, resp.Projects)
+}
+
+func TestDeleteProject_EnableAuth(t *testing.T) {
+	st, tearDown := store.NewTest(t)
+	defer tearDown()
+
+	srv := New(st)
+	srv.enableAuth = true
+
+	o := createDefaultOrg(t, srv, "u0")
+
+	u0Ctx := auth.AppendUserInfoToContext(context.Background(), auth.UserInfo{
+		UserID: "u0",
+	})
+	p, err := srv.CreateProject(u0Ctx, &v1.CreateProjectRequest{
+		Title:               "title",
+		OrganizationId:      o.OrganizationID,
+		KubernetesNamespace: "n0",
+	})
+	assert.NoError(t, err)
+
+	u1Ctx := auth.AppendUserInfoToContext(context.Background(), auth.UserInfo{
+		UserID: "u1",
+	})
+
+	req := &v1.DeleteProjectRequest{
+		OrganizationId: o.OrganizationID,
+		Id:             p.Id,
+	}
+	_, err = srv.DeleteProject(u1Ctx, req)
+	assert.Error(t, err)
+	assert.Equal(t, codes.FailedPrecondition, status.Code(err))
+
+	_, err = srv.DeleteProject(u0Ctx, req)
+	assert.NoError(t, err)
+}
+
+func TestProjectUser_EnableAuth(t *testing.T) {
+	st, tearDown := store.NewTest(t)
+	defer tearDown()
+
+	srv := New(st)
+	srv.enableAuth = true
+
+	o := createDefaultOrg(t, srv, "user0")
+
+	u0Ctx := auth.AppendUserInfoToContext(context.Background(), auth.UserInfo{
+		UserID: "user0",
+	})
+
+	p, err := srv.CreateProject(u0Ctx, &v1.CreateProjectRequest{
+		Title:               "title",
+		OrganizationId:      o.OrganizationID,
+		KubernetesNamespace: "n0",
+	})
+	assert.NoError(t, err)
+
+	// Add "u2" to the org.
+	_, err = srv.CreateOrganizationUser(u0Ctx, &v1.CreateOrganizationUserRequest{
+		OrganizationId: o.OrganizationID,
+		UserId:         "user2",
+		Role:           v1.OrganizationRole_ORGANIZATION_ROLE_READER,
+	})
+	assert.NoError(t, err)
+
+	creq := &v1.CreateProjectUserRequest{
+		ProjectId:      p.Id,
+		OrganizationId: o.OrganizationID,
+		UserId:         "user2",
+		Role:           v1.ProjectRole_PROJECT_ROLE_MEMBER,
+	}
+	u1Ctx := auth.AppendUserInfoToContext(context.Background(), auth.UserInfo{
+		UserID: "user1",
+	})
+	_, err = srv.CreateProjectUser(u1Ctx, creq)
+	assert.Error(t, err)
+	assert.Equal(t, codes.FailedPrecondition, status.Code(err))
+
+	_, err = srv.CreateProjectUser(u0Ctx, creq)
+	assert.NoError(t, err)
+
+	lreq := &v1.ListProjectUsersRequest{
+		ProjectId:      p.Id,
+		OrganizationId: o.OrganizationID,
+	}
+	_, err = srv.ListProjectUsers(u1Ctx, lreq)
+	assert.Error(t, err)
+	assert.Equal(t, codes.FailedPrecondition, status.Code(err))
+
+	_, err = srv.ListProjectUsers(u0Ctx, lreq)
+	assert.NoError(t, err)
+
+	u2Ctx := auth.AppendUserInfoToContext(context.Background(), auth.UserInfo{
+		UserID: "user2",
+	})
+	_, err = srv.ListProjectUsers(u2Ctx, lreq)
+	assert.NoError(t, err)
+
+	dreq := &v1.DeleteProjectUserRequest{
+		ProjectId:      p.Id,
+		OrganizationId: o.OrganizationID,
+		UserId:         "user2",
+	}
+	_, err = srv.DeleteProjectUser(u1Ctx, dreq)
+	assert.Error(t, err)
+	assert.Equal(t, codes.FailedPrecondition, status.Code(err))
+
+	_, err = srv.DeleteProjectUser(u2Ctx, dreq)
+	assert.Error(t, err)
+	assert.Equal(t, codes.PermissionDenied, status.Code(err))
+
+	_, err = srv.DeleteProjectUser(u0Ctx, dreq)
+	assert.NoError(t, err)
 }
