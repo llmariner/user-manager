@@ -2,8 +2,6 @@ package server
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"log"
@@ -249,20 +247,4 @@ func (s *IS) ListOrganizationUsers(ctx context.Context, req *v1.ListOrganization
 	return &v1.ListOrganizationUsersResponse{
 		Users: userProtos,
 	}, nil
-}
-
-func generateRandomString(prefix string, n int) (string, error) {
-	numBytes := (n * 3) / 4
-	randBytes := make([]byte, numBytes)
-	if _, err := rand.Read(randBytes); err != nil {
-		return "", err
-	}
-
-	randStr := base64.URLEncoding.EncodeToString(randBytes)
-	randStr = strings.TrimRight(randStr, "=")
-
-	if len(randStr) > n {
-		randStr = randStr[:n]
-	}
-	return prefix + randStr, nil
 }

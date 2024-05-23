@@ -159,11 +159,13 @@ func TestCreateDefaultProject(t *testing.T) {
 		UserId:         "u0",
 		Role:           v1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
 	})
+	assert.NoError(t, err)
 	_, err = srv.CreateOrganizationUser(ctx, &v1.CreateOrganizationUserRequest{
 		OrganizationId: org.Id,
 		UserId:         "u1",
 		Role:           v1.OrganizationRole_ORGANIZATION_ROLE_READER,
 	})
+	assert.NoError(t, err)
 
 	c := &config.DefaultProjectConfig{
 		Title:               "Default project",
