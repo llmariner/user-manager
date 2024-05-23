@@ -132,6 +132,21 @@ func (s *S) organizationRole(orgID, userID string) v1.OrganizationRole {
 	return v1.OrganizationRole(r)
 }
 
+func (s *S) validateOrganizationOwner(orgID, userID string) error {
+	r := s.organizationRole(orgID, userID)
+	switch r {
+	case v1.OrganizationRole_ORGANIZATION_ROLE_UNSPECIFIED:
+		// The org shouldn't be visible to the user.
+		return status.Errorf(codes.FailedPrecondition, "organization %q not found", orgID)
+	case v1.OrganizationRole_ORGANIZATION_ROLE_OWNER:
+		return nil
+	case v1.OrganizationRole_ORGANIZATION_ROLE_READER:
+		return status.Errorf(codes.PermissionDenied, "user %q is not the owner of organization %q", userID, orgID)
+	default:
+		return status.Errorf(codes.Internal, "unknown role %q", r.String())
+	}
+}
+
 // projectRole returns a role that the given user has for the given project.
 func (s *S) projectRole(projectID, userID string) v1.ProjectRole {
 	if !s.enableAuth {

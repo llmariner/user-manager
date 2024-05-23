@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/llm-operator/rbac-manager/pkg/auth"
 	v1 "github.com/llm-operator/user-manager/api/v1"
 	"github.com/llm-operator/user-manager/server/internal/config"
 	"github.com/llm-operator/user-manager/server/internal/store"
@@ -307,4 +308,190 @@ func TestCreateDefaultOrganization(t *testing.T) {
 	})
 	assert.Error(t, err)
 	assert.Equal(t, codes.InvalidArgument, status.Code(err))
+}
+
+func TestCreateOrganization_EnableAuth(t *testing.T) {
+	st, tearDown := store.NewTest(t)
+	defer tearDown()
+
+	srv := New(st)
+	srv.enableAuth = true
+
+	createDefaultOrg(t, srv, "admin")
+
+	ui := auth.UserInfo{
+		UserID: "non-admin",
+	}
+	adminCtx := auth.AppendUserInfoToContext(context.Background(), ui)
+	_, err := srv.CreateOrganization(adminCtx, &v1.CreateOrganizationRequest{
+		Title: "title",
+	})
+	assert.Error(t, err)
+	assert.Equal(t, codes.PermissionDenied, status.Code(err))
+
+	ui = auth.UserInfo{
+		UserID: "admin",
+	}
+	nonadminCtx := auth.AppendUserInfoToContext(context.Background(), ui)
+	_, err = srv.CreateOrganization(nonadminCtx, &v1.CreateOrganizationRequest{
+		Title: "title",
+	})
+	assert.NoError(t, err)
+}
+
+func TestListOrganization_EnableAuth(t *testing.T) {
+	st, tearDown := store.NewTest(t)
+	defer tearDown()
+
+	srv := New(st)
+	srv.enableAuth = true
+
+	o0 := createDefaultOrg(t, srv, "user0")
+
+	ui := auth.UserInfo{
+		UserID: "user0",
+	}
+	u0Ctx := auth.AppendUserInfoToContext(context.Background(), ui)
+
+	o1, err := srv.CreateOrganization(u0Ctx, &v1.CreateOrganizationRequest{
+		Title: "title",
+	})
+	assert.NoError(t, err)
+
+	_, err = srv.CreateOrganizationUser(u0Ctx, &v1.CreateOrganizationUserRequest{
+		OrganizationId: o1.Id,
+		UserId:         "user1",
+		Role:           v1.OrganizationRole_ORGANIZATION_ROLE_READER,
+	})
+	assert.NoError(t, err)
+
+	resp, err := srv.ListOrganizations(u0Ctx, &v1.ListOrganizationsRequest{})
+	assert.NoError(t, err)
+	assert.Len(t, resp.Organizations, 2)
+	var ids []string
+	for _, o := range resp.Organizations {
+		ids = append(ids, o.Id)
+	}
+	assert.ElementsMatch(t, []string{o0.OrganizationID, o1.Id}, ids)
+
+	ui = auth.UserInfo{
+		UserID: "user1",
+	}
+	u1Ctx := auth.AppendUserInfoToContext(context.Background(), ui)
+	resp, err = srv.ListOrganizations(u1Ctx, &v1.ListOrganizationsRequest{})
+	assert.NoError(t, err)
+	assert.Len(t, resp.Organizations, 1)
+	assert.Equal(t, resp.Organizations[0].Id, o1.Id)
+
+	ui = auth.UserInfo{
+		UserID: "u2",
+	}
+	u2Ctx := auth.AppendUserInfoToContext(context.Background(), ui)
+	resp, err = srv.ListOrganizations(u2Ctx, &v1.ListOrganizationsRequest{})
+	assert.NoError(t, err)
+	assert.Empty(t, resp.Organizations)
+}
+
+func TestDeleteOrganization_EnableAuth(t *testing.T) {
+	st, tearDown := store.NewTest(t)
+	defer tearDown()
+
+	srv := New(st)
+	srv.enableAuth = true
+
+	createDefaultOrg(t, srv, "user0")
+
+	ui := auth.UserInfo{
+		UserID: "user0",
+	}
+	u0Ctx := auth.AppendUserInfoToContext(context.Background(), ui)
+
+	o1, err := srv.CreateOrganization(u0Ctx, &v1.CreateOrganizationRequest{
+		Title: "title",
+	})
+	assert.NoError(t, err)
+
+	ui = auth.UserInfo{
+		UserID: "user1",
+	}
+	u1Ctx := auth.AppendUserInfoToContext(context.Background(), ui)
+
+	_, err = srv.DeleteOrganization(u1Ctx, &v1.DeleteOrganizationRequest{
+		Id: o1.Id,
+	})
+	assert.Error(t, err)
+	assert.Equal(t, codes.FailedPrecondition, status.Code(err))
+
+	_, err = srv.DeleteOrganization(u0Ctx, &v1.DeleteOrganizationRequest{
+		Id: o1.Id,
+	})
+	assert.NoError(t, err)
+}
+
+func TestOrganizationUser_EnableAuth(t *testing.T) {
+	st, tearDown := store.NewTest(t)
+	defer tearDown()
+
+	srv := New(st)
+	srv.enableAuth = true
+
+	createDefaultOrg(t, srv, "user0")
+
+	ui := auth.UserInfo{
+		UserID: "user0",
+	}
+	u0Ctx := auth.AppendUserInfoToContext(context.Background(), ui)
+
+	o1, err := srv.CreateOrganization(u0Ctx, &v1.CreateOrganizationRequest{
+		Title: "title",
+	})
+	assert.NoError(t, err)
+
+	ui = auth.UserInfo{
+		UserID: "user1",
+	}
+	u1Ctx := auth.AppendUserInfoToContext(context.Background(), ui)
+
+	creq := &v1.CreateOrganizationUserRequest{
+		OrganizationId: o1.Id,
+		UserId:         "some user",
+		Role:           v1.OrganizationRole_ORGANIZATION_ROLE_READER,
+	}
+	_, err = srv.CreateOrganizationUser(u1Ctx, creq)
+	assert.Error(t, err)
+	assert.Equal(t, codes.FailedPrecondition, status.Code(err))
+
+	_, err = srv.CreateOrganizationUser(u0Ctx, creq)
+	assert.NoError(t, err)
+
+	lreq := &v1.ListOrganizationUsersRequest{
+		OrganizationId: o1.Id,
+	}
+	_, err = srv.ListOrganizationUsers(u1Ctx, lreq)
+	assert.Error(t, err)
+	assert.Equal(t, codes.FailedPrecondition, status.Code(err))
+
+	_, err = srv.ListOrganizationUsers(u0Ctx, lreq)
+	assert.NoError(t, err)
+
+	dreq := &v1.DeleteOrganizationUserRequest{
+		OrganizationId: o1.Id,
+		UserId:         "some user",
+	}
+	_, err = srv.DeleteOrganizationUser(u1Ctx, dreq)
+	assert.Error(t, err)
+	assert.Equal(t, codes.FailedPrecondition, status.Code(err))
+
+	_, err = srv.DeleteOrganizationUser(u0Ctx, dreq)
+	assert.NoError(t, err)
+}
+
+func createDefaultOrg(t *testing.T, srv *S, userID string) *store.Organization {
+	c := &config.DefaultOrganizationConfig{
+		Title:   "default",
+		UserIDs: []string{userID},
+	}
+	o, err := srv.CreateDefaultOrganization(context.Background(), c)
+	assert.NoError(t, err)
+	return o
 }
