@@ -34,7 +34,7 @@ func (s *S) CreateOrganization(ctx context.Context, req *v1.CreateOrganizationRe
 }
 
 func (s *S) createOrganization(ctx context.Context, title string, isDefault bool) (*store.Organization, error) {
-	orgID, err := id.GenerateID("org-", 22)
+	orgID, err := id.GenerateID("org-", 24)
 	if err != nil {
 		return nil, fmt.Errorf("generate organization id: %s", err)
 	}
