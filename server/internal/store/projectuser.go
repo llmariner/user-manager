@@ -49,6 +49,15 @@ func (s *S) CreateProjectUser(p CreateProjectUserParams) (*ProjectUser, error) {
 	return pusr, nil
 }
 
+// GetProjectUser gets a project user.
+func (s *S) GetProjectUser(projectID, userID string) (*ProjectUser, error) {
+	var pusr ProjectUser
+	if err := s.db.Where("project_id = ? AND user_id = ?", projectID, userID).First(&pusr).Error; err != nil {
+		return nil, err
+	}
+	return &pusr, nil
+}
+
 // ListProjectUsersByProjectID lists project users in the specified project.
 func (s *S) ListProjectUsersByProjectID(projectID string) ([]ProjectUser, error) {
 	var users []ProjectUser

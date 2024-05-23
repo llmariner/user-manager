@@ -92,3 +92,37 @@ func (s *S) extractUserInfoFromContext(ctx context.Context) (*auth.UserInfo, err
 	}
 	return userInfo, nil
 }
+
+// orgRole returns a role that the given user has for the given organization.
+func (s *S) orgRole(orgID, userID string) v1.OrganizationRole {
+	if !s.enableAuth {
+		return v1.OrganizationRole_ORGANIZATION_ROLE_OWNER
+	}
+
+	ou, err := s.store.GetOrganizationUser(orgID, userID)
+	if err != nil {
+		return v1.OrganizationRole_ORGANIZATION_ROLE_UNSPECIFIED
+	}
+	r, ok := v1.OrganizationRole_value[ou.Role]
+	if !ok {
+		return v1.OrganizationRole_ORGANIZATION_ROLE_UNSPECIFIED
+	}
+	return v1.OrganizationRole(r)
+}
+
+// projectRole returns a role that the given user has for the given project.
+func (s *S) projectRole(projectID, userID string) v1.ProjectRole {
+	if !s.enableAuth {
+		return v1.ProjectRole_PROJECT_ROLE_OWNER
+	}
+
+	pu, err := s.store.GetProjectUser(projectID, userID)
+	if err != nil {
+		return v1.ProjectRole_PROJECT_ROLE_UNSPECIFIED
+	}
+	r, ok := v1.ProjectRole_value[pu.Role]
+	if !ok {
+		return v1.ProjectRole_PROJECT_ROLE_UNSPECIFIED
+	}
+	return v1.ProjectRole(r)
+}

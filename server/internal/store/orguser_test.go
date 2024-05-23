@@ -20,6 +20,9 @@ func TestOrganizationUser(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, users, 1)
 
+	_, err = s.GetOrganizationUser("o1", "user1")
+	assert.NoError(t, err)
+
 	userOrg, err = s.CreateOrganizationUser("o2", "user2", "r1")
 	assert.NoError(t, err)
 	assert.NotNil(t, userOrg)
