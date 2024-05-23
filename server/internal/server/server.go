@@ -62,7 +62,7 @@ func (s *S) Run(ctx context.Context, port int, authConfig config.AuthConfig) err
 					return "api.organizations.users"
 				case "CreateProject", "DeleteProject", "ListProjects":
 					return "api.organizations.projects"
-				case "CreateProjectUser", "DeleteProjectUser", "istProjectUsers":
+				case "CreateProjectUser", "DeleteProjectUser", "ListProjectUsers":
 					return "api.organizations.projects.users"
 				default:
 					return "unknown"
