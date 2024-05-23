@@ -18,13 +18,13 @@ func TestOrgRole(t *testing.T) {
 	_, err := st.CreateOrganizationUser("org1", "user1", v1.OrganizationRole_ORGANIZATION_ROLE_OWNER.String())
 	assert.NoError(t, err)
 
-	got := srv.orgRole("org1", "user1")
+	got := srv.organizationRole("org1", "user1")
 	assert.Equal(t, v1.OrganizationRole_ORGANIZATION_ROLE_OWNER, got)
 
-	got = srv.orgRole("org1", "user2")
+	got = srv.organizationRole("org1", "user2")
 	assert.Equal(t, v1.OrganizationRole_ORGANIZATION_ROLE_UNSPECIFIED, got)
 
-	got = srv.orgRole("org2", "user1")
+	got = srv.organizationRole("org2", "user1")
 	assert.Equal(t, v1.OrganizationRole_ORGANIZATION_ROLE_UNSPECIFIED, got)
 }
 
