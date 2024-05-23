@@ -1,12 +1,10 @@
 package store
 
 import (
-	"errors"
 	"testing"
 
 	gerrors "github.com/llm-operator/common/pkg/gormlib/errors"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
 func TestOrganization(t *testing.T) {
@@ -33,21 +31,6 @@ func TestOrganization(t *testing.T) {
 	assert.Equal(t, org.OrganizationID, gotOrg.OrganizationID)
 	assert.Equal(t, org.Title, gotOrg.Title)
 
-	gotOrg, err = s.GetOrganizationByTenantIDAndTitle(org.TenantID, org.Title)
-	assert.NoError(t, err)
-	assert.NotNil(t, gotOrg)
-	assert.Equal(t, org.TenantID, gotOrg.TenantID)
-	assert.Equal(t, org.OrganizationID, gotOrg.OrganizationID)
-	assert.Equal(t, org.Title, gotOrg.Title)
-
-	_, err = s.GetOrganizationByTenantIDAndTitle("different", org.Title)
-	assert.Error(t, err)
-	assert.True(t, errors.Is(err, gorm.ErrRecordNotFound))
-
-	_, err = s.GetOrganizationByTenantIDAndTitle(org.TenantID, "different")
-	assert.Error(t, err)
-	assert.True(t, errors.Is(err, gorm.ErrRecordNotFound))
-
 	_, err = s.CreateOrganization(org.TenantID, "o2", "Test Organization 2", false)
 	assert.NoError(t, err)
 	gotOrgs, err := s.ListOrganizations(org.TenantID)
@@ -59,6 +42,56 @@ func TestOrganization(t *testing.T) {
 	gotOrg, err = s.GetOrganizationByTenantIDAndOrgID(org.TenantID, org.OrganizationID)
 	assert.Error(t, err)
 	assert.Nil(t, gotOrg)
+}
+
+func TestGetDefaultOrganization(t *testing.T) {
+	s, tearDown := NewTest(t)
+	defer tearDown()
+
+	orgs := []*Organization{
+		{
+			TenantID:       "t0",
+			OrganizationID: "o0",
+			Title:          "Test Organization 0",
+			IsDefault:      true,
+		},
+		{
+			TenantID:       "t0",
+			OrganizationID: "o1",
+			Title:          "Test Organization 1",
+			IsDefault:      false,
+		},
+		{
+			TenantID:       "t2",
+			OrganizationID: "o2",
+			Title:          "Test Organization 2",
+			IsDefault:      true,
+		},
+	}
+	for _, org := range orgs {
+		_, err := s.CreateOrganization(org.TenantID, org.OrganizationID, org.Title, org.IsDefault)
+		assert.NoError(t, err)
+	}
+
+	tcs := []struct {
+		tenantID  string
+		wantOrgID string
+	}{
+		{
+			tenantID:  "t0",
+			wantOrgID: "o0",
+		},
+		{
+			tenantID:  "t2",
+			wantOrgID: "o2",
+		},
+	}
+
+	for _, tc := range tcs {
+		got, err := s.GetDefaultOrganization(tc.tenantID)
+		assert.NoError(t, err)
+		assert.Equal(t, tc.wantOrgID, got.OrganizationID)
+	}
 }
 
 func TestListAllOrganizations(t *testing.T) {

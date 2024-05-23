@@ -189,8 +189,7 @@ func (s *S) validateOrgID(orgID string) (*store.Organization, error) {
 // TODO(kenji): This is not the best place for this function as there is nothing related to
 // the server itself.
 func (s *S) CreateDefaultOrganization(ctx context.Context, c *config.DefaultOrganizationConfig) (*store.Organization, error) {
-	log.Printf("Creating default org %q", c.Title)
-	existing, err := s.store.GetOrganizationByTenantIDAndTitle(fakeTenantID, c.Title)
+	existing, err := s.store.GetDefaultOrganization(fakeTenantID)
 	if err == nil {
 		// Do nothing.
 		return existing, nil
@@ -199,7 +198,7 @@ func (s *S) CreateDefaultOrganization(ctx context.Context, c *config.DefaultOrga
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
-
+	log.Printf("Creating default org %q", c.Title)
 	org, err := s.createOrganization(ctx, c.Title, true)
 	if err != nil {
 		return nil, err

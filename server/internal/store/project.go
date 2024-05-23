@@ -76,10 +76,10 @@ func (s *S) GetProject(p GetProjectParams) (*Project, error) {
 	return &project, nil
 }
 
-// GetProjectByTenantIDAndTitle gets an project ID by a tenant ID and a title.
-func (s *S) GetProjectByTenantIDAndTitle(tenantID, title string) (*Project, error) {
+// GetDefaultProject gets a default project.
+func (s *S) GetDefaultProject(tenantID string) (*Project, error) {
 	var prj Project
-	if err := s.db.Where("tenant_id = ? AND title = ?", tenantID, title).First(&prj).Error; err != nil {
+	if err := s.db.Where("tenant_id = ? AND is_default = ?", tenantID, true).First(&prj).Error; err != nil {
 		return nil, err
 	}
 	return &prj, nil
