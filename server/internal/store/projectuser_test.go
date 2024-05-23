@@ -26,6 +26,9 @@ func TestProjectUser(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, users, 1)
 
+	_, err = s.GetProjectUser("p1", "user1")
+	assert.NoError(t, err)
+
 	userOrg, err = s.CreateProjectUser(CreateProjectUserParams{
 		ProjectID:      "p2",
 		OrganizationID: "o2",

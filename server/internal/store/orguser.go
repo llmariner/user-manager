@@ -38,6 +38,15 @@ func (s *S) CreateOrganizationUser(orgID, userID, role string) (*OrganizationUse
 	return orgusr, nil
 }
 
+// GetOrganizationUser gets a organization user.
+func (s *S) GetOrganizationUser(orgID, userID string) (*OrganizationUser, error) {
+	var orgusr OrganizationUser
+	if err := s.db.Where("organization_id = ? AND user_id = ?", orgID, userID).First(&orgusr).Error; err != nil {
+		return nil, err
+	}
+	return &orgusr, nil
+}
+
 // ListOrganizationUsersByOrganizationID lists organization users in the specified organization.
 func (s *S) ListOrganizationUsersByOrganizationID(orgID string) ([]OrganizationUser, error) {
 	var users []OrganizationUser
