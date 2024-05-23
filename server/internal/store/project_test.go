@@ -1,12 +1,10 @@
 package store
 
 import (
-	"errors"
 	"testing"
 
 	gerrors "github.com/llm-operator/common/pkg/gormlib/errors"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
 func TestProject(t *testing.T) {
@@ -45,21 +43,6 @@ func TestProject(t *testing.T) {
 	assert.Equal(t, p.ProjectID, gotPrj.ProjectID)
 	assert.Equal(t, p.Title, gotPrj.Title)
 
-	gotPrj, err = s.GetProjectByTenantIDAndTitle(p.TenantID, p.Title)
-	assert.NoError(t, err)
-	assert.NotNil(t, gotPrj)
-	assert.Equal(t, p.TenantID, gotPrj.TenantID)
-	assert.Equal(t, p.ProjectID, gotPrj.ProjectID)
-	assert.Equal(t, p.Title, gotPrj.Title)
-
-	_, err = s.GetProjectByTenantIDAndTitle("different", p.Title)
-	assert.Error(t, err)
-	assert.True(t, errors.Is(err, gorm.ErrRecordNotFound))
-
-	_, err = s.GetProjectByTenantIDAndTitle(p.TenantID, "different")
-	assert.Error(t, err)
-	assert.True(t, errors.Is(err, gorm.ErrRecordNotFound))
-
 	_, err = s.CreateProject(CreateProjectParams{
 		TenantID:            p.TenantID,
 		ProjectID:           "p2",
@@ -81,6 +64,59 @@ func TestProject(t *testing.T) {
 	})
 	assert.Error(t, err)
 	assert.Nil(t, gotPrj)
+}
+
+func TestGetDefaultProject(t *testing.T) {
+	s, tearDown := NewTest(t)
+	defer tearDown()
+
+	params := []CreateProjectParams{
+		{
+			TenantID:       "t0",
+			ProjectID:      "p0",
+			OrganizationID: "o0",
+			Title:          "Test Organization 0",
+			IsDefault:      true,
+		},
+		{
+			TenantID:       "t0",
+			ProjectID:      "p1",
+			OrganizationID: "o1",
+			Title:          "Test Organization 1",
+			IsDefault:      false,
+		},
+		{
+			TenantID:       "t2",
+			ProjectID:      "p2",
+			OrganizationID: "o2",
+			Title:          "Test Organization 2",
+			IsDefault:      true,
+		},
+	}
+	for _, p := range params {
+		_, err := s.CreateProject(p)
+		assert.NoError(t, err)
+	}
+
+	tcs := []struct {
+		tenantID      string
+		wantProjectID string
+	}{
+		{
+			tenantID:      "t0",
+			wantProjectID: "p0",
+		},
+		{
+			tenantID:      "t2",
+			wantProjectID: "p2",
+		},
+	}
+
+	for _, tc := range tcs {
+		got, err := s.GetDefaultProject(tc.tenantID)
+		assert.NoError(t, err)
+		assert.Equal(t, tc.wantProjectID, got.ProjectID)
+	}
 }
 
 func TestListAllProjects(t *testing.T) {

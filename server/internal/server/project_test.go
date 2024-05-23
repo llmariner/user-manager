@@ -174,7 +174,7 @@ func TestCreateDefaultProject(t *testing.T) {
 	err = srv.CreateDefaultProject(ctx, c, org.Id)
 	assert.NoError(t, err)
 
-	p, err := st.GetProjectByTenantIDAndTitle(fakeTenantID, c.Title)
+	p, err := st.GetDefaultProject(fakeTenantID)
 	assert.NoError(t, err)
 	assert.Equal(t, c.KubernetesNamespace, p.KubernetesNamespace)
 	assert.True(t, p.IsDefault)

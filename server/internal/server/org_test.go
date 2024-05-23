@@ -159,7 +159,7 @@ func TestCreateDefaultOrganization(t *testing.T) {
 	assert.Equal(t, created.Title, c.Title)
 	assert.True(t, created.IsDefault)
 
-	o, err := st.GetOrganizationByTenantIDAndTitle(fakeTenantID, "default")
+	o, err := st.GetDefaultOrganization(fakeTenantID)
 	assert.NoError(t, err)
 
 	users, err := st.ListAllOrganizationUsers()

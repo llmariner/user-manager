@@ -49,10 +49,10 @@ func (s *S) GetOrganizationByTenantIDAndOrgID(tenantID, orgID string) (*Organiza
 	return &org, nil
 }
 
-// GetOrganizationByTenantIDAndTitle gets an organization By a tenant ID ID and a title.
-func (s *S) GetOrganizationByTenantIDAndTitle(tenantID, title string) (*Organization, error) {
+// GetDefaultOrganization gets a default organization.
+func (s *S) GetDefaultOrganization(tenantID string) (*Organization, error) {
 	var org Organization
-	if err := s.db.Where("tenant_id = ? AND title = ?", tenantID, title).First(&org).Error; err != nil {
+	if err := s.db.Where("tenant_id = ? AND is_default = ?", tenantID, true).First(&org).Error; err != nil {
 		return nil, err
 	}
 	return &org, nil

@@ -261,8 +261,7 @@ func (s *S) validateProjectID(projectID, orgID string) (*store.Project, error) {
 // TODO(kenji): This is not the best place for this function as there is nothing related to
 // the server itself.
 func (s *S) CreateDefaultProject(ctx context.Context, c *config.DefaultProjectConfig, orgID string) error {
-	log.Printf("Creating default project %q", c.Title)
-	_, err := s.store.GetProjectByTenantIDAndTitle(fakeTenantID, c.Title)
+	_, err := s.store.GetDefaultProject(fakeTenantID)
 	if err == nil {
 		// Do nothing.
 		return nil
@@ -272,6 +271,7 @@ func (s *S) CreateDefaultProject(ctx context.Context, c *config.DefaultProjectCo
 		return err
 	}
 
+	log.Printf("Creating default project %q", c.Title)
 	if _, err := s.createProject(ctx,
 		c.Title,
 		orgID,
