@@ -142,6 +142,71 @@ func TestProjectUser(t *testing.T) {
 	assert.Equal(t, pu1.UserId, resp.Users[0].UserId)
 }
 
+func TestCreateProject_UniqueConstraintViolation(t *testing.T) {
+	st, tearDown := store.NewTest(t)
+	defer tearDown()
+
+	srv := New(st)
+	ctx := context.Background()
+
+	o, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
+		Title: "title",
+	})
+	assert.NoError(t, err)
+
+	_, err = srv.CreateProject(ctx, &v1.CreateProjectRequest{
+		Title:               "title",
+		OrganizationId:      o.Id,
+		KubernetesNamespace: "ns",
+	})
+	assert.NoError(t, err)
+
+	_, err = srv.CreateProject(ctx, &v1.CreateProjectRequest{
+		Title:               "title",
+		OrganizationId:      o.Id,
+		KubernetesNamespace: "ns",
+	})
+	assert.Error(t, err)
+	assert.Equal(t, codes.AlreadyExists, status.Code(err))
+}
+
+func TestCreateProjectUser_UniqueConstraintViolation(t *testing.T) {
+	st, tearDown := store.NewTest(t)
+	defer tearDown()
+
+	srv := New(st)
+	ctx := context.Background()
+
+	o, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
+		Title: "title",
+	})
+	assert.NoError(t, err)
+
+	p, err := srv.CreateProject(ctx, &v1.CreateProjectRequest{
+		Title:               "title",
+		OrganizationId:      o.Id,
+		KubernetesNamespace: "ns",
+	})
+	assert.NoError(t, err)
+
+	_, err = srv.CreateProjectUser(ctx, &v1.CreateProjectUserRequest{
+		ProjectId:      p.Id,
+		OrganizationId: o.Id,
+		UserId:         "u0",
+		Role:           v1.ProjectRole_PROJECT_ROLE_OWNER,
+	})
+	assert.NoError(t, err)
+
+	_, err = srv.CreateProjectUser(ctx, &v1.CreateProjectUserRequest{
+		ProjectId:      p.Id,
+		OrganizationId: o.Id,
+		UserId:         "u0",
+		Role:           v1.ProjectRole_PROJECT_ROLE_OWNER,
+	})
+	assert.Error(t, err)
+	assert.Equal(t, codes.AlreadyExists, status.Code(err))
+}
+
 func TestCreateDefaultProject(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()

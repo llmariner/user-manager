@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	gerrors "github.com/llm-operator/common/pkg/gormlib/errors"
 	"github.com/llm-operator/common/pkg/id"
 	v1 "github.com/llm-operator/user-manager/api/v1"
 	"github.com/llm-operator/user-manager/server/internal/store"
@@ -30,16 +31,6 @@ func (s *S) CreateAPIKey(
 		return nil, status.Error(codes.InvalidArgument, "name is required")
 	}
 
-	// Check if the name is already taken.
-	if _, err := s.store.GetAPIKeyByNameAndProjectID(req.Name, userInfo.ProjectID); err != nil {
-		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, status.Errorf(codes.Internal, "get api key: %s", err)
-		}
-		// The key does not exist. Move to creation.
-	} else {
-		return nil, status.Errorf(codes.AlreadyExists, "api key %q already exists", req.Name)
-	}
-
 	trackID, err := id.GenerateID("key_", 16)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "generate api key id: %s", err)
@@ -61,6 +52,9 @@ func (s *S) CreateAPIKey(
 	}
 	k, err := s.store.CreateAPIKey(spec)
 	if err != nil {
+		if gerrors.IsUniqueConstraintViolation(err) {
+			return nil, status.Errorf(codes.AlreadyExists, "api key %q already exists", req.Name)
+		}
 		return nil, status.Errorf(codes.Internal, "create api key: %s", err)
 	}
 	return toAPIKeyProto(k, true), nil

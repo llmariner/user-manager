@@ -112,6 +112,53 @@ func TestDeleteOrganization(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestCreateOrganization_UniqueConstraintViolation(t *testing.T) {
+	st, tearDown := store.NewTest(t)
+	defer tearDown()
+
+	srv := New(st)
+	ctx := context.Background()
+
+	_, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
+		Title: "title",
+	})
+	assert.NoError(t, err)
+
+	_, err = srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
+		Title: "title",
+	})
+	assert.Error(t, err)
+	assert.Equal(t, codes.AlreadyExists, status.Code(err))
+}
+
+func TestCreateOrganizationUser_UniqueConstraintViolation(t *testing.T) {
+	st, tearDown := store.NewTest(t)
+	defer tearDown()
+
+	srv := New(st)
+	ctx := context.Background()
+
+	o, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
+		Title: "title",
+	})
+	assert.NoError(t, err)
+
+	_, err = srv.CreateOrganizationUser(ctx, &v1.CreateOrganizationUserRequest{
+		OrganizationId: o.Id,
+		UserId:         "u0",
+		Role:           v1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
+	})
+	assert.NoError(t, err)
+
+	_, err = srv.CreateOrganizationUser(ctx, &v1.CreateOrganizationUserRequest{
+		OrganizationId: o.Id,
+		UserId:         "u0",
+		Role:           v1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
+	})
+	assert.Error(t, err)
+	assert.Equal(t, codes.AlreadyExists, status.Code(err))
+}
+
 func TestListOrganizationUsers(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()

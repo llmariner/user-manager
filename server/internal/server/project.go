@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 
+	gerrors "github.com/llm-operator/common/pkg/gormlib/errors"
 	"github.com/llm-operator/common/pkg/id"
 	v1 "github.com/llm-operator/user-manager/api/v1"
 	"github.com/llm-operator/user-manager/server/internal/config"
@@ -67,6 +68,9 @@ func (s *S) createProject(
 		IsDefault:           isDefault,
 	})
 	if err != nil {
+		if gerrors.IsUniqueConstraintViolation(err) {
+			return nil, status.Errorf(codes.AlreadyExists, "project %q already exists", title)
+		}
 		return nil, status.Errorf(codes.Internal, "create project: %s", err)
 	}
 
@@ -177,6 +181,9 @@ func (s *S) CreateProjectUser(ctx context.Context, req *v1.CreateProjectUserRequ
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Errorf(codes.FailedPrecondition, "project %q not found", req.ProjectId)
+		}
+		if gerrors.IsUniqueConstraintViolation(err) {
+			return nil, status.Errorf(codes.AlreadyExists, "user %q is already a member of organizatione %qs", req.UserId, req.OrganizationId)
 		}
 		return nil, status.Errorf(codes.Internal, "add user to project: %s", err)
 	}
