@@ -3,11 +3,11 @@ package server
 import (
 	"context"
 	"errors"
-	"log"
 	"strings"
 
 	gerrors "github.com/llm-operator/common/pkg/gormlib/errors"
 	"github.com/llm-operator/common/pkg/id"
+	"github.com/llm-operator/rbac-manager/pkg/auth"
 	v1 "github.com/llm-operator/user-manager/api/v1"
 	"github.com/llm-operator/user-manager/server/internal/config"
 	"github.com/llm-operator/user-manager/server/internal/store"
@@ -28,6 +28,14 @@ func (s *S) CreateOrganization(ctx context.Context, req *v1.CreateOrganizationRe
 		return nil, status.Error(codes.InvalidArgument, "title is required")
 	}
 
+	isAllowed, err := s.canCreateOrganization(userInfo)
+	if err != nil {
+		return nil, err
+	}
+	if !isAllowed {
+		return nil, status.Error(codes.PermissionDenied, "user is not allowed to create an organization")
+	}
+
 	org, err := s.createOrganization(ctx, req.Title, false)
 	if err != nil {
 		if gerrors.IsUniqueConstraintViolation(err) {
@@ -44,6 +52,22 @@ func (s *S) CreateOrganization(ctx context.Context, req *v1.CreateOrganizationRe
 	return org.ToProto(), nil
 }
 
+// canCreateOrganization checks if the user can create an organization.
+// Currently it checks if the user is the owner of the default organization.
+//
+// TODO(kenji): Should we have some more restriction?
+func (s *S) canCreateOrganization(userInfo *auth.UserInfo) (bool, error) {
+	if !s.enableAuth {
+		return true, nil
+	}
+
+	org, err := s.store.GetDefaultOrganization(fakeTenantID)
+	if err != nil {
+		return false, status.Errorf(codes.Internal, "get default organizations: %s", err)
+	}
+	return s.organizationRole(org.OrganizationID, userInfo.UserID) == v1.OrganizationRole_ORGANIZATION_ROLE_OWNER, nil
+}
+
 func (s *S) createOrganization(ctx context.Context, title string, isDefault bool) (*store.Organization, error) {
 	orgID, err := id.GenerateID("org-", 24)
 	if err != nil {
@@ -58,13 +82,26 @@ func (s *S) createOrganization(ctx context.Context, title string, isDefault bool
 
 // ListOrganizations lists all organizations.
 func (s *S) ListOrganizations(ctx context.Context, req *v1.ListOrganizationsRequest) (*v1.ListOrganizationsResponse, error) {
+	userInfo, err := s.extractUserInfoFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	orgs, err := s.store.ListOrganizations(fakeTenantID)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "list organizations: %s", err)
 	}
 
-	var orgProtos []*v1.Organization
+	// Only show orgs that the user is a owner/reader of.
+	var filtered []*store.Organization
 	for _, org := range orgs {
+		if s.organizationRole(org.OrganizationID, userInfo.UserID) != v1.OrganizationRole_ORGANIZATION_ROLE_UNSPECIFIED {
+			filtered = append(filtered, org)
+		}
+	}
+
+	var orgProtos []*v1.Organization
+	for _, org := range filtered {
 		orgProtos = append(orgProtos, org.ToProto())
 	}
 	return &v1.ListOrganizationsResponse{
@@ -74,12 +111,21 @@ func (s *S) ListOrganizations(ctx context.Context, req *v1.ListOrganizationsRequ
 
 // DeleteOrganization deletes an organization.
 func (s *S) DeleteOrganization(ctx context.Context, req *v1.DeleteOrganizationRequest) (*v1.DeleteOrganizationResponse, error) {
+	userInfo, err := s.extractUserInfoFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	if req.Id == "" {
 		return nil, status.Error(codes.InvalidArgument, "organization id is required")
 	}
 
 	o, err := s.validateOrganizationID(req.Id)
 	if err != nil {
+		return nil, err
+	}
+
+	if err := s.validateOrganizationOwner(req.Id, userInfo.UserID); err != nil {
 		return nil, err
 	}
 
@@ -113,6 +159,11 @@ func (s *S) DeleteOrganization(ctx context.Context, req *v1.DeleteOrganizationRe
 
 // CreateOrganizationUser adds a user to an organization.
 func (s *S) CreateOrganizationUser(ctx context.Context, req *v1.CreateOrganizationUserRequest) (*v1.OrganizationUser, error) {
+	userInfo, err := s.extractUserInfoFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	if req.OrganizationId == "" {
 		return nil, status.Error(codes.InvalidArgument, "organization id is required")
 	}
@@ -124,6 +175,10 @@ func (s *S) CreateOrganizationUser(ctx context.Context, req *v1.CreateOrganizati
 	}
 
 	if _, err := s.validateOrganizationID(req.OrganizationId); err != nil {
+		return nil, err
+	}
+
+	if err := s.validateOrganizationOwner(req.OrganizationId, userInfo.UserID); err != nil {
 		return nil, err
 	}
 
@@ -143,11 +198,20 @@ func (s *S) CreateOrganizationUser(ctx context.Context, req *v1.CreateOrganizati
 
 // ListOrganizationUsers lists organization users for the specified organization.
 func (s *S) ListOrganizationUsers(ctx context.Context, req *v1.ListOrganizationUsersRequest) (*v1.ListOrganizationUsersResponse, error) {
+	userInfo, err := s.extractUserInfoFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	if req.OrganizationId == "" {
 		return nil, status.Error(codes.InvalidArgument, "organization id is required")
 	}
 
 	if _, err := s.validateOrganizationID(req.OrganizationId); err != nil {
+		return nil, err
+	}
+
+	if err := s.validateOrganizationOwner(req.OrganizationId, userInfo.UserID); err != nil {
 		return nil, err
 	}
 
@@ -167,6 +231,11 @@ func (s *S) ListOrganizationUsers(ctx context.Context, req *v1.ListOrganizationU
 
 // DeleteOrganizationUser deletes an organization user.
 func (s *S) DeleteOrganizationUser(ctx context.Context, req *v1.DeleteOrganizationUserRequest) (*emptypb.Empty, error) {
+	userInfo, err := s.extractUserInfoFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	if req.OrganizationId == "" {
 		return nil, status.Error(codes.InvalidArgument, "organization id is required")
 	}
@@ -175,6 +244,10 @@ func (s *S) DeleteOrganizationUser(ctx context.Context, req *v1.DeleteOrganizati
 	}
 
 	if _, err := s.validateOrganizationID(req.OrganizationId); err != nil {
+		return nil, err
+	}
+
+	if err := s.validateOrganizationOwner(req.OrganizationId, userInfo.UserID); err != nil {
 		return nil, err
 	}
 
@@ -198,7 +271,7 @@ func (s *S) DeleteOrganizationUser(ctx context.Context, req *v1.DeleteOrganizati
 
 	if err := s.store.DeleteOrganizationUser(req.OrganizationId, req.UserId); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, status.Errorf(codes.NotFound, "organization user not found")
+			return nil, status.Errorf(codes.NotFound, "organization user %q not found", req.UserId)
 		}
 		return nil, status.Errorf(codes.Internal, "delete organization user: %s", err)
 	}
@@ -231,7 +304,6 @@ func (s *S) CreateDefaultOrganization(ctx context.Context, c *config.DefaultOrga
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
-	log.Printf("Creating default org %q", c.Title)
 	org, err := s.createOrganization(ctx, c.Title, true)
 	if err != nil {
 		return nil, err
