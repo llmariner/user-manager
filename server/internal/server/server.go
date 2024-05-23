@@ -18,7 +18,8 @@ import (
 )
 
 const (
-	defaultProjectID = "default"
+	defaultUserID    = "defaultUser"
+	defaultProjectID = "defaultProject"
 )
 
 // New creates a server.
@@ -100,6 +101,7 @@ func (s *S) Stop() {
 func (s *S) extractUserInfoFromContext(ctx context.Context) (*auth.UserInfo, error) {
 	if !s.enableAuth {
 		return &auth.UserInfo{
+			UserID:              defaultUserID,
 			OrganizationID:      "default",
 			ProjectID:           defaultProjectID,
 			KubernetesNamespace: "default",
