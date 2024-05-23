@@ -154,6 +154,17 @@ func TestCreateDefaultProject(t *testing.T) {
 	})
 	assert.NoError(t, err)
 
+	_, err = srv.CreateOrganizationUser(ctx, &v1.CreateOrganizationUserRequest{
+		OrganizationId: org.Id,
+		UserId:         "u0",
+		Role:           v1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
+	})
+	_, err = srv.CreateOrganizationUser(ctx, &v1.CreateOrganizationUserRequest{
+		OrganizationId: org.Id,
+		UserId:         "u1",
+		Role:           v1.OrganizationRole_ORGANIZATION_ROLE_READER,
+	})
+
 	c := &config.DefaultProjectConfig{
 		Title:               "Default project",
 		KubernetesNamespace: "ns",
@@ -165,6 +176,11 @@ func TestCreateDefaultProject(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, c.KubernetesNamespace, p.KubernetesNamespace)
 	assert.True(t, p.IsDefault)
+
+	pus, err := st.ListProjectUsersByProjectID(p.ProjectID)
+	assert.NoError(t, err)
+	assert.Len(t, pus, 1)
+	assert.Equal(t, "u0", pus[0].UserID)
 
 	// Default project cannot be deleted.
 	_, err = srv.DeleteProject(context.Background(), &v1.DeleteProjectRequest{

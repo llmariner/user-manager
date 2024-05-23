@@ -55,6 +55,9 @@ func (s *S) createProject(
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "generate project id: %s", err)
 	}
+
+	// TODO: Create a project and a user in the single transaction.
+
 	p, err := s.store.CreateProject(store.CreateProjectParams{
 		TenantID:            fakeTenantID,
 		ProjectID:           projectID,
@@ -65,6 +68,27 @@ func (s *S) createProject(
 	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "create project: %s", err)
+	}
+
+	// Add org owners to project owners.
+	orgUsers, err := s.store.ListOrganizationUsersByOrganizationID(organizationID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "list organization users: %s", err)
+	}
+	for _, ou := range orgUsers {
+		role := v1.OrganizationRole(v1.OrganizationRole_value[ou.Role])
+		if role != v1.OrganizationRole_ORGANIZATION_ROLE_OWNER {
+			continue
+		}
+		_, err := s.store.CreateProjectUser(store.CreateProjectUserParams{
+			ProjectID:      p.ProjectID,
+			OrganizationID: p.OrganizationID,
+			UserID:         ou.UserID,
+			Role:           v1.ProjectRole_PROJECT_ROLE_OWNER,
+		})
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return p.ToProto(), nil
@@ -203,8 +227,6 @@ func (s *S) DeleteProjectUser(ctx context.Context, req *v1.DeleteProjectUserRequ
 		return nil, err
 	}
 
-	// TODO(kenji): Validate the user ID.
-
 	if err := s.store.DeleteProjectUser(req.ProjectId, req.UserId); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Errorf(codes.NotFound, "project user not found")
@@ -250,26 +272,15 @@ func (s *S) CreateDefaultProject(ctx context.Context, c *config.DefaultProjectCo
 		return err
 	}
 
-	project, err := s.createProject(ctx,
+	if _, err := s.createProject(ctx,
 		c.Title,
 		orgID,
 		c.KubernetesNamespace,
 		true,
-	)
-	if err != nil {
+	); err != nil {
 		return err
 	}
 
-	for _, uid := range c.UserIDs {
-		if _, err := s.CreateProjectUser(ctx, &v1.CreateProjectUserRequest{
-			OrganizationId: orgID,
-			ProjectId:      project.Id,
-			UserId:         uid,
-			Role:           v1.ProjectRole_PROJECT_ROLE_OWNER,
-		}); err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
