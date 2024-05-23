@@ -3,10 +3,10 @@ package server
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
 	"strings"
 
+	gerrors "github.com/llm-operator/common/pkg/gormlib/errors"
 	"github.com/llm-operator/common/pkg/id"
 	v1 "github.com/llm-operator/user-manager/api/v1"
 	"github.com/llm-operator/user-manager/server/internal/config"
@@ -25,6 +25,9 @@ func (s *S) CreateOrganization(ctx context.Context, req *v1.CreateOrganizationRe
 
 	org, err := s.createOrganization(ctx, req.Title, false)
 	if err != nil {
+		if gerrors.IsUniqueConstraintViolation(err) {
+			return nil, status.Errorf(codes.AlreadyExists, "organizatione %q already exists", req.Title)
+		}
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
@@ -34,11 +37,11 @@ func (s *S) CreateOrganization(ctx context.Context, req *v1.CreateOrganizationRe
 func (s *S) createOrganization(ctx context.Context, title string, isDefault bool) (*store.Organization, error) {
 	orgID, err := id.GenerateID("org-", 24)
 	if err != nil {
-		return nil, fmt.Errorf("generate organization id: %s", err)
+		return nil, err
 	}
 	org, err := s.store.CreateOrganization(fakeTenantID, orgID, title, isDefault)
 	if err != nil {
-		return nil, fmt.Errorf("create organization: %s", err)
+		return nil, err
 	}
 	return org, nil
 }
@@ -117,6 +120,9 @@ func (s *S) CreateOrganizationUser(ctx context.Context, req *v1.CreateOrganizati
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Errorf(codes.FailedPrecondition, "organization %q not found", req.OrganizationId)
+		}
+		if gerrors.IsUniqueConstraintViolation(err) {
+			return nil, status.Errorf(codes.AlreadyExists, "user %q is already a member of organizatione %qs", req.UserId, req.OrganizationId)
 		}
 		return nil, status.Errorf(codes.Internal, "add user to organization: %s", err)
 	}
