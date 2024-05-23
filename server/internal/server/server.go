@@ -163,3 +163,40 @@ func (s *S) projectRole(projectID, userID string) v1.ProjectRole {
 	}
 	return v1.ProjectRole(r)
 }
+
+func (s *S) validateProjectOwner(projectID, orgID, userID string) error {
+	if s.organizationRole(orgID, userID) == v1.OrganizationRole_ORGANIZATION_ROLE_OWNER {
+		return nil
+	}
+
+	r := s.projectRole(projectID, userID)
+	switch r {
+	case v1.ProjectRole_PROJECT_ROLE_UNSPECIFIED:
+		// The project shouldn't be visible to the user.
+		return status.Errorf(codes.FailedPrecondition, "project %q not found", projectID)
+	case v1.ProjectRole_PROJECT_ROLE_OWNER:
+		return nil
+	case v1.ProjectRole_PROJECT_ROLE_MEMBER:
+		return status.Errorf(codes.PermissionDenied, "user %q is not the owner of project %q", userID, projectID)
+	default:
+		return status.Errorf(codes.Internal, "unknown role %q", r.String())
+	}
+}
+
+func (s *S) validateProjectMember(projectID, orgID, userID string) error {
+	if s.organizationRole(orgID, userID) == v1.OrganizationRole_ORGANIZATION_ROLE_OWNER {
+		return nil
+	}
+
+	r := s.projectRole(projectID, userID)
+	switch r {
+	case v1.ProjectRole_PROJECT_ROLE_UNSPECIFIED:
+		// The project shouldn't be visible to the user.
+		return status.Errorf(codes.FailedPrecondition, "project %q not found", projectID)
+	case v1.ProjectRole_PROJECT_ROLE_OWNER, v1.ProjectRole_PROJECT_ROLE_MEMBER:
+		return nil
+
+	default:
+		return status.Errorf(codes.Internal, "unknown role %q", r.String())
+	}
+}

@@ -19,6 +19,11 @@ import (
 
 // CreateProject creates a new project.
 func (s *S) CreateProject(ctx context.Context, req *v1.CreateProjectRequest) (*v1.Project, error) {
+	userInfo, err := s.extractUserInfoFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	if req.Title == "" {
 		return nil, status.Error(codes.InvalidArgument, "title is required")
 	}
@@ -27,6 +32,10 @@ func (s *S) CreateProject(ctx context.Context, req *v1.CreateProjectRequest) (*v
 	}
 	if req.KubernetesNamespace == "" {
 		return nil, status.Error(codes.InvalidArgument, "kubernetes namespace is required")
+	}
+
+	if err := s.validateOrganizationOwner(req.OrganizationId, userInfo.UserID); err != nil {
+		return nil, err
 	}
 
 	return s.createProject(ctx,
@@ -100,6 +109,11 @@ func (s *S) createProject(
 
 // ListProjects lists all projects.
 func (s *S) ListProjects(ctx context.Context, req *v1.ListProjectsRequest) (*v1.ListProjectsResponse, error) {
+	userInfo, err := s.extractUserInfoFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	if req.OrganizationId == "" {
 		return nil, status.Error(codes.InvalidArgument, "organization id is required")
 	}
@@ -113,8 +127,15 @@ func (s *S) ListProjects(ctx context.Context, req *v1.ListProjectsRequest) (*v1.
 		return nil, status.Errorf(codes.Internal, "list projects: %s", err)
 	}
 
-	var pProtos []*v1.Project
+	var filtered []*store.Project
 	for _, p := range ps {
+		if s.validateProjectMember(p.ProjectID, p.OrganizationID, userInfo.UserID) == nil {
+			filtered = append(filtered, p)
+		}
+	}
+
+	var pProtos []*v1.Project
+	for _, p := range filtered {
 		pProtos = append(pProtos, p.ToProto())
 	}
 	return &v1.ListProjectsResponse{
@@ -124,6 +145,11 @@ func (s *S) ListProjects(ctx context.Context, req *v1.ListProjectsRequest) (*v1.
 
 // DeleteProject deletes an project.
 func (s *S) DeleteProject(ctx context.Context, req *v1.DeleteProjectRequest) (*v1.DeleteProjectResponse, error) {
+	userInfo, err := s.extractUserInfoFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	if req.OrganizationId == "" {
 		return nil, status.Error(codes.InvalidArgument, "organization id is required")
 	}
@@ -135,6 +161,11 @@ func (s *S) DeleteProject(ctx context.Context, req *v1.DeleteProjectRequest) (*v
 	if err != nil {
 		return nil, err
 	}
+
+	if err := s.validateProjectOwner(req.Id, req.OrganizationId, userInfo.UserID); err != nil {
+		return nil, err
+	}
+
 	if p.IsDefault {
 		return nil, status.Errorf(codes.InvalidArgument, "cannot delete a default project")
 	}
@@ -155,6 +186,11 @@ func (s *S) DeleteProject(ctx context.Context, req *v1.DeleteProjectRequest) (*v
 
 // CreateProjectUser adds a user to an project.
 func (s *S) CreateProjectUser(ctx context.Context, req *v1.CreateProjectUserRequest) (*v1.ProjectUser, error) {
+	userInfo, err := s.extractUserInfoFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	if req.ProjectId == "" {
 		return nil, status.Error(codes.InvalidArgument, "project id is required")
 	}
@@ -170,6 +206,14 @@ func (s *S) CreateProjectUser(ctx context.Context, req *v1.CreateProjectUserRequ
 
 	if _, err := s.validateProjectID(req.ProjectId, req.OrganizationId); err != nil {
 		return nil, err
+	}
+
+	if err := s.validateProjectOwner(req.ProjectId, req.OrganizationId, userInfo.UserID); err != nil {
+		return nil, err
+	}
+
+	if s.organizationRole(req.OrganizationId, req.UserId) == v1.OrganizationRole_ORGANIZATION_ROLE_UNSPECIFIED {
+		return nil, status.Errorf(codes.FailedPrecondition, "user %q is not a member of the organization", req.UserId)
 	}
 
 	pu, err := s.store.CreateProjectUser(store.CreateProjectUserParams{
@@ -193,6 +237,11 @@ func (s *S) CreateProjectUser(ctx context.Context, req *v1.CreateProjectUserRequ
 
 // ListProjectUsers lists project users for the specified project.
 func (s *S) ListProjectUsers(ctx context.Context, req *v1.ListProjectUsersRequest) (*v1.ListProjectUsersResponse, error) {
+	userInfo, err := s.extractUserInfoFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	if req.ProjectId == "" {
 		return nil, status.Error(codes.InvalidArgument, "project id is required")
 	}
@@ -201,6 +250,10 @@ func (s *S) ListProjectUsers(ctx context.Context, req *v1.ListProjectUsersReques
 	}
 
 	if _, err := s.validateProjectID(req.ProjectId, req.OrganizationId); err != nil {
+		return nil, err
+	}
+
+	if err := s.validateProjectMember(req.ProjectId, req.OrganizationId, userInfo.UserID); err != nil {
 		return nil, err
 	}
 
@@ -220,6 +273,11 @@ func (s *S) ListProjectUsers(ctx context.Context, req *v1.ListProjectUsersReques
 
 // DeleteProjectUser deletes an project user.
 func (s *S) DeleteProjectUser(ctx context.Context, req *v1.DeleteProjectUserRequest) (*emptypb.Empty, error) {
+	userInfo, err := s.extractUserInfoFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	if req.ProjectId == "" {
 		return nil, status.Error(codes.InvalidArgument, "project id is required")
 	}
@@ -231,6 +289,10 @@ func (s *S) DeleteProjectUser(ctx context.Context, req *v1.DeleteProjectUserRequ
 	}
 
 	if _, err := s.validateProjectID(req.ProjectId, req.OrganizationId); err != nil {
+		return nil, err
+	}
+
+	if err := s.validateProjectOwner(req.ProjectId, req.OrganizationId, userInfo.UserID); err != nil {
 		return nil, err
 	}
 
