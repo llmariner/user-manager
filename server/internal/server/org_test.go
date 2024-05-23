@@ -190,6 +190,65 @@ func TestListOrganizationUsers(t *testing.T) {
 	}
 }
 
+func TestDeleteDeleteOrganizationUser(t *testing.T) {
+	const userID = "u0"
+
+	st, tearDown := store.NewTest(t)
+	defer tearDown()
+
+	srv := New(st)
+	ctx := context.Background()
+
+	o, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
+		Title: "title",
+	})
+	assert.NoError(t, err)
+
+	p, err := srv.CreateProject(ctx, &v1.CreateProjectRequest{
+		Title:               "title",
+		OrganizationId:      o.Id,
+		KubernetesNamespace: "ns",
+	})
+	assert.NoError(t, err)
+
+	_, err = srv.CreateOrganizationUser(ctx, &v1.CreateOrganizationUserRequest{
+		OrganizationId: o.Id,
+		UserId:         userID,
+		Role:           v1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
+	})
+	assert.NoError(t, err)
+
+	_, err = srv.CreateProjectUser(ctx, &v1.CreateProjectUserRequest{
+		ProjectId:      p.Id,
+		OrganizationId: o.Id,
+		UserId:         userID,
+		Role:           v1.ProjectRole_PROJECT_ROLE_OWNER,
+	})
+	assert.NoError(t, err)
+
+	resp, err := srv.ListProjectUsers(ctx, &v1.ListProjectUsersRequest{
+		ProjectId:      p.Id,
+		OrganizationId: o.Id,
+	})
+	assert.NoError(t, err)
+	assert.Len(t, resp.Users, 1)
+	assert.Equal(t, resp.Users[0].UserId, userID)
+
+	// Delete the org user. Make sure the project user is deleted as well.
+	_, err = srv.DeleteOrganizationUser(ctx, &v1.DeleteOrganizationUserRequest{
+		OrganizationId: o.Id,
+		UserId:         userID,
+	})
+	assert.NoError(t, err)
+
+	resp, err = srv.ListProjectUsers(ctx, &v1.ListProjectUsersRequest{
+		ProjectId:      p.Id,
+		OrganizationId: o.Id,
+	})
+	assert.NoError(t, err)
+	assert.Empty(t, resp.Users)
+}
+
 func TestCreateDefaultOrganization(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()

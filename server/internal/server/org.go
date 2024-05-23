@@ -170,6 +170,22 @@ func (s *S) DeleteOrganizationUser(ctx context.Context, req *v1.DeleteOrganizati
 
 	// TODO(kenji): Validate the user ID.
 
+	// TODO(kenji): Delete all records in a single transaction.
+
+	// Delete the user from all projects in the organization as well as from the organization.
+	projects, err := s.store.ListProjectsByTenantIDAndOrganizationID(fakeTenantID, req.OrganizationId)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "list projects: %s", err)
+	}
+	for _, p := range projects {
+		if err := s.store.DeleteProjectUser(p.ProjectID, req.UserId); err != nil {
+			if !errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, status.Errorf(codes.Internal, "delete project user: %s", err)
+			}
+			// Ignore.
+		}
+	}
+
 	if err := s.store.DeleteOrganizationUser(req.OrganizationId, req.UserId); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Errorf(codes.NotFound, "organization user not found")
