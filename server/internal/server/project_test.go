@@ -90,6 +90,13 @@ func TestProjectUser(t *testing.T) {
 	})
 	assert.NoError(t, err)
 
+	// Delete the default user to make the rest of the test simple.
+	_, err = srv.DeleteOrganizationUser(ctx, &v1.DeleteOrganizationUserRequest{
+		OrganizationId: org.Id,
+		UserId:         defaultUserID,
+	})
+	assert.NoError(t, err)
+
 	proj, err := srv.CreateProject(ctx, &v1.CreateProjectRequest{
 		Title:               "Test project",
 		OrganizationId:      org.Id,
@@ -216,6 +223,13 @@ func TestCreateDefaultProject(t *testing.T) {
 
 	org, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
 		Title: "Test organization",
+	})
+	assert.NoError(t, err)
+
+	// Delete the default user to make the rest of the test simple.
+	_, err = srv.DeleteOrganizationUser(ctx, &v1.DeleteOrganizationUserRequest{
+		OrganizationId: org.Id,
+		UserId:         defaultUserID,
 	})
 	assert.NoError(t, err)
 

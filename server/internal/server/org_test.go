@@ -29,6 +29,13 @@ func TestOrganization(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, title, cresp.Title)
 
+		// Delete the default user to make the rest of the test simple.
+		_, err = srv.DeleteOrganizationUser(ctx, &v1.DeleteOrganizationUserRequest{
+			OrganizationId: cresp.Id,
+			UserId:         defaultUserID,
+		})
+		assert.NoError(t, err)
+
 		_, err = srv.CreateOrganizationUser(ctx, &v1.CreateOrganizationUserRequest{
 			OrganizationId: cresp.Id,
 			UserId:         "user 1",
@@ -174,6 +181,13 @@ func TestListOrganizationUsers(t *testing.T) {
 		assert.NoError(t, err)
 		orgs = append(orgs, org)
 
+		// Delete the default user to make the rest of the test simple.
+		_, err = srv.DeleteOrganizationUser(ctx, &v1.DeleteOrganizationUserRequest{
+			OrganizationId: org.Id,
+			UserId:         defaultUserID,
+		})
+		assert.NoError(t, err)
+
 		_, err = srv.CreateOrganizationUser(ctx, &v1.CreateOrganizationUserRequest{
 			OrganizationId: org.Id,
 			UserId:         fmt.Sprintf("user %d", i),
@@ -201,6 +215,13 @@ func TestDeleteDeleteOrganizationUser(t *testing.T) {
 
 	o, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
 		Title: "title",
+	})
+	assert.NoError(t, err)
+
+	// Delete the default user to make the rest of the test simple.
+	_, err = srv.DeleteOrganizationUser(ctx, &v1.DeleteOrganizationUserRequest{
+		OrganizationId: o.Id,
+		UserId:         defaultUserID,
 	})
 	assert.NoError(t, err)
 

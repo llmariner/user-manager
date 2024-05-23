@@ -19,6 +19,11 @@ import (
 
 // CreateOrganization creates a new organization.
 func (s *S) CreateOrganization(ctx context.Context, req *v1.CreateOrganizationRequest) (*v1.Organization, error) {
+	userInfo, err := s.extractUserInfoFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	if req.Title == "" {
 		return nil, status.Error(codes.InvalidArgument, "title is required")
 	}
@@ -29,6 +34,11 @@ func (s *S) CreateOrganization(ctx context.Context, req *v1.CreateOrganizationRe
 			return nil, status.Errorf(codes.AlreadyExists, "organizatione %q already exists", req.Title)
 		}
 		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	// Add a creator as an owner. Othewise, there is no owner in the org, and no one can access.
+	if _, err := s.store.CreateOrganizationUser(org.OrganizationID, userInfo.UserID, v1.OrganizationRole_ORGANIZATION_ROLE_OWNER.String()); err != nil {
+		return nil, err
 	}
 
 	return org.ToProto(), nil
