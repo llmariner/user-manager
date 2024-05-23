@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strings"
 
 	"github.com/llm-operator/rbac-manager/pkg/auth"
 	v1 "github.com/llm-operator/user-manager/api/v1"
@@ -44,10 +45,29 @@ func (s *S) Run(ctx context.Context, port int, authConfig config.AuthConfig) err
 
 	var opts []grpc.ServerOption
 	if authConfig.Enable {
-		// TODO(kenji): Change the scope depending on RPC methods.
 		ai, err := auth.NewInterceptor(ctx, auth.Config{
 			RBACServerAddr: authConfig.RBACInternalServerAddr,
-			AccessResource: "api.users.api_keys",
+			GetAccessResourceForGRPCRequest: func(fullMethod string) string {
+				// Note that the authorization check peformed by the RBAC server is not sufficient
+				// since organizations and projects have more complex authorization rules.
+				// The additional checks are performed in the individual handlers.
+				ms := strings.Split(fullMethod, "/")
+				method := ms[len(ms)-1]
+				switch method {
+				case "CreateAPIKey", "DeleteAPIKey", "ListAPIKeys":
+					return "api.users.api_keys"
+				case "CreateOrganization", "DeleteOrganization", "ListOrganizations":
+					return "api.organizations"
+				case "CreateOrganizationUser", "DeleteOrganizationUser", "ListOrganizationUsers":
+					return "api.organizations.users"
+				case "CreateProject", "DeleteProject", "ListProjects":
+					return "api.organizations.projects"
+				case "CreateProjectUser", "DeleteProjectUser", "istProjectUsers":
+					return "api.organizations.projects.users"
+				default:
+					return "unknown"
+				}
+			},
 		})
 		if err != nil {
 			return err
