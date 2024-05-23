@@ -113,8 +113,8 @@ func (s *S) extractUserInfoFromContext(ctx context.Context) (*auth.UserInfo, err
 	return userInfo, nil
 }
 
-// orgRole returns a role that the given user has for the given organization.
-func (s *S) orgRole(orgID, userID string) v1.OrganizationRole {
+// organizationRole returns a role that the given user has for the given organization.
+func (s *S) organizationRole(orgID, userID string) v1.OrganizationRole {
 	if !s.enableAuth {
 		return v1.OrganizationRole_ORGANIZATION_ROLE_OWNER
 	}

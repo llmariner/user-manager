@@ -44,7 +44,7 @@ func (s *S) createProject(
 	kubernetesNamespace string,
 	isDefault bool,
 ) (*v1.Project, error) {
-	if _, err := s.validateOrgID(organizationID); err != nil {
+	if _, err := s.validateOrganizationID(organizationID); err != nil {
 		return nil, err
 	}
 
@@ -104,7 +104,7 @@ func (s *S) ListProjects(ctx context.Context, req *v1.ListProjectsRequest) (*v1.
 		return nil, status.Error(codes.InvalidArgument, "organization id is required")
 	}
 
-	if _, err := s.validateOrgID(req.OrganizationId); err != nil {
+	if _, err := s.validateOrganizationID(req.OrganizationId); err != nil {
 		return nil, err
 	}
 
@@ -245,7 +245,7 @@ func (s *S) DeleteProjectUser(ctx context.Context, req *v1.DeleteProjectUserRequ
 }
 
 func (s *S) validateProjectID(projectID, orgID string) (*store.Project, error) {
-	if _, err := s.validateOrgID(orgID); err != nil {
+	if _, err := s.validateOrganizationID(orgID); err != nil {
 		return nil, err
 	}
 
