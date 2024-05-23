@@ -123,7 +123,7 @@ func (s *S) CreateOrganizationUser(ctx context.Context, req *v1.CreateOrganizati
 			return nil, status.Errorf(codes.FailedPrecondition, "organization %q not found", req.OrganizationId)
 		}
 		if gerrors.IsUniqueConstraintViolation(err) {
-			return nil, status.Errorf(codes.AlreadyExists, "user %q is already a member of organizatione %qs", req.UserId, req.OrganizationId)
+			return nil, status.Errorf(codes.AlreadyExists, "user %q is already a member of organization %qs", req.UserId, req.OrganizationId)
 		}
 		return nil, status.Errorf(codes.Internal, "add user to organization: %s", err)
 	}

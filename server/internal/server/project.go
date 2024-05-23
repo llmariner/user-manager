@@ -183,7 +183,7 @@ func (s *S) CreateProjectUser(ctx context.Context, req *v1.CreateProjectUserRequ
 			return nil, status.Errorf(codes.FailedPrecondition, "project %q not found", req.ProjectId)
 		}
 		if gerrors.IsUniqueConstraintViolation(err) {
-			return nil, status.Errorf(codes.AlreadyExists, "user %q is already a member of organizatione %qs", req.UserId, req.OrganizationId)
+			return nil, status.Errorf(codes.AlreadyExists, "user %q is already a member of project %q", req.UserId, req.ProjectId)
 		}
 		return nil, status.Errorf(codes.Internal, "add user to project: %s", err)
 	}
