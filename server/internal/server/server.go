@@ -56,7 +56,7 @@ func (s *S) Run(ctx context.Context, port int, authConfig config.AuthConfig) err
 				method := ms[len(ms)-1]
 				switch method {
 				case "CreateAPIKey", "DeleteAPIKey", "ListAPIKeys":
-					return "api.users.api_keys"
+					return "api.organizations.projects.api_keys"
 				case "CreateOrganization", "DeleteOrganization", "ListOrganizations":
 					return "api.organizations"
 				case "CreateOrganizationUser", "DeleteOrganizationUser", "ListOrganizationUsers":

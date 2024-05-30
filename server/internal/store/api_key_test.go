@@ -12,7 +12,7 @@ func TestAPIKey(t *testing.T) {
 	st, tearDown := NewTest(t)
 	defer tearDown()
 
-	_, err := st.GetAPIKeyByNameAndProjectID("n0", "p0")
+	_, err := st.GetAPIKeyByNameAndUserID("n0", "u0")
 	assert.Error(t, err)
 	assert.True(t, errors.Is(err, gorm.ErrRecordNotFound))
 
@@ -34,7 +34,11 @@ func TestAPIKey(t *testing.T) {
 	assert.Equal(t, "p0", k0.ProjectID)
 	assert.Equal(t, "u0", k0.UserID)
 
-	k, err := st.GetAPIKeyByNameAndProjectID("n0", "p0")
+	k, err := st.GetAPIKeyByNameAndUserID("n0", "u0")
+	assert.NoError(t, err)
+	assert.Equal(t, "k0", k.APIKeyID)
+
+	k, err = st.GetAPIKey(k0.APIKeyID, "p0")
 	assert.NoError(t, err)
 	assert.Equal(t, "k0", k.APIKeyID)
 
@@ -104,6 +108,7 @@ func TestAPIKeySameName(t *testing.T) {
 	_, err := st.CreateAPIKey(APIKeySpec{
 		APIKeyID: "k1",
 		TenantID: "t1",
+		UserID:   "u1",
 		Name:     "n1",
 		Secret:   "s1",
 	})
@@ -112,6 +117,7 @@ func TestAPIKeySameName(t *testing.T) {
 	_, err = st.CreateAPIKey(APIKeySpec{
 		APIKeyID: "k2",
 		TenantID: "t1",
+		UserID:   "u1",
 		Name:     "n1",
 		Secret:   "s2",
 	})

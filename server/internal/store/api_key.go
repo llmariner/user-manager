@@ -10,13 +10,13 @@ type APIKey struct {
 
 	APIKeyID string `gorm:"uniqueIndex"`
 
-	Name string `gorm:"uniqueIndex:idx_api_key_name_tenant_id"`
+	Name string `gorm:"uniqueIndex:idx_api_key_name_user_id"`
 
-	TenantID string `gorm:"uniqueIndex:idx_api_key_name_tenant_id"`
+	TenantID string
 
 	OrganizationID string
 	ProjectID      string
-	UserID         string
+	UserID         string `gorm:"uniqueIndex:idx_api_key_name_user_id"`
 
 	Secret string
 
@@ -62,10 +62,19 @@ func (s *S) ListAPIKeysByProjectID(projectID string) ([]*APIKey, error) {
 	return ks, nil
 }
 
-// GetAPIKeyByNameAndProjectID gets an API key by its name and tenant ID.
-func (s *S) GetAPIKeyByNameAndProjectID(name, projectID string) (*APIKey, error) {
+// GetAPIKeyByNameAndUserID gets an API key by its name and user ID.
+func (s *S) GetAPIKeyByNameAndUserID(name, userID string) (*APIKey, error) {
 	var k APIKey
-	if err := s.db.Where("name = ? AND project_id = ?", name, projectID).Take(&k).Error; err != nil {
+	if err := s.db.Where("name = ? AND user_id = ?", name, userID).Take(&k).Error; err != nil {
+		return nil, err
+	}
+	return &k, nil
+}
+
+// GetAPIKey gets an API key by its ID and tenant ID.
+func (s *S) GetAPIKey(id, projectID string) (*APIKey, error) {
+	var k APIKey
+	if err := s.db.Where("api_key_id = ? AND project_id = ?", id, projectID).Take(&k).Error; err != nil {
 		return nil, err
 	}
 	return &k, nil

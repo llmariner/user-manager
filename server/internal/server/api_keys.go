@@ -30,6 +30,20 @@ func (s *S) CreateAPIKey(
 	if req.Name == "" {
 		return nil, status.Error(codes.InvalidArgument, "name is required")
 	}
+	if req.ProjectId == "" {
+		return nil, status.Error(codes.InvalidArgument, "project id is required")
+	}
+	if req.OrganizationId == "" {
+		return nil, status.Error(codes.InvalidArgument, "organization id is required")
+	}
+
+	if _, err := s.validateProjectID(req.ProjectId, req.OrganizationId); err != nil {
+		return nil, err
+	}
+
+	if err := s.validateProjectMember(req.ProjectId, req.OrganizationId, userInfo.UserID); err != nil {
+		return nil, err
+	}
 
 	trackID, err := id.GenerateID("key_", 16)
 	if err != nil {
@@ -44,8 +58,8 @@ func (s *S) CreateAPIKey(
 	spec := store.APIKeySpec{
 		APIKeyID:       trackID,
 		TenantID:       fakeTenantID,
-		OrganizationID: userInfo.OrganizationID,
-		ProjectID:      userInfo.ProjectID,
+		OrganizationID: req.OrganizationId,
+		ProjectID:      req.ProjectId,
 		UserID:         userInfo.UserID,
 		Name:           req.Name,
 		Secret:         secKey,
@@ -70,13 +84,37 @@ func (s *S) ListAPIKeys(
 		return nil, err
 	}
 
-	ks, err := s.store.ListAPIKeysByProjectID(userInfo.ProjectID)
+	if req.ProjectId == "" {
+		return nil, status.Error(codes.InvalidArgument, "project id is required")
+	}
+	if req.OrganizationId == "" {
+		return nil, status.Error(codes.InvalidArgument, "organization id is required")
+	}
+
+	if _, err := s.validateProjectID(req.ProjectId, req.OrganizationId); err != nil {
+		return nil, err
+	}
+
+	// TODO(kenji): Do not allow a project member to delete other users' API keys.
+	if err := s.validateProjectMember(req.ProjectId, req.OrganizationId, userInfo.UserID); err != nil {
+		return nil, err
+	}
+
+	ks, err := s.store.ListAPIKeysByProjectID(req.ProjectId)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "list api keys: %s", err)
 	}
 
-	var apiKeyProtos []*v1.APIKey
+	// Show all API keys if the user is an owner. Otherwise only show API keys owned by the user.
+	var filtered []*store.APIKey
+	isOwner := s.validateProjectOwner(req.ProjectId, req.OrganizationId, userInfo.UserID) == nil
 	for _, k := range ks {
+		if isOwner || k.UserID == userInfo.UserID {
+			filtered = append(filtered, k)
+		}
+	}
+	var apiKeyProtos []*v1.APIKey
+	for _, k := range filtered {
 		apiKeyProtos = append(apiKeyProtos, toAPIKeyProto(k, false))
 	}
 	return &v1.ListAPIKeysResponse{
@@ -98,11 +136,38 @@ func (s *S) DeleteAPIKey(
 	if req.Id == "" {
 		return nil, status.Error(codes.InvalidArgument, "id is required")
 	}
+	if req.ProjectId == "" {
+		return nil, status.Error(codes.InvalidArgument, "project id is required")
+	}
+	if req.OrganizationId == "" {
+		return nil, status.Error(codes.InvalidArgument, "organization id is required")
+	}
 
-	if err := s.store.DeleteAPIKey(req.Id, userInfo.ProjectID); err != nil {
+	if _, err := s.validateProjectID(req.ProjectId, req.OrganizationId); err != nil {
+		return nil, err
+	}
+
+	// TODO(kenji): Do not allow a project member to delete other users' API keys.
+	if err := s.validateProjectMember(req.ProjectId, req.OrganizationId, userInfo.UserID); err != nil {
+		return nil, err
+	}
+
+	// Do not allow a project member to delete other users' API keys.
+
+	key, err := s.store.GetAPIKey(req.Id, req.ProjectId)
+	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Errorf(codes.NotFound, "api key %q not found", req.Id)
 		}
+		return nil, status.Errorf(codes.Internal, "get api key: %s", err)
+	}
+
+	isOwner := s.validateProjectOwner(req.ProjectId, req.OrganizationId, userInfo.UserID) == nil
+	if !isOwner && userInfo.UserID != key.UserID {
+		return nil, status.Errorf(codes.NotFound, "api key %q not found", req.Id)
+	}
+
+	if err := s.store.DeleteAPIKey(req.Id, req.ProjectId); err != nil {
 		return nil, status.Errorf(codes.Internal, "delete api key: %s", err)
 	}
 	return &v1.DeleteAPIKeyResponse{
