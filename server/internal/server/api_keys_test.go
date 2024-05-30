@@ -111,6 +111,7 @@ func TestAPIKey_EnableAuth(t *testing.T) {
 		UserId:         "u2",
 		Role:           v1.OrganizationRole_ORGANIZATION_ROLE_READER,
 	})
+	assert.NoError(t, err)
 	_, err = srv.CreateProjectUser(u0Ctx, &v1.CreateProjectUserRequest{
 		OrganizationId: org.OrganizationID,
 		ProjectId:      proj.Id,
@@ -119,7 +120,7 @@ func TestAPIKey_EnableAuth(t *testing.T) {
 	})
 	assert.NoError(t, err)
 
-	// Create API keys.a
+	// Create API keys.
 
 	req := &v1.CreateAPIKeyRequest{
 		Name:           "title",
