@@ -65,9 +65,13 @@ message Project {
 
 message CreateAPIKeyRequest {
   string name = 1;
+  string project_id = 2;
+  string organization_id = 3;
 }
 
 message ListAPIKeysRequest {
+  string project_id = 1;
+  string organization_id = 2;
 }
 
 message ListAPIKeysResponse {
@@ -77,6 +81,8 @@ message ListAPIKeysResponse {
 
 message DeleteAPIKeyRequest {
   string id = 1;
+  string project_id = 2;
+  string organization_id = 3;
 }
 
 message DeleteAPIKeyResponse {
@@ -189,20 +195,20 @@ message DeleteProjectUserResponse {
 service UsersService {
   rpc CreateAPIKey(CreateAPIKeyRequest) returns (APIKey) {
     option (google.api.http) = {
-      post: "/v1/users/api_keys"
+      post: "/v1/organizations/{organization_id}/projects/{project_id}/api_keys"
       body: "*"
     };
   }
 
   rpc ListAPIKeys(ListAPIKeysRequest) returns (ListAPIKeysResponse) {
     option (google.api.http) = {
-      get: "/v1/users/api_keys"
+      get: "/v1/organizations/{organization_id}/projects/{project_id}/api_keys"
     };
   }
 
   rpc DeleteAPIKey(DeleteAPIKeyRequest) returns (DeleteAPIKeyResponse) {
     option (google.api.http) = {
-      delete: "/v1/users/api_keys/{id}"
+      delete: "/v1/organizations/{organization_id}/projects/{project_id}/api_keys/{id}"
     };
   }
 
