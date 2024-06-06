@@ -281,13 +281,14 @@ func TestCreateDefaultOrganization(t *testing.T) {
 		UserIDs: []string{
 			"admin",
 		},
+		TenantID: defaultTenantID,
 	}
 	created, err := srv.CreateDefaultOrganization(context.Background(), c)
 	assert.NoError(t, err)
 	assert.Equal(t, created.Title, c.Title)
 	assert.True(t, created.IsDefault)
 
-	o, err := st.GetDefaultOrganization(fakeTenantID)
+	o, err := st.GetDefaultOrganization(c.TenantID)
 	assert.NoError(t, err)
 
 	users, err := st.ListAllOrganizationUsers()

@@ -13,6 +13,7 @@ data:
       title: {{ .Values.defaultOrganization.title }}
       userIds:
       {{- toYaml .Values.defaultOrganization.userIds | nindent 6 }}
+      tenantId: {{ .Values.defaultOrganization.tenantId }}
     defaultProject:
       title: {{ .Values.defaultProject.title }}
       kubernetesNamespace: {{ .Values.defaultProject.kubernetesNamespace }}

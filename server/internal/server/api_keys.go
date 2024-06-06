@@ -13,10 +13,6 @@ import (
 	"gorm.io/gorm"
 )
 
-const (
-	fakeTenantID = "fake-tenant-id"
-)
-
 // CreateAPIKey creates an API key.
 func (s *S) CreateAPIKey(
 	ctx context.Context,
@@ -37,7 +33,7 @@ func (s *S) CreateAPIKey(
 		return nil, status.Error(codes.InvalidArgument, "organization id is required")
 	}
 
-	if _, err := s.validateProjectID(req.ProjectId, req.OrganizationId); err != nil {
+	if _, err := s.validateProjectID(req.ProjectId, req.OrganizationId, userInfo.TenantID); err != nil {
 		return nil, err
 	}
 
@@ -57,7 +53,7 @@ func (s *S) CreateAPIKey(
 
 	spec := store.APIKeySpec{
 		APIKeyID:       trackID,
-		TenantID:       fakeTenantID,
+		TenantID:       userInfo.TenantID,
 		OrganizationID: req.OrganizationId,
 		ProjectID:      req.ProjectId,
 		UserID:         userInfo.UserID,
@@ -91,7 +87,7 @@ func (s *S) ListAPIKeys(
 		return nil, status.Error(codes.InvalidArgument, "organization id is required")
 	}
 
-	if _, err := s.validateProjectID(req.ProjectId, req.OrganizationId); err != nil {
+	if _, err := s.validateProjectID(req.ProjectId, req.OrganizationId, userInfo.TenantID); err != nil {
 		return nil, err
 	}
 
@@ -143,7 +139,7 @@ func (s *S) DeleteAPIKey(
 		return nil, status.Error(codes.InvalidArgument, "organization id is required")
 	}
 
-	if _, err := s.validateProjectID(req.ProjectId, req.OrganizationId); err != nil {
+	if _, err := s.validateProjectID(req.ProjectId, req.OrganizationId, userInfo.TenantID); err != nil {
 		return nil, err
 	}
 
