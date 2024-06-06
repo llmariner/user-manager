@@ -36,7 +36,7 @@ func (s *S) CreateOrganization(ctx context.Context, req *v1.CreateOrganizationRe
 		return nil, status.Error(codes.PermissionDenied, "user is not allowed to create an organization")
 	}
 
-	org, err := s.createOrganization(ctx, req.Title, false)
+	org, err := s.createOrganization(ctx, req.Title, false, userInfo.TenantID)
 	if err != nil {
 		if gerrors.IsUniqueConstraintViolation(err) {
 			return nil, status.Errorf(codes.AlreadyExists, "organizatione %q already exists", req.Title)
@@ -61,19 +61,19 @@ func (s *S) canCreateOrganization(userInfo *auth.UserInfo) (bool, error) {
 		return true, nil
 	}
 
-	org, err := s.store.GetDefaultOrganization(fakeTenantID)
+	org, err := s.store.GetDefaultOrganization(userInfo.TenantID)
 	if err != nil {
 		return false, status.Errorf(codes.Internal, "get default organizations: %s", err)
 	}
 	return s.organizationRole(org.OrganizationID, userInfo.UserID) == v1.OrganizationRole_ORGANIZATION_ROLE_OWNER, nil
 }
 
-func (s *S) createOrganization(ctx context.Context, title string, isDefault bool) (*store.Organization, error) {
+func (s *S) createOrganization(ctx context.Context, title string, isDefault bool, tenantID string) (*store.Organization, error) {
 	orgID, err := id.GenerateID("org-", 24)
 	if err != nil {
 		return nil, err
 	}
-	org, err := s.store.CreateOrganization(fakeTenantID, orgID, title, isDefault)
+	org, err := s.store.CreateOrganization(tenantID, orgID, title, isDefault)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +87,7 @@ func (s *S) ListOrganizations(ctx context.Context, req *v1.ListOrganizationsRequ
 		return nil, err
 	}
 
-	orgs, err := s.store.ListOrganizations(fakeTenantID)
+	orgs, err := s.store.ListOrganizations(userInfo.TenantID)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "list organizations: %s", err)
 	}
@@ -120,7 +120,7 @@ func (s *S) DeleteOrganization(ctx context.Context, req *v1.DeleteOrganizationRe
 		return nil, status.Error(codes.InvalidArgument, "organization id is required")
 	}
 
-	o, err := s.validateOrganizationID(req.Id)
+	o, err := s.validateOrganizationID(req.Id, userInfo.TenantID)
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +134,7 @@ func (s *S) DeleteOrganization(ctx context.Context, req *v1.DeleteOrganizationRe
 	}
 
 	// Check if the org still has a project.
-	ps, err := s.store.ListProjectsByTenantIDAndOrganizationID(fakeTenantID, req.Id)
+	ps, err := s.store.ListProjectsByTenantIDAndOrganizationID(userInfo.TenantID, req.Id)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "list projects: %s", err)
 	}
@@ -146,7 +146,7 @@ func (s *S) DeleteOrganization(ctx context.Context, req *v1.DeleteOrganizationRe
 		return nil, status.Errorf(codes.FailedPrecondition, "organization %q still has projects: %q", req.Id, strings.Join(s, ", "))
 	}
 
-	if err := s.store.DeleteOrganization(fakeTenantID, req.Id); err != nil {
+	if err := s.store.DeleteOrganization(userInfo.TenantID, req.Id); err != nil {
 		return nil, status.Errorf(codes.Internal, "delete organization: %s", err)
 	}
 
@@ -174,7 +174,7 @@ func (s *S) CreateOrganizationUser(ctx context.Context, req *v1.CreateOrganizati
 		return nil, status.Error(codes.InvalidArgument, "role is required")
 	}
 
-	if _, err := s.validateOrganizationID(req.OrganizationId); err != nil {
+	if _, err := s.validateOrganizationID(req.OrganizationId, userInfo.TenantID); err != nil {
 		return nil, err
 	}
 
@@ -207,7 +207,7 @@ func (s *S) ListOrganizationUsers(ctx context.Context, req *v1.ListOrganizationU
 		return nil, status.Error(codes.InvalidArgument, "organization id is required")
 	}
 
-	if _, err := s.validateOrganizationID(req.OrganizationId); err != nil {
+	if _, err := s.validateOrganizationID(req.OrganizationId, userInfo.TenantID); err != nil {
 		return nil, err
 	}
 
@@ -243,7 +243,7 @@ func (s *S) DeleteOrganizationUser(ctx context.Context, req *v1.DeleteOrganizati
 		return nil, status.Error(codes.InvalidArgument, "user id is required")
 	}
 
-	if _, err := s.validateOrganizationID(req.OrganizationId); err != nil {
+	if _, err := s.validateOrganizationID(req.OrganizationId, userInfo.TenantID); err != nil {
 		return nil, err
 	}
 
@@ -256,7 +256,7 @@ func (s *S) DeleteOrganizationUser(ctx context.Context, req *v1.DeleteOrganizati
 	// TODO(kenji): Delete all records in a single transaction.
 
 	// Delete the user from all projects in the organization as well as from the organization.
-	projects, err := s.store.ListProjectsByTenantIDAndOrganizationID(fakeTenantID, req.OrganizationId)
+	projects, err := s.store.ListProjectsByTenantIDAndOrganizationID(userInfo.TenantID, req.OrganizationId)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "list projects: %s", err)
 	}
@@ -279,8 +279,8 @@ func (s *S) DeleteOrganizationUser(ctx context.Context, req *v1.DeleteOrganizati
 	return &emptypb.Empty{}, nil
 }
 
-func (s *S) validateOrganizationID(orgID string) (*store.Organization, error) {
-	o, err := s.store.GetOrganizationByTenantIDAndOrgID(fakeTenantID, orgID)
+func (s *S) validateOrganizationID(orgID, tenantID string) (*store.Organization, error) {
+	o, err := s.store.GetOrganizationByTenantIDAndOrgID(tenantID, orgID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Errorf(codes.FailedPrecondition, "organization %q not found", orgID)
@@ -295,7 +295,7 @@ func (s *S) validateOrganizationID(orgID string) (*store.Organization, error) {
 // TODO(kenji): This is not the best place for this function as there is nothing related to
 // the server itself.
 func (s *S) CreateDefaultOrganization(ctx context.Context, c *config.DefaultOrganizationConfig) (*store.Organization, error) {
-	existing, err := s.store.GetDefaultOrganization(fakeTenantID)
+	existing, err := s.store.GetDefaultOrganization(c.TenantID)
 	if err == nil {
 		// Do nothing.
 		return existing, nil
@@ -304,7 +304,7 @@ func (s *S) CreateDefaultOrganization(ctx context.Context, c *config.DefaultOrga
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
-	org, err := s.createOrganization(ctx, c.Title, true)
+	org, err := s.createOrganization(ctx, c.Title, true, c.TenantID)
 	if err != nil {
 		return nil, err
 	}

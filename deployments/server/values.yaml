@@ -26,6 +26,7 @@ defaultOrganization:
   title: Default Organization
   userIds:
   - admin@example.com
+  tenantId: fake-tenant-id
 
 defaultProject:
   title: Default Project

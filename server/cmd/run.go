@@ -99,7 +99,7 @@ func run(ctx context.Context, c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	if err := s.CreateDefaultProject(ctx, &c.DefaultProject, org.OrganizationID); err != nil {
+	if err := s.CreateDefaultProject(ctx, &c.DefaultProject, org.OrganizationID, c.DefaultOrganization.TenantID); err != nil {
 		return err
 	}
 
