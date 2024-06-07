@@ -109,7 +109,6 @@ func (s *S) extractUserInfoFromContext(ctx context.Context) (*auth.UserInfo, err
 			TenantID:            defaultTenantID,
 		}, nil
 	}
-	var ok bool
 	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "user info not found")
