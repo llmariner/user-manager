@@ -317,18 +317,21 @@ func (s *S) CreateDefaultOrganization(ctx context.Context, c *config.DefaultOrga
 	return org, nil
 }
 
-// ListOrganizations lists all organizations.
-func (s *IS) ListOrganizations(ctx context.Context, req *v1.ListOrganizationsRequest) (*v1.ListOrganizationsResponse, error) {
+// ListInternalOrganizations lists all organizations.
+func (s *IS) ListInternalOrganizations(ctx context.Context, req *v1.ListInternalOrganizationsRequest) (*v1.ListInternalOrganizationsResponse, error) {
 	orgs, err := s.store.ListAllOrganizations()
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "list organizations: %s", err)
 	}
 
-	var orgProtos []*v1.Organization
+	var orgProtos []*v1.InternalOrganization
 	for _, org := range orgs {
-		orgProtos = append(orgProtos, org.ToProto())
+		orgProtos = append(orgProtos, &v1.InternalOrganization{
+			Organization: org.ToProto(),
+			TenantId:     org.TenantID,
+		})
 	}
-	return &v1.ListOrganizationsResponse{
+	return &v1.ListInternalOrganizationsResponse{
 		Organizations: orgProtos,
 	}, nil
 }
