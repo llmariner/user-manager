@@ -686,6 +686,28 @@
         }
       }
     },
+    "v1InternalAPIKey": {
+      "type": "object",
+      "properties": {
+        "apiKey": {
+          "$ref": "#/definitions/v1APIKey"
+        },
+        "tenantId": {
+          "type": "string"
+        }
+      }
+    },
+    "v1InternalOrganization": {
+      "type": "object",
+      "properties": {
+        "organization": {
+          "$ref": "#/definitions/v1Organization"
+        },
+        "tenantId": {
+          "type": "string"
+        }
+      }
+    },
     "v1ListAPIKeysResponse": {
       "type": "object",
       "properties": {
@@ -696,6 +718,28 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/v1APIKey"
+          }
+        }
+      }
+    },
+    "v1ListInternalAPIKeysResponse": {
+      "type": "object",
+      "properties": {
+        "apiKeys": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1InternalAPIKey"
+          }
+        }
+      }
+    },
+    "v1ListInternalOrganizationsResponse": {
+      "type": "object",
+      "properties": {
+        "organizations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1InternalOrganization"
           }
         }
       }

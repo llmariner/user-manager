@@ -282,10 +282,34 @@ service UsersService {
 
 }
 
+message InternalAPIKey {
+  APIKey api_key = 1;
+  string tenant_id = 2;
+}
+
+message ListInternalAPIKeysRequest {
+}
+
+message ListInternalAPIKeysResponse {
+  repeated InternalAPIKey api_keys = 1;
+}
+
+message InternalOrganization {
+  Organization organization = 1;
+  string tenant_id = 2;
+}
+
+message ListInternalOrganizationsRequest {
+}
+
+message ListInternalOrganizationsResponse {
+  repeated InternalOrganization organizations = 1;
+}
+
 service UsersInternalService {
-  rpc ListAPIKeys(ListAPIKeysRequest) returns (ListAPIKeysResponse) {
+  rpc ListInternalAPIKeys(ListInternalAPIKeysRequest) returns (ListInternalAPIKeysResponse) {
   }
-  rpc ListOrganizations(ListOrganizationsRequest) returns (ListOrganizationsResponse) {
+  rpc ListInternalOrganizations(ListInternalOrganizationsRequest) returns (ListInternalOrganizationsResponse) {
   }
   rpc ListOrganizationUsers(ListOrganizationUsersRequest) returns (ListOrganizationUsersResponse) {
   }

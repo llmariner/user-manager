@@ -49,9 +49,9 @@ func TestOrganization(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, lresp.Organizations, 2)
 
-	lresp, err = isrv.ListOrganizations(ctx, &v1.ListOrganizationsRequest{})
+	ilresp, err := isrv.ListInternalOrganizations(ctx, &v1.ListInternalOrganizationsRequest{})
 	assert.NoError(t, err)
-	assert.Len(t, lresp.Organizations, 2)
+	assert.Len(t, ilresp.Organizations, 2)
 
 	laresp, err := isrv.store.ListAllOrganizationUsers()
 	assert.NoError(t, err)

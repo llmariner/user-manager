@@ -55,12 +55,9 @@ func TestAPIKey(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, lresp.Data, 1)
 
-	lresp, err = isrv.ListAPIKeys(ctx, &v1.ListAPIKeysRequest{
-		OrganizationId: org.Id,
-		ProjectId:      proj.Id,
-	})
+	ilresp, err := isrv.ListInternalAPIKeys(ctx, &v1.ListInternalAPIKeysRequest{})
 	assert.NoError(t, err)
-	assert.Len(t, lresp.Data, 1)
+	assert.Len(t, ilresp.ApiKeys, 1)
 
 	_, err = srv.DeleteAPIKey(ctx, &v1.DeleteAPIKeyRequest{
 		Id:             cresp.Id,

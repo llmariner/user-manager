@@ -173,23 +173,25 @@ func (s *S) DeleteAPIKey(
 	}, nil
 }
 
-// ListAPIKeys lists all API keys.
-func (s *IS) ListAPIKeys(
+// ListInternalAPIKeys lists all API keys.
+func (s *IS) ListInternalAPIKeys(
 	ctx context.Context,
-	req *v1.ListAPIKeysRequest,
-) (*v1.ListAPIKeysResponse, error) {
+	req *v1.ListInternalAPIKeysRequest,
+) (*v1.ListInternalAPIKeysResponse, error) {
 	ks, err := s.store.ListAllAPIKeys()
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "list api keys: %s", err)
 	}
 
-	var apiKeyProtos []*v1.APIKey
+	var apiKeyProtos []*v1.InternalAPIKey
 	for _, k := range ks {
-		apiKeyProtos = append(apiKeyProtos, toAPIKeyProto(k, true))
+		apiKeyProtos = append(apiKeyProtos, &v1.InternalAPIKey{
+			ApiKey:   toAPIKeyProto(k, true),
+			TenantId: k.TenantID,
+		})
 	}
-	return &v1.ListAPIKeysResponse{
-		Object: "list",
-		Data:   apiKeyProtos,
+	return &v1.ListInternalAPIKeysResponse{
+		ApiKeys: apiKeyProtos,
 	}, nil
 }
 
