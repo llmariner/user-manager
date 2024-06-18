@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 
 	gerrors "github.com/llm-operator/common/pkg/gormlib/errors"
@@ -36,17 +37,14 @@ func (s *S) CreateOrganization(ctx context.Context, req *v1.CreateOrganizationRe
 		return nil, status.Error(codes.PermissionDenied, "user is not allowed to create an organization")
 	}
 
-	org, err := s.createOrganization(ctx, req.Title, false, userInfo.TenantID)
+	// Create a new organization. Add a creator as an owner. Othewise, there is no owner in the org, and no one can access.
+
+	org, err := s.createOrganization(ctx, req.Title, false, userInfo.TenantID, []string{userInfo.UserID})
 	if err != nil {
 		if gerrors.IsUniqueConstraintViolation(err) {
 			return nil, status.Errorf(codes.AlreadyExists, "organizatione %q already exists", req.Title)
 		}
 		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	// Add a creator as an owner. Othewise, there is no owner in the org, and no one can access.
-	if _, err := s.store.CreateOrganizationUser(org.OrganizationID, userInfo.UserID, v1.OrganizationRole_ORGANIZATION_ROLE_OWNER.String()); err != nil {
-		return nil, err
 	}
 
 	return org.ToProto(), nil
@@ -68,15 +66,29 @@ func (s *S) canCreateOrganization(userInfo *auth.UserInfo) (bool, error) {
 	return s.organizationRole(org.OrganizationID, userInfo.UserID) == v1.OrganizationRole_ORGANIZATION_ROLE_OWNER, nil
 }
 
-func (s *S) createOrganization(ctx context.Context, title string, isDefault bool, tenantID string) (*store.Organization, error) {
+func (s *S) createOrganization(ctx context.Context, title string, isDefault bool, tenantID string, userIDs []string) (*store.Organization, error) {
 	orgID, err := id.GenerateID("org-", 24)
 	if err != nil {
 		return nil, err
 	}
-	org, err := s.store.CreateOrganization(tenantID, orgID, title, isDefault)
-	if err != nil {
+
+	var org *store.Organization
+	if err := s.store.Transaction(func(tx *gorm.DB) error {
+		org, err = store.CreateOrganizationInTransaction(tx, tenantID, orgID, title, isDefault)
+		if err != nil {
+			return err
+		}
+
+		for _, uid := range userIDs {
+			if _, err := store.CreateOrganizationUserInTransaction(tx, org.OrganizationID, uid, v1.OrganizationRole_ORGANIZATION_ROLE_OWNER.String()); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
 		return nil, err
 	}
+
 	return org, nil
 }
 
@@ -146,8 +158,19 @@ func (s *S) DeleteOrganization(ctx context.Context, req *v1.DeleteOrganizationRe
 		return nil, status.Errorf(codes.FailedPrecondition, "organization %q still has projects: %q", req.Id, strings.Join(s, ", "))
 	}
 
-	if err := s.store.DeleteOrganization(userInfo.TenantID, req.Id); err != nil {
-		return nil, status.Errorf(codes.Internal, "delete organization: %s", err)
+	// TODO(kenji): There is a slight chance that a new project is created just after the check above. Handle such a race condition.
+
+	if err := s.store.Transaction(func(tx *gorm.DB) error {
+		if err := store.DeleteOrganizationInTransaction(tx, req.Id); err != nil {
+			return fmt.Errorf("delete organization: %s", err)
+		}
+
+		if err := store.DeleteAllOrganizationUsersInTransaction(tx, req.Id); err != nil {
+			return fmt.Errorf("delete all organization users: %s", err)
+		}
+		return nil
+	}); err != nil {
+		return nil, status.Errorf(codes.Internal, "transaction: %s", err)
 	}
 
 	return &v1.DeleteOrganizationResponse{
@@ -251,29 +274,37 @@ func (s *S) DeleteOrganizationUser(ctx context.Context, req *v1.DeleteOrganizati
 		return nil, err
 	}
 
-	// TODO(kenji): Validate the user ID.
+	if _, err := s.store.GetOrganizationUser(req.OrganizationId, req.UserId); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, status.Errorf(codes.NotFound, "organization user %q not found", req.UserId)
+		}
+		return nil, status.Errorf(codes.Internal, "get organization user: %s", err)
+	}
 
-	// TODO(kenji): Delete all records in a single transaction.
+	// TODO(kenji): Validate the user ID.
 
 	// Delete the user from all projects in the organization as well as from the organization.
 	projects, err := s.store.ListProjectsByTenantIDAndOrganizationID(userInfo.TenantID, req.OrganizationId)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "list projects: %s", err)
 	}
-	for _, p := range projects {
-		if err := s.store.DeleteProjectUser(p.ProjectID, req.UserId); err != nil {
-			if !errors.Is(err, gorm.ErrRecordNotFound) {
-				return nil, status.Errorf(codes.Internal, "delete project user: %s", err)
-			}
-			// Ignore.
-		}
-	}
 
-	if err := s.store.DeleteOrganizationUser(req.OrganizationId, req.UserId); err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, status.Errorf(codes.NotFound, "organization user %q not found", req.UserId)
+	if err := s.store.Transaction(func(tx *gorm.DB) error {
+		for _, p := range projects {
+			if err := store.DeleteProjectUserInTransaction(tx, p.ProjectID, req.UserId); err != nil {
+				if !errors.Is(err, gorm.ErrRecordNotFound) {
+					return fmt.Errorf("delete project user: %s", err)
+				}
+				// Ignore.
+			}
 		}
-		return nil, status.Errorf(codes.Internal, "delete organization user: %s", err)
+
+		if err := store.DeleteOrganizationUserInTransaction(tx, req.OrganizationId, req.UserId); err != nil {
+			return fmt.Errorf("delete organization user: %s", err)
+		}
+		return nil
+	}); err != nil {
+		return nil, status.Errorf(codes.Internal, "transaction: %s", err)
 	}
 
 	return &emptypb.Empty{}, nil
@@ -304,16 +335,11 @@ func (s *S) CreateDefaultOrganization(ctx context.Context, c *config.DefaultOrga
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
-	org, err := s.createOrganization(ctx, c.Title, true, c.TenantID)
+	org, err := s.createOrganization(ctx, c.Title, true, c.TenantID, c.UserIDs)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, uid := range c.UserIDs {
-		if _, err := s.store.CreateOrganizationUser(org.OrganizationID, uid, v1.OrganizationRole_ORGANIZATION_ROLE_OWNER.String()); err != nil {
-			return nil, err
-		}
-	}
 	return org, nil
 }
 

@@ -37,7 +37,7 @@ func TestOrganization(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, gotOrgs, 2)
 
-	err = s.DeleteOrganization(org.TenantID, org.OrganizationID)
+	err = s.DeleteOrganization(org.OrganizationID)
 	assert.NoError(t, err)
 	gotOrg, err = s.GetOrganizationByTenantIDAndOrgID(org.TenantID, org.OrganizationID)
 	assert.Error(t, err)

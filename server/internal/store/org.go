@@ -28,13 +28,18 @@ func (o *Organization) ToProto() *v1.Organization {
 
 // CreateOrganization creates a new organization.
 func (s *S) CreateOrganization(tenantID, orgID, title string, isDefault bool) (*Organization, error) {
+	return CreateOrganizationInTransaction(s.db, tenantID, orgID, title, isDefault)
+}
+
+// CreateOrganizationInTransaction creates a new organization in a transaction.
+func CreateOrganizationInTransaction(tx *gorm.DB, tenantID, orgID, title string, isDefault bool) (*Organization, error) {
 	org := &Organization{
 		TenantID:       tenantID,
 		OrganizationID: orgID,
 		Title:          title,
 		IsDefault:      isDefault,
 	}
-	if err := s.db.Create(org).Error; err != nil {
+	if err := tx.Create(org).Error; err != nil {
 		return nil, err
 	}
 	return org, nil
@@ -77,19 +82,19 @@ func (s *S) ListAllOrganizations() ([]*Organization, error) {
 }
 
 // DeleteOrganization deletes an organization.
-func (s *S) DeleteOrganization(tenantID, orgID string) error {
-	return s.db.Transaction(func(tx *gorm.DB) error {
-		res := tx.Unscoped().Where("organization_id = ? AND tenant_id = ?", orgID, tenantID).Delete(&Organization{})
-		if res.Error != nil {
-			return res.Error
-		}
-		if res.RowsAffected == 0 {
-			return gorm.ErrRecordNotFound
-		}
-		if err := tx.Unscoped().Where("organization_id = ?", orgID).Delete(&OrganizationUser{}).Error; err != nil {
-			return err
-		}
+func (s *S) DeleteOrganization(orgID string) error {
+	return DeleteOrganizationInTransaction(s.db, orgID)
+}
 
-		return nil
-	})
+// DeleteOrganizationInTransaction deletes an organization in a transaction.
+func DeleteOrganizationInTransaction(tx *gorm.DB, orgID string) error {
+	res := tx.Unscoped().Where("organization_id = ?", orgID).Delete(&Organization{})
+	if err := res.Error; err != nil {
+		return err
+	}
+	if res.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+
+	return nil
 }

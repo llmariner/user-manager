@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 
 	gerrors "github.com/llm-operator/common/pkg/gormlib/errors"
@@ -68,42 +69,47 @@ func (s *S) createProject(
 		return nil, status.Errorf(codes.Internal, "generate project id: %s", err)
 	}
 
-	// TODO: Create a project and a user in the single transaction.
-
-	p, err := s.store.CreateProject(store.CreateProjectParams{
-		TenantID:            tenantID,
-		ProjectID:           projectID,
-		OrganizationID:      organizationID,
-		Title:               title,
-		KubernetesNamespace: kubernetesNamespace,
-		IsDefault:           isDefault,
-	})
-	if err != nil {
-		if gerrors.IsUniqueConstraintViolation(err) {
-			return nil, status.Errorf(codes.AlreadyExists, "project %q already exists", title)
-		}
-		return nil, status.Errorf(codes.Internal, "create project: %s", err)
-	}
-
-	// Add org owners to project owners.
 	orgUsers, err := s.store.ListOrganizationUsersByOrganizationID(organizationID)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "list organization users: %s", err)
 	}
-	for _, ou := range orgUsers {
-		role := v1.OrganizationRole(v1.OrganizationRole_value[ou.Role])
-		if role != v1.OrganizationRole_ORGANIZATION_ROLE_OWNER {
-			continue
-		}
-		_, err := s.store.CreateProjectUser(store.CreateProjectUserParams{
-			ProjectID:      p.ProjectID,
-			OrganizationID: p.OrganizationID,
-			UserID:         ou.UserID,
-			Role:           v1.ProjectRole_PROJECT_ROLE_OWNER,
+
+	var p *store.Project
+	if err := s.store.Transaction(func(tx *gorm.DB) error {
+		p, err = store.CreateProjectInTransaction(tx, store.CreateProjectParams{
+			TenantID:            tenantID,
+			ProjectID:           projectID,
+			OrganizationID:      organizationID,
+			Title:               title,
+			KubernetesNamespace: kubernetesNamespace,
+			IsDefault:           isDefault,
 		})
 		if err != nil {
-			return nil, err
+			return err
 		}
+
+		// Add org owners to project owners.
+		for _, ou := range orgUsers {
+			role := v1.OrganizationRole(v1.OrganizationRole_value[ou.Role])
+			if role != v1.OrganizationRole_ORGANIZATION_ROLE_OWNER {
+				continue
+			}
+			_, err := store.CreateProjectUserInTransaction(tx, store.CreateProjectUserParams{
+				ProjectID:      p.ProjectID,
+				OrganizationID: p.OrganizationID,
+				UserID:         ou.UserID,
+				Role:           v1.ProjectRole_PROJECT_ROLE_OWNER,
+			})
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
+		if gerrors.IsUniqueConstraintViolation(err) {
+			return nil, status.Errorf(codes.AlreadyExists, "project %q already exists", title)
+		}
+		return nil, status.Errorf(codes.Internal, "create project: %s", err)
 	}
 
 	return p.ToProto(), nil
@@ -172,11 +178,16 @@ func (s *S) DeleteProject(ctx context.Context, req *v1.DeleteProjectRequest) (*v
 		return nil, status.Errorf(codes.InvalidArgument, "cannot delete a default project")
 	}
 
-	if err := s.store.DeleteProject(userInfo.TenantID, req.Id); err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, status.Errorf(codes.NotFound, "project %q not found", req.Id)
+	if err := s.store.Transaction(func(tx *gorm.DB) error {
+		if err := store.DeleteProjectInTransaction(tx, req.Id); err != nil {
+			return fmt.Errorf("delete project: %s", err)
 		}
-		return nil, status.Errorf(codes.Internal, "delete project: %s", err)
+		if err := store.DeleteAllProjectUsersInTransaction(tx, req.Id); err != nil {
+			return fmt.Errorf("delete all project users: %s", err)
+		}
+		return nil
+	}); err != nil {
+		return nil, status.Errorf(codes.Internal, "transaction: %s", err)
 	}
 
 	return &v1.DeleteProjectResponse{
