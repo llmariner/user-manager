@@ -46,6 +46,11 @@ type CreateProjectParams struct {
 
 // CreateProject creates a new project.
 func (s *S) CreateProject(p CreateProjectParams) (*Project, error) {
+	return CreateProjectInTransaction(s.db, p)
+}
+
+// CreateProjectInTransaction creates a new project in a transaction.
+func CreateProjectInTransaction(tx *gorm.DB, p CreateProjectParams) (*Project, error) {
 	project := &Project{
 		ProjectID:           p.ProjectID,
 		OrganizationID:      p.OrganizationID,
@@ -54,7 +59,7 @@ func (s *S) CreateProject(p CreateProjectParams) (*Project, error) {
 		KubernetesNamespace: p.KubernetesNamespace,
 		IsDefault:           p.IsDefault,
 	}
-	if err := s.db.Create(project).Error; err != nil {
+	if err := tx.Create(project).Error; err != nil {
 		return nil, err
 	}
 	return project, nil
@@ -104,15 +109,18 @@ func (s *S) ListAllProjects() ([]*Project, error) {
 }
 
 // DeleteProject deletes an project.
-func (s *S) DeleteProject(tenantID, projectID string) error {
-	return s.db.Transaction(func(tx *gorm.DB) error {
-		res := tx.Unscoped().Where("project_id = ? AND tenant_id = ?", projectID, tenantID).Delete(&Project{})
-		if res.Error != nil {
-			return res.Error
-		}
-		if res.RowsAffected == 0 {
-			return gorm.ErrRecordNotFound
-		}
-		return tx.Unscoped().Where("project_id = ?", projectID).Delete(&ProjectUser{}).Error
-	})
+func (s *S) DeleteProject(projectID string) error {
+	return DeleteProjectInTransaction(s.db, projectID)
+}
+
+// DeleteProjectInTransaction deletes an project in a transaction.
+func DeleteProjectInTransaction(tx *gorm.DB, projectID string) error {
+	res := tx.Unscoped().Where("project_id = ?", projectID).Delete(&Project{})
+	if err := res.Error; err != nil {
+		return err
+	}
+	if res.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
 }

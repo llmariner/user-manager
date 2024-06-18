@@ -55,7 +55,7 @@ func TestProject(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, gotPrjs, 2)
 
-	err = s.DeleteProject(p.TenantID, p.ProjectID)
+	err = s.DeleteProject(p.ProjectID)
 	assert.NoError(t, err)
 	gotPrj, err = s.GetProject(GetProjectParams{
 		TenantID:       p.TenantID,

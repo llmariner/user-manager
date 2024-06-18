@@ -36,6 +36,11 @@ type CreateProjectUserParams struct {
 
 // CreateProjectUser creates a project user.
 func (s *S) CreateProjectUser(p CreateProjectUserParams) (*ProjectUser, error) {
+	return CreateProjectUserInTransaction(s.db, p)
+}
+
+// CreateProjectUserInTransaction creates a project user in a transaction.
+func CreateProjectUserInTransaction(tx *gorm.DB, p CreateProjectUserParams) (*ProjectUser, error) {
 	// TODO(aya): rethink user validation: retrieving user information from dex?
 	pusr := &ProjectUser{
 		ProjectID:      p.ProjectID,
@@ -43,7 +48,7 @@ func (s *S) CreateProjectUser(p CreateProjectUserParams) (*ProjectUser, error) {
 		UserID:         p.UserID,
 		Role:           p.Role.String(),
 	}
-	if err := s.db.Create(pusr).Error; err != nil {
+	if err := tx.Create(pusr).Error; err != nil {
 		return nil, err
 	}
 	return pusr, nil
@@ -78,12 +83,26 @@ func (s *S) ListAllProjectUsers() ([]ProjectUser, error) {
 
 // DeleteProjectUser deletes a project user.
 func (s *S) DeleteProjectUser(projectID, userID string) error {
-	res := s.db.Unscoped().Where("project_id = ? AND user_id = ?", projectID, userID).Delete(&ProjectUser{})
+	return DeleteProjectUserInTransaction(s.db, projectID, userID)
+}
+
+// DeleteProjectUserInTransaction deletes a project user in a transaction.
+func DeleteProjectUserInTransaction(tx *gorm.DB, projectID, userID string) error {
+	res := tx.Unscoped().Where("project_id = ? AND user_id = ?", projectID, userID).Delete(&ProjectUser{})
 	if err := res.Error; err != nil {
 		return err
 	}
 	if res.RowsAffected == 0 {
 		return gorm.ErrRecordNotFound
 	}
+	return nil
+}
+
+// DeleteAllProjectUsersInTransaction deletes all project users in a transaction.
+func DeleteAllProjectUsersInTransaction(tx *gorm.DB, projectID string) error {
+	if err := tx.Unscoped().Where("project_id = ?", projectID).Delete(&ProjectUser{}).Error; err != nil {
+		return err
+	}
+
 	return nil
 }

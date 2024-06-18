@@ -26,13 +26,18 @@ func (o *OrganizationUser) ToProto() *v1.OrganizationUser {
 
 // CreateOrganizationUser creates a organization user.
 func (s *S) CreateOrganizationUser(orgID, userID, role string) (*OrganizationUser, error) {
+	return CreateOrganizationUserInTransaction(s.db, orgID, userID, role)
+}
+
+// CreateOrganizationUserInTransaction creates a organization user in a transaction.
+func CreateOrganizationUserInTransaction(tx *gorm.DB, orgID, userID, role string) (*OrganizationUser, error) {
 	// TODO(aya): rethink user validation: retrieving user information from dex?
 	orgusr := &OrganizationUser{
 		OrganizationID: orgID,
 		UserID:         userID,
 		Role:           role,
 	}
-	if err := s.db.Create(orgusr).Error; err != nil {
+	if err := tx.Create(orgusr).Error; err != nil {
 		return nil, err
 	}
 	return orgusr, nil
@@ -67,12 +72,25 @@ func (s *S) ListAllOrganizationUsers() ([]OrganizationUser, error) {
 
 // DeleteOrganizationUser deletes a organization user.
 func (s *S) DeleteOrganizationUser(orgID, userID string) error {
-	res := s.db.Unscoped().Where("organization_id = ? AND user_id = ?", orgID, userID).Delete(&OrganizationUser{})
+	return DeleteOrganizationUserInTransaction(s.db, orgID, userID)
+}
+
+// DeleteOrganizationUserInTransaction deletes a organization user in a transaction.
+func DeleteOrganizationUserInTransaction(tx *gorm.DB, orgID, userID string) error {
+	res := tx.Unscoped().Where("organization_id = ? AND user_id = ?", orgID, userID).Delete(&OrganizationUser{})
 	if err := res.Error; err != nil {
 		return err
 	}
 	if res.RowsAffected == 0 {
 		return gorm.ErrRecordNotFound
+	}
+	return nil
+}
+
+// DeleteAllOrganizationUsersInTransaction deletes all organization users in the specified organization.
+func DeleteAllOrganizationUsersInTransaction(tx *gorm.DB, orgID string) error {
+	if err := tx.Unscoped().Where("organization_id = ?", orgID).Delete(&OrganizationUser{}).Error; err != nil {
+		return err
 	}
 	return nil
 }
