@@ -40,7 +40,7 @@ defaultProject:
 
 replicaCount: 1
 image:
-  repository: public.ecr.aws/v8n3t7y5/llm-operator/user-manager-server
+  repository: public.ecr.aws/cloudnatix/llm-operator/user-manager-server
   pullPolicy: IfNotPresent
 
 version:
