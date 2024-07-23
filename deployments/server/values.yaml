@@ -43,4 +43,9 @@ image:
   repository: public.ecr.aws/v8n3t7y5/llm-operator/user-manager-server
   pullPolicy: IfNotPresent
 
+podAnnotations:
+nodeSelector:
+affinity:
+tolerations:
+
 version:
