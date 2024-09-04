@@ -9,6 +9,7 @@ import (
 	gerrors "github.com/llm-operator/common/pkg/gormlib/errors"
 	"github.com/llm-operator/common/pkg/id"
 	v1 "github.com/llm-operator/user-manager/api/v1"
+	"github.com/llm-operator/user-manager/pkg/userid"
 	"github.com/llm-operator/user-manager/server/internal/config"
 	"github.com/llm-operator/user-manager/server/internal/store"
 	"google.golang.org/grpc/codes"
@@ -225,14 +226,15 @@ func (s *S) CreateProjectUser(ctx context.Context, req *v1.CreateProjectUserRequ
 		return nil, err
 	}
 
-	if s.organizationRole(req.OrganizationId, req.UserId) == v1.OrganizationRole_ORGANIZATION_ROLE_UNSPECIFIED {
-		return nil, status.Errorf(codes.FailedPrecondition, "user %q is not a member of the organization", req.UserId)
+	userID := userid.Normalize(req.UserId)
+	if s.organizationRole(req.OrganizationId, userID) == v1.OrganizationRole_ORGANIZATION_ROLE_UNSPECIFIED {
+		return nil, status.Errorf(codes.FailedPrecondition, "user %q is not a member of the organization", userID)
 	}
 
 	pu, err := s.store.CreateProjectUser(store.CreateProjectUserParams{
 		ProjectID:      req.ProjectId,
 		OrganizationID: req.OrganizationId,
-		UserID:         req.UserId,
+		UserID:         userID,
 		Role:           req.Role,
 	})
 	if err != nil {
@@ -240,7 +242,7 @@ func (s *S) CreateProjectUser(ctx context.Context, req *v1.CreateProjectUserRequ
 			return nil, status.Errorf(codes.FailedPrecondition, "project %q not found", req.ProjectId)
 		}
 		if gerrors.IsUniqueConstraintViolation(err) {
-			return nil, status.Errorf(codes.AlreadyExists, "user %q is already a member of project %q", req.UserId, req.ProjectId)
+			return nil, status.Errorf(codes.AlreadyExists, "user %q is already a member of project %q", userID, req.ProjectId)
 		}
 		return nil, status.Errorf(codes.Internal, "add user to project: %s", err)
 	}
@@ -309,7 +311,8 @@ func (s *S) DeleteProjectUser(ctx context.Context, req *v1.DeleteProjectUserRequ
 		return nil, err
 	}
 
-	if err := s.store.DeleteProjectUser(req.ProjectId, req.UserId); err != nil {
+	userID := userid.Normalize(req.UserId)
+	if err := s.store.DeleteProjectUser(req.ProjectId, userID); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Errorf(codes.NotFound, "project user not found")
 		}
