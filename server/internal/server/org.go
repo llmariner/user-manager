@@ -10,6 +10,7 @@ import (
 	"github.com/llm-operator/common/pkg/id"
 	"github.com/llm-operator/rbac-manager/pkg/auth"
 	v1 "github.com/llm-operator/user-manager/api/v1"
+	"github.com/llm-operator/user-manager/pkg/userid"
 	"github.com/llm-operator/user-manager/server/internal/config"
 	"github.com/llm-operator/user-manager/server/internal/store"
 	"google.golang.org/grpc/codes"
@@ -39,7 +40,7 @@ func (s *S) CreateOrganization(ctx context.Context, req *v1.CreateOrganizationRe
 
 	// Create a new organization. Add a creator as an owner. Othewise, there is no owner in the org, and no one can access.
 
-	org, err := s.createOrganization(ctx, req.Title, false, userInfo.TenantID, []string{userInfo.UserID})
+	org, err := s.createOrganization(ctx, req.Title, false, userInfo.TenantID, []string{userid.Normalize(userInfo.UserID)})
 	if err != nil {
 		if gerrors.IsUniqueConstraintViolation(err) {
 			return nil, status.Errorf(codes.AlreadyExists, "organizatione %q already exists", req.Title)
@@ -205,13 +206,14 @@ func (s *S) CreateOrganizationUser(ctx context.Context, req *v1.CreateOrganizati
 		return nil, err
 	}
 
-	ou, err := s.store.CreateOrganizationUser(req.OrganizationId, req.UserId, req.Role.String())
+	userID := userid.Normalize(req.UserId)
+	ou, err := s.store.CreateOrganizationUser(req.OrganizationId, userID, req.Role.String())
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Errorf(codes.FailedPrecondition, "organization %q not found", req.OrganizationId)
 		}
 		if gerrors.IsUniqueConstraintViolation(err) {
-			return nil, status.Errorf(codes.AlreadyExists, "user %q is already a member of organization %qs", req.UserId, req.OrganizationId)
+			return nil, status.Errorf(codes.AlreadyExists, "user %q is already a member of organization %qs", userID, req.OrganizationId)
 		}
 		return nil, status.Errorf(codes.Internal, "add user to organization: %s", err)
 	}
@@ -274,9 +276,10 @@ func (s *S) DeleteOrganizationUser(ctx context.Context, req *v1.DeleteOrganizati
 		return nil, err
 	}
 
-	if _, err := s.store.GetOrganizationUser(req.OrganizationId, req.UserId); err != nil {
+	userID := userid.Normalize(req.UserId)
+	if _, err := s.store.GetOrganizationUser(req.OrganizationId, userID); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, status.Errorf(codes.NotFound, "organization user %q not found", req.UserId)
+			return nil, status.Errorf(codes.NotFound, "organization user %q not found", userID)
 		}
 		return nil, status.Errorf(codes.Internal, "get organization user: %s", err)
 	}
@@ -291,7 +294,7 @@ func (s *S) DeleteOrganizationUser(ctx context.Context, req *v1.DeleteOrganizati
 
 	if err := s.store.Transaction(func(tx *gorm.DB) error {
 		for _, p := range projects {
-			if err := store.DeleteProjectUserInTransaction(tx, p.ProjectID, req.UserId); err != nil {
+			if err := store.DeleteProjectUserInTransaction(tx, p.ProjectID, userID); err != nil {
 				if !errors.Is(err, gorm.ErrRecordNotFound) {
 					return fmt.Errorf("delete project user: %s", err)
 				}
@@ -299,7 +302,7 @@ func (s *S) DeleteOrganizationUser(ctx context.Context, req *v1.DeleteOrganizati
 			}
 		}
 
-		if err := store.DeleteOrganizationUserInTransaction(tx, req.OrganizationId, req.UserId); err != nil {
+		if err := store.DeleteOrganizationUserInTransaction(tx, req.OrganizationId, userID); err != nil {
 			return fmt.Errorf("delete organization user: %s", err)
 		}
 		return nil
