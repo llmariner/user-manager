@@ -3,6 +3,9 @@ global:
     host:
     port:
     username:
+    ssl:
+      mode:
+      rootCert:
 
   databaseSecret:
     name:
