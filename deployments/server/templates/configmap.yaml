@@ -26,7 +26,7 @@ data:
       username: {{ .Values.global.database.username }}
       passwordEnvName: DB_PASSWORD
       ssl:
-        model: {{ .Values.global.database.ssl.mode }}
+        mode: {{ .Values.global.database.ssl.mode }}
         rootCert: {{ .Values.global.database.ssl.rootCert }}
     auth:
       enable: {{ .Values.global.auth.enable }}
