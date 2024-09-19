@@ -28,6 +28,8 @@ data:
       ssl:
         mode: {{ .Values.global.database.ssl.mode }}
         rootCert: {{ .Values.global.database.ssl.rootCert }}
+      createDatabase: {{ .Values.global.database.createDatabase }}
+      originalDatabase: {{ .Values.global.database.originalDatabase }}
     auth:
       enable: {{ .Values.global.auth.enable }}
       rbacInternalServerAddr: {{ .Values.global.auth.rbacInternalServerAddr }}
