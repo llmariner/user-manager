@@ -7,7 +7,7 @@ import (
 	"net"
 	"strings"
 
-	"github.com/llm-operator/rbac-manager/pkg/auth"
+	"github.com/llmariner/rbac-manager/pkg/auth"
 	v1 "github.com/llm-operator/user-manager/api/v1"
 	"github.com/llm-operator/user-manager/server/internal/config"
 	"github.com/llm-operator/user-manager/server/internal/store"
