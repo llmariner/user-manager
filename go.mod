@@ -5,7 +5,7 @@ go 1.22.2
 require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0
 	github.com/llm-operator/common v0.6.0
-	github.com/llm-operator/rbac-manager v0.73.0
+	github.com/llmariner/rbac-manager v0.101.0
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.9.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20240227224415-6ceb2ff114de
