@@ -6,6 +6,7 @@ import (
 	"net"
 
 	v1 "github.com/llm-operator/user-manager/api/v1"
+	v1legacy "github.com/llm-operator/user-manager/api/v1/legacy"
 	"github.com/llm-operator/user-manager/server/internal/store"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -18,9 +19,15 @@ func NewInternal(store *store.S) *IS {
 	}
 }
 
+// legacyServer is a type alias required for embedding the same types in IS
+// nolint:unused
+type legacyServer = v1legacy.UnimplementedUsersInternalServiceServer
+
 // IS is an internal server.
 type IS struct {
 	v1.UnimplementedUsersInternalServiceServer
+	// nolint:unused
+	legacyServer
 
 	srv *grpc.Server
 
@@ -33,6 +40,7 @@ func (s *IS) Run(port int) error {
 
 	grpcServer := grpc.NewServer()
 	v1.RegisterUsersInternalServiceServer(grpcServer, s)
+	v1legacy.RegisterUsersInternalServiceServer(grpcServer, s)
 	reflection.Register(grpcServer)
 
 	s.srv = grpcServer

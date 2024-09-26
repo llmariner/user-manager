@@ -46,7 +46,7 @@ func NewUsersServiceClient(cc grpc.ClientConnInterface) UsersServiceClient {
 
 func (c *usersServiceClient) CreateAPIKey(ctx context.Context, in *CreateAPIKeyRequest, opts ...grpc.CallOption) (*APIKey, error) {
 	out := new(APIKey)
-	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersService/CreateAPIKey", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.users.server.v1.UsersService/CreateAPIKey", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func (c *usersServiceClient) CreateAPIKey(ctx context.Context, in *CreateAPIKeyR
 
 func (c *usersServiceClient) ListAPIKeys(ctx context.Context, in *ListAPIKeysRequest, opts ...grpc.CallOption) (*ListAPIKeysResponse, error) {
 	out := new(ListAPIKeysResponse)
-	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersService/ListAPIKeys", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.users.server.v1.UsersService/ListAPIKeys", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (c *usersServiceClient) ListAPIKeys(ctx context.Context, in *ListAPIKeysReq
 
 func (c *usersServiceClient) DeleteAPIKey(ctx context.Context, in *DeleteAPIKeyRequest, opts ...grpc.CallOption) (*DeleteAPIKeyResponse, error) {
 	out := new(DeleteAPIKeyResponse)
-	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersService/DeleteAPIKey", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.users.server.v1.UsersService/DeleteAPIKey", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +73,7 @@ func (c *usersServiceClient) DeleteAPIKey(ctx context.Context, in *DeleteAPIKeyR
 
 func (c *usersServiceClient) CreateOrganization(ctx context.Context, in *CreateOrganizationRequest, opts ...grpc.CallOption) (*Organization, error) {
 	out := new(Organization)
-	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersService/CreateOrganization", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.users.server.v1.UsersService/CreateOrganization", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +82,7 @@ func (c *usersServiceClient) CreateOrganization(ctx context.Context, in *CreateO
 
 func (c *usersServiceClient) ListOrganizations(ctx context.Context, in *ListOrganizationsRequest, opts ...grpc.CallOption) (*ListOrganizationsResponse, error) {
 	out := new(ListOrganizationsResponse)
-	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersService/ListOrganizations", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.users.server.v1.UsersService/ListOrganizations", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +91,7 @@ func (c *usersServiceClient) ListOrganizations(ctx context.Context, in *ListOrga
 
 func (c *usersServiceClient) DeleteOrganization(ctx context.Context, in *DeleteOrganizationRequest, opts ...grpc.CallOption) (*DeleteOrganizationResponse, error) {
 	out := new(DeleteOrganizationResponse)
-	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersService/DeleteOrganization", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.users.server.v1.UsersService/DeleteOrganization", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +100,7 @@ func (c *usersServiceClient) DeleteOrganization(ctx context.Context, in *DeleteO
 
 func (c *usersServiceClient) CreateOrganizationUser(ctx context.Context, in *CreateOrganizationUserRequest, opts ...grpc.CallOption) (*OrganizationUser, error) {
 	out := new(OrganizationUser)
-	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersService/CreateOrganizationUser", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.users.server.v1.UsersService/CreateOrganizationUser", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +109,7 @@ func (c *usersServiceClient) CreateOrganizationUser(ctx context.Context, in *Cre
 
 func (c *usersServiceClient) ListOrganizationUsers(ctx context.Context, in *ListOrganizationUsersRequest, opts ...grpc.CallOption) (*ListOrganizationUsersResponse, error) {
 	out := new(ListOrganizationUsersResponse)
-	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersService/ListOrganizationUsers", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.users.server.v1.UsersService/ListOrganizationUsers", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +118,7 @@ func (c *usersServiceClient) ListOrganizationUsers(ctx context.Context, in *List
 
 func (c *usersServiceClient) DeleteOrganizationUser(ctx context.Context, in *DeleteOrganizationUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersService/DeleteOrganizationUser", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.users.server.v1.UsersService/DeleteOrganizationUser", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -127,7 +127,7 @@ func (c *usersServiceClient) DeleteOrganizationUser(ctx context.Context, in *Del
 
 func (c *usersServiceClient) CreateProject(ctx context.Context, in *CreateProjectRequest, opts ...grpc.CallOption) (*Project, error) {
 	out := new(Project)
-	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersService/CreateProject", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.users.server.v1.UsersService/CreateProject", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +136,7 @@ func (c *usersServiceClient) CreateProject(ctx context.Context, in *CreateProjec
 
 func (c *usersServiceClient) ListProjects(ctx context.Context, in *ListProjectsRequest, opts ...grpc.CallOption) (*ListProjectsResponse, error) {
 	out := new(ListProjectsResponse)
-	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersService/ListProjects", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.users.server.v1.UsersService/ListProjects", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +145,7 @@ func (c *usersServiceClient) ListProjects(ctx context.Context, in *ListProjectsR
 
 func (c *usersServiceClient) DeleteProject(ctx context.Context, in *DeleteProjectRequest, opts ...grpc.CallOption) (*DeleteProjectResponse, error) {
 	out := new(DeleteProjectResponse)
-	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersService/DeleteProject", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.users.server.v1.UsersService/DeleteProject", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +154,7 @@ func (c *usersServiceClient) DeleteProject(ctx context.Context, in *DeleteProjec
 
 func (c *usersServiceClient) CreateProjectUser(ctx context.Context, in *CreateProjectUserRequest, opts ...grpc.CallOption) (*ProjectUser, error) {
 	out := new(ProjectUser)
-	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersService/CreateProjectUser", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.users.server.v1.UsersService/CreateProjectUser", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +163,7 @@ func (c *usersServiceClient) CreateProjectUser(ctx context.Context, in *CreatePr
 
 func (c *usersServiceClient) ListProjectUsers(ctx context.Context, in *ListProjectUsersRequest, opts ...grpc.CallOption) (*ListProjectUsersResponse, error) {
 	out := new(ListProjectUsersResponse)
-	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersService/ListProjectUsers", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.users.server.v1.UsersService/ListProjectUsers", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -172,7 +172,7 @@ func (c *usersServiceClient) ListProjectUsers(ctx context.Context, in *ListProje
 
 func (c *usersServiceClient) DeleteProjectUser(ctx context.Context, in *DeleteProjectUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersService/DeleteProjectUser", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.users.server.v1.UsersService/DeleteProjectUser", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -273,7 +273,7 @@ func _UsersService_CreateAPIKey_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.users.server.v1.UsersService/CreateAPIKey",
+		FullMethod: "/llmariner.users.server.v1.UsersService/CreateAPIKey",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UsersServiceServer).CreateAPIKey(ctx, req.(*CreateAPIKeyRequest))
@@ -291,7 +291,7 @@ func _UsersService_ListAPIKeys_Handler(srv interface{}, ctx context.Context, dec
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.users.server.v1.UsersService/ListAPIKeys",
+		FullMethod: "/llmariner.users.server.v1.UsersService/ListAPIKeys",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UsersServiceServer).ListAPIKeys(ctx, req.(*ListAPIKeysRequest))
@@ -309,7 +309,7 @@ func _UsersService_DeleteAPIKey_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.users.server.v1.UsersService/DeleteAPIKey",
+		FullMethod: "/llmariner.users.server.v1.UsersService/DeleteAPIKey",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UsersServiceServer).DeleteAPIKey(ctx, req.(*DeleteAPIKeyRequest))
@@ -327,7 +327,7 @@ func _UsersService_CreateOrganization_Handler(srv interface{}, ctx context.Conte
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.users.server.v1.UsersService/CreateOrganization",
+		FullMethod: "/llmariner.users.server.v1.UsersService/CreateOrganization",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UsersServiceServer).CreateOrganization(ctx, req.(*CreateOrganizationRequest))
@@ -345,7 +345,7 @@ func _UsersService_ListOrganizations_Handler(srv interface{}, ctx context.Contex
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.users.server.v1.UsersService/ListOrganizations",
+		FullMethod: "/llmariner.users.server.v1.UsersService/ListOrganizations",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UsersServiceServer).ListOrganizations(ctx, req.(*ListOrganizationsRequest))
@@ -363,7 +363,7 @@ func _UsersService_DeleteOrganization_Handler(srv interface{}, ctx context.Conte
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.users.server.v1.UsersService/DeleteOrganization",
+		FullMethod: "/llmariner.users.server.v1.UsersService/DeleteOrganization",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UsersServiceServer).DeleteOrganization(ctx, req.(*DeleteOrganizationRequest))
@@ -381,7 +381,7 @@ func _UsersService_CreateOrganizationUser_Handler(srv interface{}, ctx context.C
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.users.server.v1.UsersService/CreateOrganizationUser",
+		FullMethod: "/llmariner.users.server.v1.UsersService/CreateOrganizationUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UsersServiceServer).CreateOrganizationUser(ctx, req.(*CreateOrganizationUserRequest))
@@ -399,7 +399,7 @@ func _UsersService_ListOrganizationUsers_Handler(srv interface{}, ctx context.Co
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.users.server.v1.UsersService/ListOrganizationUsers",
+		FullMethod: "/llmariner.users.server.v1.UsersService/ListOrganizationUsers",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UsersServiceServer).ListOrganizationUsers(ctx, req.(*ListOrganizationUsersRequest))
@@ -417,7 +417,7 @@ func _UsersService_DeleteOrganizationUser_Handler(srv interface{}, ctx context.C
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.users.server.v1.UsersService/DeleteOrganizationUser",
+		FullMethod: "/llmariner.users.server.v1.UsersService/DeleteOrganizationUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UsersServiceServer).DeleteOrganizationUser(ctx, req.(*DeleteOrganizationUserRequest))
@@ -435,7 +435,7 @@ func _UsersService_CreateProject_Handler(srv interface{}, ctx context.Context, d
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.users.server.v1.UsersService/CreateProject",
+		FullMethod: "/llmariner.users.server.v1.UsersService/CreateProject",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UsersServiceServer).CreateProject(ctx, req.(*CreateProjectRequest))
@@ -453,7 +453,7 @@ func _UsersService_ListProjects_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.users.server.v1.UsersService/ListProjects",
+		FullMethod: "/llmariner.users.server.v1.UsersService/ListProjects",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UsersServiceServer).ListProjects(ctx, req.(*ListProjectsRequest))
@@ -471,7 +471,7 @@ func _UsersService_DeleteProject_Handler(srv interface{}, ctx context.Context, d
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.users.server.v1.UsersService/DeleteProject",
+		FullMethod: "/llmariner.users.server.v1.UsersService/DeleteProject",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UsersServiceServer).DeleteProject(ctx, req.(*DeleteProjectRequest))
@@ -489,7 +489,7 @@ func _UsersService_CreateProjectUser_Handler(srv interface{}, ctx context.Contex
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.users.server.v1.UsersService/CreateProjectUser",
+		FullMethod: "/llmariner.users.server.v1.UsersService/CreateProjectUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UsersServiceServer).CreateProjectUser(ctx, req.(*CreateProjectUserRequest))
@@ -507,7 +507,7 @@ func _UsersService_ListProjectUsers_Handler(srv interface{}, ctx context.Context
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.users.server.v1.UsersService/ListProjectUsers",
+		FullMethod: "/llmariner.users.server.v1.UsersService/ListProjectUsers",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UsersServiceServer).ListProjectUsers(ctx, req.(*ListProjectUsersRequest))
@@ -525,7 +525,7 @@ func _UsersService_DeleteProjectUser_Handler(srv interface{}, ctx context.Contex
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.users.server.v1.UsersService/DeleteProjectUser",
+		FullMethod: "/llmariner.users.server.v1.UsersService/DeleteProjectUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UsersServiceServer).DeleteProjectUser(ctx, req.(*DeleteProjectUserRequest))
@@ -537,7 +537,7 @@ func _UsersService_DeleteProjectUser_Handler(srv interface{}, ctx context.Contex
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var UsersService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "llmoperator.users.server.v1.UsersService",
+	ServiceName: "llmariner.users.server.v1.UsersService",
 	HandlerType: (*UsersServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -626,7 +626,7 @@ func NewUsersInternalServiceClient(cc grpc.ClientConnInterface) UsersInternalSer
 
 func (c *usersInternalServiceClient) ListInternalAPIKeys(ctx context.Context, in *ListInternalAPIKeysRequest, opts ...grpc.CallOption) (*ListInternalAPIKeysResponse, error) {
 	out := new(ListInternalAPIKeysResponse)
-	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersInternalService/ListInternalAPIKeys", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.users.server.v1.UsersInternalService/ListInternalAPIKeys", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -635,7 +635,7 @@ func (c *usersInternalServiceClient) ListInternalAPIKeys(ctx context.Context, in
 
 func (c *usersInternalServiceClient) ListInternalOrganizations(ctx context.Context, in *ListInternalOrganizationsRequest, opts ...grpc.CallOption) (*ListInternalOrganizationsResponse, error) {
 	out := new(ListInternalOrganizationsResponse)
-	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersInternalService/ListInternalOrganizations", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.users.server.v1.UsersInternalService/ListInternalOrganizations", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -644,7 +644,7 @@ func (c *usersInternalServiceClient) ListInternalOrganizations(ctx context.Conte
 
 func (c *usersInternalServiceClient) ListOrganizationUsers(ctx context.Context, in *ListOrganizationUsersRequest, opts ...grpc.CallOption) (*ListOrganizationUsersResponse, error) {
 	out := new(ListOrganizationUsersResponse)
-	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersInternalService/ListOrganizationUsers", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.users.server.v1.UsersInternalService/ListOrganizationUsers", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -653,7 +653,7 @@ func (c *usersInternalServiceClient) ListOrganizationUsers(ctx context.Context, 
 
 func (c *usersInternalServiceClient) ListProjects(ctx context.Context, in *ListProjectsRequest, opts ...grpc.CallOption) (*ListProjectsResponse, error) {
 	out := new(ListProjectsResponse)
-	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersInternalService/ListProjects", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.users.server.v1.UsersInternalService/ListProjects", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -662,7 +662,7 @@ func (c *usersInternalServiceClient) ListProjects(ctx context.Context, in *ListP
 
 func (c *usersInternalServiceClient) ListProjectUsers(ctx context.Context, in *ListProjectUsersRequest, opts ...grpc.CallOption) (*ListProjectUsersResponse, error) {
 	out := new(ListProjectUsersResponse)
-	err := c.cc.Invoke(ctx, "/llmoperator.users.server.v1.UsersInternalService/ListProjectUsers", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.users.server.v1.UsersInternalService/ListProjectUsers", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -723,7 +723,7 @@ func _UsersInternalService_ListInternalAPIKeys_Handler(srv interface{}, ctx cont
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.users.server.v1.UsersInternalService/ListInternalAPIKeys",
+		FullMethod: "/llmariner.users.server.v1.UsersInternalService/ListInternalAPIKeys",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UsersInternalServiceServer).ListInternalAPIKeys(ctx, req.(*ListInternalAPIKeysRequest))
@@ -741,7 +741,7 @@ func _UsersInternalService_ListInternalOrganizations_Handler(srv interface{}, ct
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.users.server.v1.UsersInternalService/ListInternalOrganizations",
+		FullMethod: "/llmariner.users.server.v1.UsersInternalService/ListInternalOrganizations",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UsersInternalServiceServer).ListInternalOrganizations(ctx, req.(*ListInternalOrganizationsRequest))
@@ -759,7 +759,7 @@ func _UsersInternalService_ListOrganizationUsers_Handler(srv interface{}, ctx co
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.users.server.v1.UsersInternalService/ListOrganizationUsers",
+		FullMethod: "/llmariner.users.server.v1.UsersInternalService/ListOrganizationUsers",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UsersInternalServiceServer).ListOrganizationUsers(ctx, req.(*ListOrganizationUsersRequest))
@@ -777,7 +777,7 @@ func _UsersInternalService_ListProjects_Handler(srv interface{}, ctx context.Con
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.users.server.v1.UsersInternalService/ListProjects",
+		FullMethod: "/llmariner.users.server.v1.UsersInternalService/ListProjects",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UsersInternalServiceServer).ListProjects(ctx, req.(*ListProjectsRequest))
@@ -795,7 +795,7 @@ func _UsersInternalService_ListProjectUsers_Handler(srv interface{}, ctx context
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.users.server.v1.UsersInternalService/ListProjectUsers",
+		FullMethod: "/llmariner.users.server.v1.UsersInternalService/ListProjectUsers",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UsersInternalServiceServer).ListProjectUsers(ctx, req.(*ListProjectUsersRequest))
@@ -807,7 +807,7 @@ func _UsersInternalService_ListProjectUsers_Handler(srv interface{}, ctx context
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var UsersInternalService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "llmoperator.users.server.v1.UsersInternalService",
+	ServiceName: "llmariner.users.server.v1.UsersInternalService",
 	HandlerType: (*UsersInternalServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

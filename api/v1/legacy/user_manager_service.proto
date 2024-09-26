@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package llmoperator.users.server.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "api/v1/user_manager_service.proto";
+
+option go_package = "github.com/llm-operator/user-manager/api/v1/legacy";
+
+service UsersInternalService {
+  rpc ListInternalAPIKeys(llmariner.users.server.v1.ListInternalAPIKeysRequest) returns (llmariner.users.server.v1.ListInternalAPIKeysResponse) {
+  }
+  rpc ListInternalOrganizations(llmariner.users.server.v1.ListInternalOrganizationsRequest) returns (llmariner.users.server.v1.ListInternalOrganizationsResponse) {
+  }
+  rpc ListOrganizationUsers(llmariner.users.server.v1.ListOrganizationUsersRequest) returns (llmariner.users.server.v1.ListOrganizationUsersResponse) {
+  }
+  rpc ListProjects(llmariner.users.server.v1.ListProjectsRequest) returns (llmariner.users.server.v1.ListProjectsResponse) {
+  }
+  rpc ListProjectUsers(llmariner.users.server.v1.ListProjectUsersRequest) returns (llmariner.users.server.v1.ListProjectUsersResponse) {
+  }
+}
