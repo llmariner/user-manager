@@ -4,7 +4,7 @@ package legacy
 
 import (
 	context "context"
-	v1 "github.com/llm-operator/user-manager/api/v1"
+	v1 "github.com/llmariner/user-manager/api/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"

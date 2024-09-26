@@ -3,8 +3,8 @@ package server
 import (
 	"testing"
 
-	v1 "github.com/llm-operator/user-manager/api/v1"
-	"github.com/llm-operator/user-manager/server/internal/store"
+	v1 "github.com/llmariner/user-manager/api/v1"
+	"github.com/llmariner/user-manager/server/internal/store"
 	"github.com/stretchr/testify/assert"
 )
 

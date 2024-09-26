@@ -1,5 +1,5 @@
 {
-  "name": "@llm-operator-types/user-manager",
+  "name": "@llmariner-types/user-manager",
   "version": "1.0.0",
   "description": "user-manager",
   "main": "dist/index.js",
@@ -17,12 +17,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/llm-operator/user-manager.git"
+    "url": "git+https://github.com/llmariner/user-manager.git"
   },
-  "author": "llm-operator",
+  "author": "llmariner",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/llm-operator/user-manager/issues"
+    "url": "https://github.com/llmariner/user-manager/issues"
   },
-  "homepage": "https://github.com/llm-operator/user-manager#readme"
+  "homepage": "https://github.com/llmariner/user-manager#readme"
 }

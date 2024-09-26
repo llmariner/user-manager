@@ -1,7 +1,7 @@
 package store
 
 import (
-	v1 "github.com/llm-operator/user-manager/api/v1"
+	v1 "github.com/llmariner/user-manager/api/v1"
 	"gorm.io/gorm"
 )
 

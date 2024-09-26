@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/llmariner/rbac-manager/pkg/auth"
-	v1 "github.com/llm-operator/user-manager/api/v1"
-	"github.com/llm-operator/user-manager/server/internal/store"
+	v1 "github.com/llmariner/user-manager/api/v1"
+	"github.com/llmariner/user-manager/server/internal/store"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

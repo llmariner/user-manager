@@ -6,7 +6,7 @@ import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 import "api/v1/user_manager_service.proto";
 
-option go_package = "github.com/llm-operator/user-manager/api/v1/legacy";
+option go_package = "github.com/llmariner/user-manager/api/v1/legacy";
 
 service UsersInternalService {
   rpc ListInternalAPIKeys(llmariner.users.server.v1.ListInternalAPIKeysRequest) returns (llmariner.users.server.v1.ListInternalAPIKeysResponse) {

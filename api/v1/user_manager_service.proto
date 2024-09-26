@@ -5,7 +5,7 @@ package llmariner.users.server.v1;
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 
-option go_package = "github.com/llm-operator/user-manager/api/v1";
+option go_package = "github.com/llmariner/user-manager/api/v1";
 
 message APIKey {
   string id = 1;

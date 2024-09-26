@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	"github.com/llmariner/rbac-manager/pkg/auth"
-	v1 "github.com/llm-operator/user-manager/api/v1"
-	"github.com/llm-operator/user-manager/server/internal/config"
-	"github.com/llm-operator/user-manager/server/internal/store"
+	v1 "github.com/llmariner/user-manager/api/v1"
+	"github.com/llmariner/user-manager/server/internal/config"
+	"github.com/llmariner/user-manager/server/internal/store"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/health"
