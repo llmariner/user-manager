@@ -45,7 +45,7 @@ defaultProject:
 
 replicaCount: 1
 image:
-  repository: public.ecr.aws/cloudnatix/llm-operator/user-manager-server
+  repository: public.ecr.aws/cloudnatix/llmariner/user-manager-server
   pullPolicy: IfNotPresent
 
 podAnnotations:

@@ -1,10 +1,10 @@
-module github.com/llm-operator/user-manager
+module github.com/llmariner/user-manager
 
 go 1.22.2
 
 require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0
-	github.com/llm-operator/common v0.6.0
+	github.com/llmariner/common v0.7.0
 	github.com/llmariner/rbac-manager v0.101.0
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.9.0

@@ -1,7 +1,7 @@
 package role
 
 import (
-	uv1 "github.com/llm-operator/user-manager/api/v1"
+	uv1 "github.com/llmariner/user-manager/api/v1"
 )
 
 const (
