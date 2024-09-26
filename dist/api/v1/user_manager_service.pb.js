@@ -65,18 +65,18 @@ export class UsersService {
 }
 export class UsersInternalService {
     static ListInternalAPIKeys(req, initReq) {
-        return fm.fetchReq(`/llmoperator.users.server.v1.UsersInternalService/ListInternalAPIKeys`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
+        return fm.fetchReq(`/llmariner.users.server.v1.UsersInternalService/ListInternalAPIKeys`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
     }
     static ListInternalOrganizations(req, initReq) {
-        return fm.fetchReq(`/llmoperator.users.server.v1.UsersInternalService/ListInternalOrganizations`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
+        return fm.fetchReq(`/llmariner.users.server.v1.UsersInternalService/ListInternalOrganizations`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
     }
     static ListOrganizationUsers(req, initReq) {
-        return fm.fetchReq(`/llmoperator.users.server.v1.UsersInternalService/ListOrganizationUsers`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
+        return fm.fetchReq(`/llmariner.users.server.v1.UsersInternalService/ListOrganizationUsers`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
     }
     static ListProjects(req, initReq) {
-        return fm.fetchReq(`/llmoperator.users.server.v1.UsersInternalService/ListProjects`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
+        return fm.fetchReq(`/llmariner.users.server.v1.UsersInternalService/ListProjects`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
     }
     static ListProjectUsers(req, initReq) {
-        return fm.fetchReq(`/llmoperator.users.server.v1.UsersInternalService/ListProjectUsers`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
+        return fm.fetchReq(`/llmariner.users.server.v1.UsersInternalService/ListProjectUsers`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
     }
 }

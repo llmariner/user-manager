@@ -1035,7 +1035,7 @@ func RegisterUsersServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/CreateAPIKey", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects/{project_id}/api_keys"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmariner.users.server.v1.UsersService/CreateAPIKey", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects/{project_id}/api_keys"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1058,7 +1058,7 @@ func RegisterUsersServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/ListAPIKeys", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects/{project_id}/api_keys"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmariner.users.server.v1.UsersService/ListAPIKeys", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects/{project_id}/api_keys"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1081,7 +1081,7 @@ func RegisterUsersServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/DeleteAPIKey", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects/{project_id}/api_keys/{id}"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmariner.users.server.v1.UsersService/DeleteAPIKey", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects/{project_id}/api_keys/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1104,7 +1104,7 @@ func RegisterUsersServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/CreateOrganization", runtime.WithHTTPPathPattern("/v1/organizations"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmariner.users.server.v1.UsersService/CreateOrganization", runtime.WithHTTPPathPattern("/v1/organizations"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1127,7 +1127,7 @@ func RegisterUsersServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/ListOrganizations", runtime.WithHTTPPathPattern("/v1/organizations"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmariner.users.server.v1.UsersService/ListOrganizations", runtime.WithHTTPPathPattern("/v1/organizations"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1150,7 +1150,7 @@ func RegisterUsersServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/DeleteOrganization", runtime.WithHTTPPathPattern("/v1/organizations/{id}"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmariner.users.server.v1.UsersService/DeleteOrganization", runtime.WithHTTPPathPattern("/v1/organizations/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1173,7 +1173,7 @@ func RegisterUsersServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/CreateOrganizationUser", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/users"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmariner.users.server.v1.UsersService/CreateOrganizationUser", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/users"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1196,7 +1196,7 @@ func RegisterUsersServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/ListOrganizationUsers", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/users"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmariner.users.server.v1.UsersService/ListOrganizationUsers", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/users"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1219,7 +1219,7 @@ func RegisterUsersServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/DeleteOrganizationUser", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/users/{user_id}"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmariner.users.server.v1.UsersService/DeleteOrganizationUser", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/users/{user_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1242,7 +1242,7 @@ func RegisterUsersServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/CreateProject", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmariner.users.server.v1.UsersService/CreateProject", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1265,7 +1265,7 @@ func RegisterUsersServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/ListProjects", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmariner.users.server.v1.UsersService/ListProjects", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1288,7 +1288,7 @@ func RegisterUsersServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/DeleteProject", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects/{id}"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmariner.users.server.v1.UsersService/DeleteProject", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1311,7 +1311,7 @@ func RegisterUsersServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/CreateProjectUser", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects/{project_id}/users"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmariner.users.server.v1.UsersService/CreateProjectUser", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects/{project_id}/users"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1334,7 +1334,7 @@ func RegisterUsersServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/ListProjectUsers", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects/{project_id}/users"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmariner.users.server.v1.UsersService/ListProjectUsers", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects/{project_id}/users"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1357,7 +1357,7 @@ func RegisterUsersServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/DeleteProjectUser", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects/{project_id}/users/{user_id}"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmariner.users.server.v1.UsersService/DeleteProjectUser", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects/{project_id}/users/{user_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1419,7 +1419,7 @@ func RegisterUsersServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/CreateAPIKey", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects/{project_id}/api_keys"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmariner.users.server.v1.UsersService/CreateAPIKey", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects/{project_id}/api_keys"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1439,7 +1439,7 @@ func RegisterUsersServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/ListAPIKeys", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects/{project_id}/api_keys"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmariner.users.server.v1.UsersService/ListAPIKeys", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects/{project_id}/api_keys"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1459,7 +1459,7 @@ func RegisterUsersServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/DeleteAPIKey", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects/{project_id}/api_keys/{id}"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmariner.users.server.v1.UsersService/DeleteAPIKey", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects/{project_id}/api_keys/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1479,7 +1479,7 @@ func RegisterUsersServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/CreateOrganization", runtime.WithHTTPPathPattern("/v1/organizations"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmariner.users.server.v1.UsersService/CreateOrganization", runtime.WithHTTPPathPattern("/v1/organizations"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1499,7 +1499,7 @@ func RegisterUsersServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/ListOrganizations", runtime.WithHTTPPathPattern("/v1/organizations"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmariner.users.server.v1.UsersService/ListOrganizations", runtime.WithHTTPPathPattern("/v1/organizations"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1519,7 +1519,7 @@ func RegisterUsersServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/DeleteOrganization", runtime.WithHTTPPathPattern("/v1/organizations/{id}"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmariner.users.server.v1.UsersService/DeleteOrganization", runtime.WithHTTPPathPattern("/v1/organizations/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1539,7 +1539,7 @@ func RegisterUsersServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/CreateOrganizationUser", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/users"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmariner.users.server.v1.UsersService/CreateOrganizationUser", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/users"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1559,7 +1559,7 @@ func RegisterUsersServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/ListOrganizationUsers", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/users"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmariner.users.server.v1.UsersService/ListOrganizationUsers", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/users"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1579,7 +1579,7 @@ func RegisterUsersServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/DeleteOrganizationUser", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/users/{user_id}"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmariner.users.server.v1.UsersService/DeleteOrganizationUser", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/users/{user_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1599,7 +1599,7 @@ func RegisterUsersServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/CreateProject", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmariner.users.server.v1.UsersService/CreateProject", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1619,7 +1619,7 @@ func RegisterUsersServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/ListProjects", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmariner.users.server.v1.UsersService/ListProjects", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1639,7 +1639,7 @@ func RegisterUsersServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/DeleteProject", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects/{id}"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmariner.users.server.v1.UsersService/DeleteProject", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1659,7 +1659,7 @@ func RegisterUsersServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/CreateProjectUser", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects/{project_id}/users"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmariner.users.server.v1.UsersService/CreateProjectUser", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects/{project_id}/users"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1679,7 +1679,7 @@ func RegisterUsersServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/ListProjectUsers", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects/{project_id}/users"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmariner.users.server.v1.UsersService/ListProjectUsers", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects/{project_id}/users"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1699,7 +1699,7 @@ func RegisterUsersServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmoperator.users.server.v1.UsersService/DeleteProjectUser", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects/{project_id}/users/{user_id}"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmariner.users.server.v1.UsersService/DeleteProjectUser", runtime.WithHTTPPathPattern("/v1/organizations/{organization_id}/projects/{project_id}/users/{user_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return

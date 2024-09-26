@@ -261,18 +261,18 @@ export class UsersService {
 }
 export class UsersInternalService {
   static ListInternalAPIKeys(req: ListInternalAPIKeysRequest, initReq?: fm.InitReq): Promise<ListInternalAPIKeysResponse> {
-    return fm.fetchReq<ListInternalAPIKeysRequest, ListInternalAPIKeysResponse>(`/llmoperator.users.server.v1.UsersInternalService/ListInternalAPIKeys`, {...initReq, method: "POST", body: JSON.stringify(req)})
+    return fm.fetchReq<ListInternalAPIKeysRequest, ListInternalAPIKeysResponse>(`/llmariner.users.server.v1.UsersInternalService/ListInternalAPIKeys`, {...initReq, method: "POST", body: JSON.stringify(req)})
   }
   static ListInternalOrganizations(req: ListInternalOrganizationsRequest, initReq?: fm.InitReq): Promise<ListInternalOrganizationsResponse> {
-    return fm.fetchReq<ListInternalOrganizationsRequest, ListInternalOrganizationsResponse>(`/llmoperator.users.server.v1.UsersInternalService/ListInternalOrganizations`, {...initReq, method: "POST", body: JSON.stringify(req)})
+    return fm.fetchReq<ListInternalOrganizationsRequest, ListInternalOrganizationsResponse>(`/llmariner.users.server.v1.UsersInternalService/ListInternalOrganizations`, {...initReq, method: "POST", body: JSON.stringify(req)})
   }
   static ListOrganizationUsers(req: ListOrganizationUsersRequest, initReq?: fm.InitReq): Promise<ListOrganizationUsersResponse> {
-    return fm.fetchReq<ListOrganizationUsersRequest, ListOrganizationUsersResponse>(`/llmoperator.users.server.v1.UsersInternalService/ListOrganizationUsers`, {...initReq, method: "POST", body: JSON.stringify(req)})
+    return fm.fetchReq<ListOrganizationUsersRequest, ListOrganizationUsersResponse>(`/llmariner.users.server.v1.UsersInternalService/ListOrganizationUsers`, {...initReq, method: "POST", body: JSON.stringify(req)})
   }
   static ListProjects(req: ListProjectsRequest, initReq?: fm.InitReq): Promise<ListProjectsResponse> {
-    return fm.fetchReq<ListProjectsRequest, ListProjectsResponse>(`/llmoperator.users.server.v1.UsersInternalService/ListProjects`, {...initReq, method: "POST", body: JSON.stringify(req)})
+    return fm.fetchReq<ListProjectsRequest, ListProjectsResponse>(`/llmariner.users.server.v1.UsersInternalService/ListProjects`, {...initReq, method: "POST", body: JSON.stringify(req)})
   }
   static ListProjectUsers(req: ListProjectUsersRequest, initReq?: fm.InitReq): Promise<ListProjectUsersResponse> {
-    return fm.fetchReq<ListProjectUsersRequest, ListProjectUsersResponse>(`/llmoperator.users.server.v1.UsersInternalService/ListProjectUsers`, {...initReq, method: "POST", body: JSON.stringify(req)})
+    return fm.fetchReq<ListProjectUsersRequest, ListProjectUsersResponse>(`/llmariner.users.server.v1.UsersInternalService/ListProjectUsers`, {...initReq, method: "POST", body: JSON.stringify(req)})
   }
 }
