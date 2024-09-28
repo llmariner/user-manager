@@ -81,6 +81,9 @@ func (s *S) createOrganization(ctx context.Context, title string, isDefault bool
 		}
 
 		for _, uid := range userIDs {
+			if err := findOrCreateUserInTransaction(tx, uid); err != nil {
+				return err
+			}
 			if _, err := store.CreateOrganizationUserInTransaction(tx, org.OrganizationID, uid, v1.OrganizationRole_ORGANIZATION_ROLE_OWNER.String()); err != nil {
 				return err
 			}
@@ -207,15 +210,25 @@ func (s *S) CreateOrganizationUser(ctx context.Context, req *v1.CreateOrganizati
 	}
 
 	userID := userid.Normalize(req.UserId)
-	ou, err := s.store.CreateOrganizationUser(req.OrganizationId, userID, req.Role.String())
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, status.Errorf(codes.FailedPrecondition, "organization %q not found", req.OrganizationId)
+	var ou *store.OrganizationUser
+	if err := s.store.Transaction(func(tx *gorm.DB) error {
+		if err := findOrCreateUserInTransaction(tx, userID); err != nil {
+			return status.Errorf(codes.Internal, "create new user: %s", err)
 		}
-		if gerrors.IsUniqueConstraintViolation(err) {
-			return nil, status.Errorf(codes.AlreadyExists, "user %q is already a member of organization %qs", userID, req.OrganizationId)
+
+		ou, err = store.CreateOrganizationUserInTransaction(tx, req.OrganizationId, userID, req.Role.String())
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return status.Errorf(codes.FailedPrecondition, "organization %q not found", req.OrganizationId)
+			}
+			if gerrors.IsUniqueConstraintViolation(err) {
+				return status.Errorf(codes.AlreadyExists, "user %q is already a member of organization %qs", userID, req.OrganizationId)
+			}
+			return status.Errorf(codes.Internal, "add user to organization: %s", err)
 		}
-		return nil, status.Errorf(codes.Internal, "add user to organization: %s", err)
+		return nil
+	}); err != nil {
+		return nil, err
 	}
 
 	return ou.ToProto(), nil
@@ -379,4 +392,15 @@ func (s *IS) ListOrganizationUsers(ctx context.Context, req *v1.ListOrganization
 	return &v1.ListOrganizationUsersResponse{
 		Users: userProtos,
 	}, nil
+}
+
+func findOrCreateUserInTransaction(tx *gorm.DB, userID string) error {
+	internalUserID, err := id.GenerateID("user-", 24)
+	if err != nil {
+		return err
+	}
+	if _, err := store.FindOrCreateUserInTransaction(tx, userID, internalUserID); err != nil {
+		return err
+	}
+	return nil
 }
