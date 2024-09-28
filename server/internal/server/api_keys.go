@@ -67,7 +67,8 @@ func (s *S) CreateAPIKey(
 		}
 		return nil, status.Errorf(codes.Internal, "create api key: %s", err)
 	}
-	return toAPIKeyProto(k, true), nil
+	// Do not populate the internal User ID for non-internal gRPC.
+	return toAPIKeyProto(k, "", true), nil
 }
 
 // ListAPIKeys lists API keys.
@@ -109,9 +110,11 @@ func (s *S) ListAPIKeys(
 			filtered = append(filtered, k)
 		}
 	}
+
 	var apiKeyProtos []*v1.APIKey
 	for _, k := range filtered {
-		apiKeyProtos = append(apiKeyProtos, toAPIKeyProto(k, false))
+		// Do not populate the internal User ID for non-internal gRPC.
+		apiKeyProtos = append(apiKeyProtos, toAPIKeyProto(k, "", false))
 	}
 	return &v1.ListAPIKeysResponse{
 		Object: "list",
@@ -183,10 +186,22 @@ func (s *IS) ListInternalAPIKeys(
 		return nil, status.Errorf(codes.Internal, "list api keys: %s", err)
 	}
 
+	us, err := s.store.ListAllUsers()
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "list users: %s", err)
+	}
+	internalUserIDs := map[string]string{}
+	for _, u := range us {
+		internalUserIDs[u.UserID] = u.InternalUserID
+	}
+
 	var apiKeyProtos []*v1.InternalAPIKey
 	for _, k := range ks {
+		// Gracefully handle a case where the user is not found for backward compatibility.
+		// TODO(kenji): Remove once all users are backfilled.
+		id := internalUserIDs[k.UserID]
 		apiKeyProtos = append(apiKeyProtos, &v1.InternalAPIKey{
-			ApiKey:   toAPIKeyProto(k, true),
+			ApiKey:   toAPIKeyProto(k, id, true),
 			TenantId: k.TenantID,
 		})
 	}
@@ -195,14 +210,15 @@ func (s *IS) ListInternalAPIKeys(
 	}, nil
 }
 
-func toAPIKeyProto(k *store.APIKey, includeSecret bool) *v1.APIKey {
+func toAPIKeyProto(k *store.APIKey, internalUserID string, includeSecret bool) *v1.APIKey {
 	kp := &v1.APIKey{
 		Id:        k.APIKeyID,
 		CreatedAt: k.CreatedAt.UTC().Unix(),
 		Name:      k.Name,
 		Object:    "user.api_key",
 		User: &v1.User{
-			Id: k.UserID,
+			Id:         k.UserID,
+			InternalId: internalUserID,
 		},
 		Organization: &v1.Organization{
 			Id: k.OrganizationID,

@@ -487,6 +487,34 @@ func TestOrganizationUser_EnableAuth(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestInternalServiceListOrganiationUsers(t *testing.T) {
+	st, tearDown := store.NewTest(t)
+	defer tearDown()
+
+	srv := New(st)
+	isrv := NewInternal(st)
+	ctx := context.Background()
+
+	for i := 0; i < 2; i++ {
+		title := fmt.Sprintf("test %d", i)
+		cresp, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
+			Title: title,
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, title, cresp.Title)
+	}
+
+	ous, err := isrv.ListOrganizationUsers(ctx, &v1.ListOrganizationUsersRequest{})
+	assert.NoError(t, err)
+	assert.Len(t, ous.Users, 2)
+	for _, ou := range ous.Users {
+		assert.NotEmpty(t, ou.OrganizationId)
+		assert.NotEmpty(t, ou.UserId)
+		assert.NotEmpty(t, ou.InternalUserId)
+		assert.NotEmpty(t, ou.Role)
+	}
+}
+
 func createDefaultOrg(t *testing.T, srv *S, userID string) *store.Organization {
 	c := &config.DefaultOrganizationConfig{
 		Title:   "default",

@@ -22,9 +22,11 @@ export type APIKey = {
 };
 export type User = {
     id?: string;
+    internalId?: string;
 };
 export type OrganizationUser = {
     userId?: string;
+    internalUserId?: string;
     organizationId?: string;
     role?: OrganizationRole;
 };

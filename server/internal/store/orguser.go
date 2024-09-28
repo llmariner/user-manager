@@ -16,10 +16,11 @@ type OrganizationUser struct {
 }
 
 // ToProto converts the model to Porto.
-func (o *OrganizationUser) ToProto() *v1.OrganizationUser {
+func (o *OrganizationUser) ToProto(internalUserID string) *v1.OrganizationUser {
 	return &v1.OrganizationUser{
 		OrganizationId: o.OrganizationID,
 		UserId:         o.UserID,
+		InternalUserId: internalUserID,
 		Role:           v1.OrganizationRole(v1.OrganizationRole_value[o.Role]),
 	}
 }

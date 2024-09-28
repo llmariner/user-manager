@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	defaultUserID    = "defaultUser"
+	defaultUserID    = "defaultuser"
 	defaultProjectID = "defaultProject"
 	defaultTenantID  = "default-tenant-id"
 )

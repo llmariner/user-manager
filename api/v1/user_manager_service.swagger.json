@@ -818,6 +818,9 @@
         "userId": {
           "type": "string"
         },
+        "internalUserId": {
+          "type": "string"
+        },
         "organizationId": {
           "type": "string"
         },
@@ -878,6 +881,9 @@
       "type": "object",
       "properties": {
         "id": {
+          "type": "string"
+        },
+        "internalId": {
           "type": "string"
         }
       }

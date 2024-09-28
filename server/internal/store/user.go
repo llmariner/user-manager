@@ -40,3 +40,21 @@ func FindOrCreateUserInTransaction(tx *gorm.DB, userID, internalUserID string) (
 	}
 	return u, nil
 }
+
+// GetUserByUserID returns the user with the given ID.
+func (s *S) GetUserByUserID(userID string) (*User, error) {
+	var u User
+	if err := s.db.Where("user_id = ?", userID).First(&u).Error; err != nil {
+		return nil, err
+	}
+	return &u, nil
+}
+
+// ListAllUsers lists all users.
+func (s *S) ListAllUsers() ([]User, error) {
+	var users []User
+	if err := s.db.Find(&users).Error; err != nil {
+		return nil, err
+	}
+	return users, nil
+}

@@ -58,6 +58,10 @@ func TestAPIKey(t *testing.T) {
 	ilresp, err := isrv.ListInternalAPIKeys(ctx, &v1.ListInternalAPIKeysRequest{})
 	assert.NoError(t, err)
 	assert.Len(t, ilresp.ApiKeys, 1)
+	key := ilresp.ApiKeys[0].ApiKey
+	u, err := st.GetUserByUserID(key.User.Id)
+	assert.NoError(t, err, "failed to get user by user id", key.User.Id)
+	assert.Equal(t, u.InternalUserID, key.User.InternalId)
 
 	_, err = srv.DeleteAPIKey(ctx, &v1.DeleteAPIKeyRequest{
 		Id:             cresp.Id,
