@@ -81,7 +81,7 @@ func (s *S) createOrganization(ctx context.Context, title string, isDefault bool
 		}
 
 		for _, uid := range userIDs {
-			if err := findOrCreateUserInTransaction(tx, uid); err != nil {
+			if _, err := findOrCreateUserInTransaction(tx, uid); err != nil {
 				return err
 			}
 			if _, err := store.CreateOrganizationUserInTransaction(tx, org.OrganizationID, uid, v1.OrganizationRole_ORGANIZATION_ROLE_OWNER.String()); err != nil {
@@ -212,7 +212,7 @@ func (s *S) CreateOrganizationUser(ctx context.Context, req *v1.CreateOrganizati
 	userID := userid.Normalize(req.UserId)
 	var ou *store.OrganizationUser
 	if err := s.store.Transaction(func(tx *gorm.DB) error {
-		if err := findOrCreateUserInTransaction(tx, userID); err != nil {
+		if _, err = findOrCreateUserInTransaction(tx, userID); err != nil {
 			return status.Errorf(codes.Internal, "create new user: %s", err)
 		}
 
@@ -231,7 +231,8 @@ func (s *S) CreateOrganizationUser(ctx context.Context, req *v1.CreateOrganizati
 		return nil, err
 	}
 
-	return ou.ToProto(), nil
+	// Do not populate the internal User ID for non-internal RPC.
+	return ou.ToProto(""), nil
 }
 
 // ListOrganizationUsers lists organization users for the specified organization.
@@ -260,7 +261,8 @@ func (s *S) ListOrganizationUsers(ctx context.Context, req *v1.ListOrganizationU
 
 	var userProtos []*v1.OrganizationUser
 	for _, user := range users {
-		userProtos = append(userProtos, user.ToProto())
+		// Do not populate the internal User ID for non-internal RPC.
+		userProtos = append(userProtos, user.ToProto(""))
 	}
 	return &v1.ListOrganizationUsersResponse{
 		Users: userProtos,
@@ -380,27 +382,41 @@ func (s *IS) ListInternalOrganizations(ctx context.Context, req *v1.ListInternal
 
 // ListOrganizationUsers lists organization users for all organizations.
 func (s *IS) ListOrganizationUsers(ctx context.Context, req *v1.ListOrganizationUsersRequest) (*v1.ListOrganizationUsersResponse, error) {
-	users, err := s.store.ListAllOrganizationUsers()
+	ous, err := s.store.ListAllOrganizationUsers()
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "list organization users: %s", err)
 	}
 
-	var userProtos []*v1.OrganizationUser
-	for _, user := range users {
-		userProtos = append(userProtos, user.ToProto())
+	us, err := s.store.ListAllUsers()
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "list users: %s", err)
 	}
+	internalUserIDs := map[string]string{}
+	for _, u := range us {
+		internalUserIDs[u.UserID] = u.InternalUserID
+	}
+
+	var userProtos []*v1.OrganizationUser
+	for _, ou := range ous {
+		// Gracefully handle a case where the user is not found for backward compatibility.
+		// TODO(kenji): Remove once all users are backfilled.
+		id := internalUserIDs[ou.UserID]
+		userProtos = append(userProtos, ou.ToProto(id))
+	}
+
 	return &v1.ListOrganizationUsersResponse{
 		Users: userProtos,
 	}, nil
 }
 
-func findOrCreateUserInTransaction(tx *gorm.DB, userID string) error {
+func findOrCreateUserInTransaction(tx *gorm.DB, userID string) (*store.User, error) {
 	internalUserID, err := id.GenerateID("user-", 24)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	if _, err := store.FindOrCreateUserInTransaction(tx, userID, internalUserID); err != nil {
-		return err
+	u, err := store.FindOrCreateUserInTransaction(tx, userID, internalUserID)
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	return u, nil
 }

@@ -21,6 +21,8 @@ message APIKey {
 
 message User {
   string id = 1;
+  // internal_id is populated only for internal gRPC service.
+  string internal_id = 2;
 }
 
 enum OrganizationRole {
@@ -37,8 +39,13 @@ enum ProjectRole {
 
 message OrganizationUser {
   string user_id = 1;
+  // internal_user_id is populated only for internal gRPC service.
+  string internal_user_id = 4;
+
   string organization_id = 2;
   OrganizationRole role = 3;
+
+  // Next ID: 5
 }
 
 message Organization {
