@@ -33,5 +33,6 @@ func autoMigrate(db *gorm.DB) error {
 		&OrganizationUser{},
 		&Project{},
 		&ProjectUser{},
+		&User{},
 	)
 }
