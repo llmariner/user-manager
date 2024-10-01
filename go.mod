@@ -1,6 +1,6 @@
 module github.com/llmariner/user-manager
 
-go 1.22.2
+go 1.23.1
 
 require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0
