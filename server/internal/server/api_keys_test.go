@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/go-logr/logr/testr"
 	"github.com/llmariner/rbac-manager/pkg/auth"
 	v1 "github.com/llmariner/user-manager/api/v1"
 	"github.com/llmariner/user-manager/server/internal/store"
@@ -16,8 +17,8 @@ func TestAPIKey(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()
 
-	srv := New(st)
-	isrv := NewInternal(st)
+	srv := New(st, testr.New(t))
+	isrv := NewInternal(st, testr.New(t))
 
 	ctx := context.Background()
 	org, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
@@ -82,7 +83,7 @@ func TestAPIKey_EnableAuth(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()
 
-	srv := New(st)
+	srv := New(st, testr.New(t))
 	srv.enableAuth = true
 	org := createDefaultOrg(t, srv, "u0")
 

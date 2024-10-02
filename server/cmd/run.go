@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/go-logr/stdr"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/llmariner/common/pkg/db"
 	"github.com/llmariner/rbac-manager/pkg/auth"
@@ -22,34 +23,37 @@ import (
 	"gorm.io/gorm"
 )
 
-const flagConfig = "config"
-
-var runCmd = &cobra.Command{
-	Use:   "run",
-	Short: "run",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		path, err := cmd.Flags().GetString(flagConfig)
-		if err != nil {
-			return err
-		}
-
-		c, err := config.Parse(path)
-		if err != nil {
-			return err
-		}
-
-		if err := c.Validate(); err != nil {
-			return err
-		}
-
-		if err := run(cmd.Context(), &c); err != nil {
-			return err
-		}
-		return nil
-	},
+func runCmd() *cobra.Command {
+	var path string
+	var logLevel int
+	cmd := &cobra.Command{
+		Use:   "run",
+		Short: "run",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			c, err := config.Parse(path)
+			if err != nil {
+				return err
+			}
+			if err := c.Validate(); err != nil {
+				return err
+			}
+			stdr.SetVerbosity(logLevel)
+			if err := run(cmd.Context(), &c); err != nil {
+				return err
+			}
+			return nil
+		},
+	}
+	cmd.Flags().StringVar(&path, "config", "", "Path to the config file")
+	cmd.Flags().IntVar(&logLevel, "v", 0, "Log level")
+	_ = cmd.MarkFlagRequired("config")
+	return cmd
 }
 
 func run(ctx context.Context, c *config.Config) error {
+	logger := stdr.New(log.Default())
+	log := logger.WithName("boot")
+
 	var dbInst *gorm.DB
 	var err error
 	if c.Debug.Standalone {
@@ -92,11 +96,11 @@ func run(ctx context.Context, c *config.Config) error {
 
 	errCh := make(chan error)
 	go func() {
-		log.Printf("Starting HTTP server on port %d", c.HTTPPort)
+		log.Info("Starting HTTP server...", "port", c.HTTPPort)
 		errCh <- http.ListenAndServe(fmt.Sprintf(":%d", c.HTTPPort), mux)
 	}()
 
-	s := server.New(st)
+	s := server.New(st, logger)
 	go func() {
 		errCh <- s.Run(ctx, c.GRPCPort, c.AuthConfig)
 	}()
@@ -110,14 +114,9 @@ func run(ctx context.Context, c *config.Config) error {
 	}
 
 	go func() {
-		s := server.NewInternal(st)
+		s := server.NewInternal(st, logger)
 		errCh <- s.Run(c.InternalGRPCPort)
 	}()
 
 	return <-errCh
-}
-
-func init() {
-	runCmd.Flags().StringP(flagConfig, "c", "", "Configuration file path")
-	_ = runCmd.MarkFlagRequired(flagConfig)
 }

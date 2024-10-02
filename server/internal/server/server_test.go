@@ -3,6 +3,7 @@ package server
 import (
 	"testing"
 
+	"github.com/go-logr/logr/testr"
 	v1 "github.com/llmariner/user-manager/api/v1"
 	"github.com/llmariner/user-manager/server/internal/store"
 	"github.com/stretchr/testify/assert"
@@ -12,7 +13,7 @@ func TestOrgRole(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()
 
-	srv := New(st)
+	srv := New(st, testr.New(t))
 	srv.enableAuth = true
 
 	_, err := st.CreateOrganizationUser("org1", "user1", v1.OrganizationRole_ORGANIZATION_ROLE_OWNER.String())
@@ -32,7 +33,7 @@ func TestProjectRole(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()
 
-	srv := New(st)
+	srv := New(st, testr.New(t))
 	srv.enableAuth = true
 
 	_, err := st.CreateProjectUser(store.CreateProjectUserParams{

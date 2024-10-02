@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/go-logr/logr/testr"
 	"github.com/llmariner/rbac-manager/pkg/auth"
 	v1 "github.com/llmariner/user-manager/api/v1"
 	"github.com/llmariner/user-manager/server/internal/config"
@@ -18,8 +19,8 @@ func TestOrganization(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()
 
-	srv := New(st)
-	isrv := NewInternal(st)
+	srv := New(st, testr.New(t))
+	isrv := NewInternal(st, testr.New(t))
 	ctx := context.Background()
 
 	for i := 0; i < 2; i++ {
@@ -86,7 +87,7 @@ func TestDeleteOrganization(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()
 
-	srv := New(st)
+	srv := New(st, testr.New(t))
 	ctx := context.Background()
 
 	org, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
@@ -124,7 +125,7 @@ func TestCreateOrganization_UniqueConstraintViolation(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()
 
-	srv := New(st)
+	srv := New(st, testr.New(t))
 	ctx := context.Background()
 
 	_, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
@@ -143,7 +144,7 @@ func TestCreateOrganizationUser_UniqueConstraintViolation(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()
 
-	srv := New(st)
+	srv := New(st, testr.New(t))
 	ctx := context.Background()
 
 	o, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
@@ -171,7 +172,7 @@ func TestListOrganizationUsers(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()
 
-	srv := New(st)
+	srv := New(st, testr.New(t))
 	ctx := context.Background()
 
 	var orgs []*v1.Organization
@@ -211,7 +212,7 @@ func TestDeleteDeleteOrganizationUser(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()
 
-	srv := New(st)
+	srv := New(st, testr.New(t))
 	ctx := context.Background()
 
 	o, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
@@ -275,7 +276,7 @@ func TestCreateDefaultOrganization(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()
 
-	srv := New(st)
+	srv := New(st, testr.New(t))
 	c := &config.DefaultOrganizationConfig{
 		Title: "default",
 		UserIDs: []string{
@@ -315,7 +316,7 @@ func TestCreateOrganization_EnableAuth(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()
 
-	srv := New(st)
+	srv := New(st, testr.New(t))
 	srv.enableAuth = true
 
 	createDefaultOrg(t, srv, "admin")
@@ -344,7 +345,7 @@ func TestListOrganization_EnableAuth(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()
 
-	srv := New(st)
+	srv := New(st, testr.New(t))
 	srv.enableAuth = true
 
 	o0 := createDefaultOrg(t, srv, "user0")
@@ -397,7 +398,7 @@ func TestDeleteOrganization_EnableAuth(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()
 
-	srv := New(st)
+	srv := New(st, testr.New(t))
 	srv.enableAuth = true
 
 	createDefaultOrg(t, srv, "user0")
@@ -433,7 +434,7 @@ func TestOrganizationUser_EnableAuth(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()
 
-	srv := New(st)
+	srv := New(st, testr.New(t))
 	srv.enableAuth = true
 
 	createDefaultOrg(t, srv, "user0")
@@ -491,8 +492,8 @@ func TestInternalServiceListOrganiationUsers(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()
 
-	srv := New(st)
-	isrv := NewInternal(st)
+	srv := New(st, testr.New(t))
+	isrv := NewInternal(st, testr.New(t))
 	ctx := context.Background()
 
 	for i := 0; i < 2; i++ {

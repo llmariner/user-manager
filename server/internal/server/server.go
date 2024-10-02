@@ -3,10 +3,10 @@ package server
 import (
 	"context"
 	"fmt"
-	"log"
 	"net"
 	"strings"
 
+	"github.com/go-logr/logr"
 	"github.com/llmariner/rbac-manager/pkg/auth"
 	v1 "github.com/llmariner/user-manager/api/v1"
 	"github.com/llmariner/user-manager/server/internal/config"
@@ -26,9 +26,10 @@ const (
 )
 
 // New creates a server.
-func New(store *store.S) *S {
+func New(store *store.S, log logr.Logger) *S {
 	return &S{
 		store: store,
+		log:   log.WithName("grpc"),
 	}
 }
 
@@ -39,13 +40,14 @@ type S struct {
 	srv *grpc.Server
 
 	store *store.S
+	log   logr.Logger
 
 	enableAuth bool
 }
 
 // Run starts the gRPC server.
 func (s *S) Run(ctx context.Context, port int, authConfig config.AuthConfig) error {
-	log.Printf("Starting server on port %d\n", port)
+	s.log.Info("Starting gRPC server...", "port", port)
 
 	var opts []grpc.ServerOption
 	if authConfig.Enable {
