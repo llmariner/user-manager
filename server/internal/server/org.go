@@ -21,9 +21,9 @@ import (
 
 // CreateOrganization creates a new organization.
 func (s *S) CreateOrganization(ctx context.Context, req *v1.CreateOrganizationRequest) (*v1.Organization, error) {
-	userInfo, err := s.extractUserInfoFromContext(ctx)
-	if err != nil {
-		return nil, err
+	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("failed to extract user info from context")
 	}
 
 	if req.Title == "" {
@@ -98,9 +98,9 @@ func (s *S) createOrganization(ctx context.Context, title string, isDefault bool
 
 // ListOrganizations lists all organizations.
 func (s *S) ListOrganizations(ctx context.Context, req *v1.ListOrganizationsRequest) (*v1.ListOrganizationsResponse, error) {
-	userInfo, err := s.extractUserInfoFromContext(ctx)
-	if err != nil {
-		return nil, err
+	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("failed to extract user info from context")
 	}
 
 	orgs, err := s.store.ListOrganizations(userInfo.TenantID)
@@ -127,9 +127,9 @@ func (s *S) ListOrganizations(ctx context.Context, req *v1.ListOrganizationsRequ
 
 // DeleteOrganization deletes an organization.
 func (s *S) DeleteOrganization(ctx context.Context, req *v1.DeleteOrganizationRequest) (*v1.DeleteOrganizationResponse, error) {
-	userInfo, err := s.extractUserInfoFromContext(ctx)
-	if err != nil {
-		return nil, err
+	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("failed to extract user info from context")
 	}
 
 	if req.Id == "" {
@@ -186,9 +186,9 @@ func (s *S) DeleteOrganization(ctx context.Context, req *v1.DeleteOrganizationRe
 
 // CreateOrganizationUser adds a user to an organization.
 func (s *S) CreateOrganizationUser(ctx context.Context, req *v1.CreateOrganizationUserRequest) (*v1.OrganizationUser, error) {
-	userInfo, err := s.extractUserInfoFromContext(ctx)
-	if err != nil {
-		return nil, err
+	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("failed to extract user info from context")
 	}
 
 	if req.OrganizationId == "" {
@@ -211,6 +211,7 @@ func (s *S) CreateOrganizationUser(ctx context.Context, req *v1.CreateOrganizati
 
 	userID := userid.Normalize(req.UserId)
 	var ou *store.OrganizationUser
+	var err error
 	if err := s.store.Transaction(func(tx *gorm.DB) error {
 		if _, err = findOrCreateUserInTransaction(tx, userID); err != nil {
 			return status.Errorf(codes.Internal, "create new user: %s", err)
@@ -237,9 +238,9 @@ func (s *S) CreateOrganizationUser(ctx context.Context, req *v1.CreateOrganizati
 
 // ListOrganizationUsers lists organization users for the specified organization.
 func (s *S) ListOrganizationUsers(ctx context.Context, req *v1.ListOrganizationUsersRequest) (*v1.ListOrganizationUsersResponse, error) {
-	userInfo, err := s.extractUserInfoFromContext(ctx)
-	if err != nil {
-		return nil, err
+	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("failed to extract user info from context")
 	}
 
 	if req.OrganizationId == "" {
@@ -271,9 +272,9 @@ func (s *S) ListOrganizationUsers(ctx context.Context, req *v1.ListOrganizationU
 
 // DeleteOrganizationUser deletes an organization user.
 func (s *S) DeleteOrganizationUser(ctx context.Context, req *v1.DeleteOrganizationUserRequest) (*emptypb.Empty, error) {
-	userInfo, err := s.extractUserInfoFromContext(ctx)
-	if err != nil {
-		return nil, err
+	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("failed to extract user info from context")
 	}
 
 	if req.OrganizationId == "" {

@@ -20,7 +20,7 @@ func TestAPIKey(t *testing.T) {
 	srv := New(st, testr.New(t))
 	isrv := NewInternal(st, testr.New(t))
 
-	ctx := context.Background()
+	ctx := fakeAuthInto(context.Background())
 	org, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
 		Title: "Test organization",
 	})

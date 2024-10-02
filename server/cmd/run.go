@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-logr/stdr"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/llmariner/api-usage/pkg/sender"
 	"github.com/llmariner/common/pkg/db"
 	"github.com/llmariner/rbac-manager/pkg/auth"
 	v1 "github.com/llmariner/user-manager/api/v1"
@@ -100,9 +101,15 @@ func run(ctx context.Context, c *config.Config) error {
 		errCh <- http.ListenAndServe(fmt.Sprintf(":%d", c.HTTPPort), mux)
 	}()
 
+	usage, err := sender.New(ctx, c.UsageSender, grpc.WithTransportCredentials(insecure.NewCredentials()), logger)
+	if err != nil {
+		return err
+	}
+	go func() { usage.Run(ctx) }()
+
 	s := server.New(st, logger)
 	go func() {
-		errCh <- s.Run(ctx, c.GRPCPort, c.AuthConfig)
+		errCh <- s.Run(ctx, c.GRPCPort, c.AuthConfig, usage)
 	}()
 
 	org, err := s.CreateDefaultOrganization(ctx, &c.DefaultOrganization)

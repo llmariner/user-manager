@@ -3,9 +3,11 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	gerrors "github.com/llmariner/common/pkg/gormlib/errors"
 	"github.com/llmariner/common/pkg/id"
+	"github.com/llmariner/rbac-manager/pkg/auth"
 	v1 "github.com/llmariner/user-manager/api/v1"
 	"github.com/llmariner/user-manager/server/internal/store"
 	"google.golang.org/grpc/codes"
@@ -18,9 +20,9 @@ func (s *S) CreateAPIKey(
 	ctx context.Context,
 	req *v1.CreateAPIKeyRequest,
 ) (*v1.APIKey, error) {
-	userInfo, err := s.extractUserInfoFromContext(ctx)
-	if err != nil {
-		return nil, err
+	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("failed to extract user info from context")
 	}
 
 	if req.Name == "" {
@@ -76,9 +78,9 @@ func (s *S) ListAPIKeys(
 	ctx context.Context,
 	req *v1.ListAPIKeysRequest,
 ) (*v1.ListAPIKeysResponse, error) {
-	userInfo, err := s.extractUserInfoFromContext(ctx)
-	if err != nil {
-		return nil, err
+	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("failed to extract user info from context")
 	}
 
 	if req.ProjectId == "" {
@@ -127,9 +129,9 @@ func (s *S) DeleteAPIKey(
 	ctx context.Context,
 	req *v1.DeleteAPIKeyRequest,
 ) (*v1.DeleteAPIKeyResponse, error) {
-	userInfo, err := s.extractUserInfoFromContext(ctx)
-	if err != nil {
-		return nil, err
+	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("failed to extract user info from context")
 	}
 
 	if req.Id == "" {
