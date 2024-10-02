@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/go-logr/logr"
+	"github.com/llmariner/api-usage/pkg/sender"
 	"github.com/llmariner/rbac-manager/pkg/auth"
 	v1 "github.com/llmariner/user-manager/api/v1"
 	"github.com/llmariner/user-manager/server/internal/config"
@@ -46,10 +47,10 @@ type S struct {
 }
 
 // Run starts the gRPC server.
-func (s *S) Run(ctx context.Context, port int, authConfig config.AuthConfig) error {
+func (s *S) Run(ctx context.Context, port int, authConfig config.AuthConfig, usage sender.UsageSetter) error {
 	s.log.Info("Starting gRPC server...", "port", port)
 
-	var opts []grpc.ServerOption
+	var opt grpc.ServerOption
 	if authConfig.Enable {
 		ai, err := auth.NewInterceptor(ctx, auth.Config{
 			RBACServerAddr: authConfig.RBACInternalServerAddr,
@@ -78,19 +79,16 @@ func (s *S) Run(ctx context.Context, port int, authConfig config.AuthConfig) err
 		if err != nil {
 			return err
 		}
-		authFn := ai.Unary()
-		healthSkip := func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
-			if info.FullMethod == "/grpc.health.v1.Health/Check" {
-				// Skip authentication for health check
-				return handler(ctx, req)
-			}
-			return authFn(ctx, req, info, handler)
-		}
-		opts = append(opts, grpc.ChainUnaryInterceptor(healthSkip))
+		opt = grpc.ChainUnaryInterceptor(ai.Unary("/grpc.health.v1.Health/Check"), sender.Unary(usage))
 		s.enableAuth = true
+	} else {
+		fakeAuth := func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
+			return handler(fakeAuthInto(ctx), req)
+		}
+		opt = grpc.ChainUnaryInterceptor(fakeAuth, sender.Unary(usage))
 	}
 
-	grpcServer := grpc.NewServer(opts...)
+	grpcServer := grpc.NewServer(opt)
 	v1.RegisterUsersServiceServer(grpcServer, s)
 	reflection.Register(grpcServer)
 
@@ -115,26 +113,20 @@ func (s *S) Stop() {
 	s.srv.Stop()
 }
 
-func (s *S) extractUserInfoFromContext(ctx context.Context) (*auth.UserInfo, error) {
-	if !s.enableAuth {
-		return &auth.UserInfo{
-			UserID:         defaultUserID,
-			OrganizationID: "default",
-			ProjectID:      defaultProjectID,
-			AssignedKubernetesEnvs: []auth.AssignedKubernetesEnv{
-				{
-					ClusterID: "default",
-					Namespace: "default",
-				},
+// fakeAuthInto sets dummy user info and token into the context.
+func fakeAuthInto(ctx context.Context) context.Context {
+	return auth.AppendUserInfoToContext(ctx, auth.UserInfo{
+		UserID:         defaultUserID,
+		OrganizationID: "default",
+		ProjectID:      defaultProjectID,
+		AssignedKubernetesEnvs: []auth.AssignedKubernetesEnv{
+			{
+				ClusterID: "default",
+				Namespace: "default",
 			},
-			TenantID: defaultTenantID,
-		}, nil
-	}
-	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
-	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "user info not found")
-	}
-	return userInfo, nil
+		},
+		TenantID: defaultTenantID,
+	})
 }
 
 // organizationRole returns a role that the given user has for the given organization.

@@ -22,7 +22,7 @@ func TestProject(t *testing.T) {
 
 	srv := New(st, testr.New(t))
 	isrv := NewInternal(st, testr.New(t))
-	ctx := context.Background()
+	ctx := fakeAuthInto(context.Background())
 
 	var orgs []*v1.Organization
 	var projs []*v1.Project
@@ -86,7 +86,7 @@ func TestProjectUser(t *testing.T) {
 	srv := New(st, testr.New(t))
 	isrv := NewInternal(st, testr.New(t))
 
-	ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs("Authorization", "dummy"))
+	ctx := metadata.NewIncomingContext(fakeAuthInto(context.Background()), metadata.Pairs("Authorization", "dummy"))
 	org, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
 		Title: "Test organization",
 	})
@@ -156,7 +156,7 @@ func TestCreateProject_UniqueConstraintViolation(t *testing.T) {
 	defer tearDown()
 
 	srv := New(st, testr.New(t))
-	ctx := context.Background()
+	ctx := fakeAuthInto(context.Background())
 
 	o, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
 		Title: "title",
@@ -184,7 +184,7 @@ func TestCreateProjectUser_UniqueConstraintViolation(t *testing.T) {
 	defer tearDown()
 
 	srv := New(st, testr.New(t))
-	ctx := context.Background()
+	ctx := fakeAuthInto(context.Background())
 
 	o, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
 		Title: "title",
@@ -221,7 +221,7 @@ func TestCreateDefaultProject(t *testing.T) {
 	defer tearDown()
 
 	srv := New(st, testr.New(t))
-	ctx := context.Background()
+	ctx := fakeAuthInto(context.Background())
 
 	org, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
 		Title: "Test organization",
@@ -266,7 +266,7 @@ func TestCreateDefaultProject(t *testing.T) {
 	assert.Equal(t, "u0", pus[0].UserID)
 
 	// Default project cannot be deleted.
-	_, err = srv.DeleteProject(context.Background(), &v1.DeleteProjectRequest{
+	_, err = srv.DeleteProject(fakeAuthInto(context.Background()), &v1.DeleteProjectRequest{
 		Id:             p.ProjectID,
 		OrganizationId: org.Id,
 	})

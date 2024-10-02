@@ -21,7 +21,7 @@ func TestOrganization(t *testing.T) {
 
 	srv := New(st, testr.New(t))
 	isrv := NewInternal(st, testr.New(t))
-	ctx := context.Background()
+	ctx := fakeAuthInto(context.Background())
 
 	for i := 0; i < 2; i++ {
 		title := fmt.Sprintf("test %d", i)
@@ -88,7 +88,7 @@ func TestDeleteOrganization(t *testing.T) {
 	defer tearDown()
 
 	srv := New(st, testr.New(t))
-	ctx := context.Background()
+	ctx := fakeAuthInto(context.Background())
 
 	org, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
 		Title: "Test organization",
@@ -126,7 +126,7 @@ func TestCreateOrganization_UniqueConstraintViolation(t *testing.T) {
 	defer tearDown()
 
 	srv := New(st, testr.New(t))
-	ctx := context.Background()
+	ctx := fakeAuthInto(context.Background())
 
 	_, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
 		Title: "title",
@@ -145,7 +145,7 @@ func TestCreateOrganizationUser_UniqueConstraintViolation(t *testing.T) {
 	defer tearDown()
 
 	srv := New(st, testr.New(t))
-	ctx := context.Background()
+	ctx := fakeAuthInto(context.Background())
 
 	o, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
 		Title: "title",
@@ -173,7 +173,7 @@ func TestListOrganizationUsers(t *testing.T) {
 	defer tearDown()
 
 	srv := New(st, testr.New(t))
-	ctx := context.Background()
+	ctx := fakeAuthInto(context.Background())
 
 	var orgs []*v1.Organization
 	for i := 0; i < 2; i++ {
@@ -213,7 +213,7 @@ func TestDeleteDeleteOrganizationUser(t *testing.T) {
 	defer tearDown()
 
 	srv := New(st, testr.New(t))
-	ctx := context.Background()
+	ctx := fakeAuthInto(context.Background())
 
 	o, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
 		Title: "title",
@@ -284,7 +284,7 @@ func TestCreateDefaultOrganization(t *testing.T) {
 		},
 		TenantID: defaultTenantID,
 	}
-	created, err := srv.CreateDefaultOrganization(context.Background(), c)
+	created, err := srv.CreateDefaultOrganization(fakeAuthInto(context.Background()), c)
 	assert.NoError(t, err)
 	assert.Equal(t, created.Title, c.Title)
 	assert.True(t, created.IsDefault)
@@ -301,11 +301,11 @@ func TestCreateDefaultOrganization(t *testing.T) {
 	assert.Equal(t, v1.OrganizationRole_ORGANIZATION_ROLE_OWNER.String(), u.Role)
 
 	// Calling again is no-op.
-	_, err = srv.CreateDefaultOrganization(context.Background(), c)
+	_, err = srv.CreateDefaultOrganization(fakeAuthInto(context.Background()), c)
 	assert.NoError(t, err)
 
 	// Default org cannot be deleted.
-	_, err = srv.DeleteOrganization(context.Background(), &v1.DeleteOrganizationRequest{
+	_, err = srv.DeleteOrganization(fakeAuthInto(context.Background()), &v1.DeleteOrganizationRequest{
 		Id: o.OrganizationID,
 	})
 	assert.Error(t, err)
@@ -494,7 +494,7 @@ func TestInternalServiceListOrganiationUsers(t *testing.T) {
 
 	srv := New(st, testr.New(t))
 	isrv := NewInternal(st, testr.New(t))
-	ctx := context.Background()
+	ctx := fakeAuthInto(context.Background())
 
 	for i := 0; i < 2; i++ {
 		title := fmt.Sprintf("test %d", i)
@@ -521,7 +521,7 @@ func createDefaultOrg(t *testing.T, srv *S, userID string) *store.Organization {
 		Title:   "default",
 		UserIDs: []string{userID},
 	}
-	o, err := srv.CreateDefaultOrganization(context.Background(), c)
+	o, err := srv.CreateDefaultOrganization(fakeAuthInto(context.Background()), c)
 	assert.NoError(t, err)
 	return o
 }
