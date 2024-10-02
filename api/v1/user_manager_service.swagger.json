@@ -633,6 +633,12 @@
         },
         "project": {
           "$ref": "#/definitions/v1Project"
+        },
+        "organizationRole": {
+          "$ref": "#/definitions/v1OrganizationRole"
+        },
+        "projectRole": {
+          "$ref": "#/definitions/v1ProjectRole"
         }
       }
     },
@@ -819,7 +825,8 @@
           "type": "string"
         },
         "internalUserId": {
-          "type": "string"
+          "type": "string",
+          "description": "internal_user_id is populated only for internal gRPC service."
         },
         "organizationId": {
           "type": "string"
@@ -884,7 +891,8 @@
           "type": "string"
         },
         "internalId": {
-          "type": "string"
+          "type": "string",
+          "description": "internal_id is populated only for internal gRPC service."
         }
       }
     }

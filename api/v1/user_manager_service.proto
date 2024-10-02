@@ -17,6 +17,9 @@ message APIKey {
   User user = 6;
   Organization organization = 7;
   Project project = 8;
+
+  OrganizationRole organization_role = 9;
+  ProjectRole project_role = 10;
 }
 
 message User {
