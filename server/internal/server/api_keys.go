@@ -199,9 +199,10 @@ func (s *IS) ListInternalAPIKeys(
 
 	var apiKeyProtos []*v1.InternalAPIKey
 	for _, k := range ks {
-		// Gracefully handle a case where the user is not found for backward compatibility.
-		// TODO(kenji): Remove once all users are backfilled.
-		id := internalUserIDs[k.UserID]
+		id, ok := internalUserIDs[k.UserID]
+		if !ok {
+			return nil, status.Errorf(codes.Internal, "internal user ID not found for user %q", k.UserID)
+		}
 		apiKeyProtos = append(apiKeyProtos, &v1.InternalAPIKey{
 			ApiKey:   toAPIKeyProto(k, id, true),
 			TenantId: k.TenantID,

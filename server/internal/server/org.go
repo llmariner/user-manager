@@ -399,9 +399,10 @@ func (s *IS) ListOrganizationUsers(ctx context.Context, req *v1.ListOrganization
 
 	var userProtos []*v1.OrganizationUser
 	for _, ou := range ous {
-		// Gracefully handle a case where the user is not found for backward compatibility.
-		// TODO(kenji): Remove once all users are backfilled.
-		id := internalUserIDs[ou.UserID]
+		id, ok := internalUserIDs[ou.UserID]
+		if !ok {
+			return nil, status.Errorf(codes.Internal, "internal user ID not found for user %q", ou.UserID)
+		}
 		userProtos = append(userProtos, ou.ToProto(id))
 	}
 
