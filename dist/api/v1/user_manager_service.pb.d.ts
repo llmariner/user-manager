@@ -19,6 +19,8 @@ export type APIKey = {
     user?: User;
     organization?: Organization;
     project?: Project;
+    organizationRole?: OrganizationRole;
+    projectRole?: ProjectRole;
 };
 export type User = {
     id?: string;
