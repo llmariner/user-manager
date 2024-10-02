@@ -70,7 +70,11 @@ func (s *S) CreateAPIKey(
 		return nil, status.Errorf(codes.Internal, "create api key: %s", err)
 	}
 	// Do not populate the internal User ID for non-internal gRPC.
-	return toAPIKeyProto(k, "", true), nil
+	kProto, err := toAPIKeyProto(s.store, k, "", true)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "to api key proto")
+	}
+	return kProto, nil
 }
 
 // ListAPIKeys lists API keys.
@@ -116,7 +120,11 @@ func (s *S) ListAPIKeys(
 	var apiKeyProtos []*v1.APIKey
 	for _, k := range filtered {
 		// Do not populate the internal User ID for non-internal gRPC.
-		apiKeyProtos = append(apiKeyProtos, toAPIKeyProto(k, "", false))
+		kp, err := toAPIKeyProto(s.store, k, "", false)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "to api key proto")
+		}
+		apiKeyProtos = append(apiKeyProtos, kp)
 	}
 	return &v1.ListAPIKeysResponse{
 		Object: "list",
@@ -202,9 +210,13 @@ func (s *IS) ListInternalAPIKeys(
 		id, ok := internalUserIDs[k.UserID]
 		if !ok {
 			return nil, status.Errorf(codes.Internal, "internal user ID not found for user %q", k.UserID)
+    }
+		kp, err := toAPIKeyProto(s.store, k, id, true)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "to api key proto")
 		}
 		apiKeyProtos = append(apiKeyProtos, &v1.InternalAPIKey{
-			ApiKey:   toAPIKeyProto(k, id, true),
+			ApiKey:   kp,
 			TenantId: k.TenantID,
 		})
 	}
@@ -213,7 +225,21 @@ func (s *IS) ListInternalAPIKeys(
 	}, nil
 }
 
-func toAPIKeyProto(k *store.APIKey, internalUserID string, includeSecret bool) *v1.APIKey {
+func toAPIKeyProto(
+	s *store.S,
+	k *store.APIKey,
+	internalUserID string,
+	includeSecret bool,
+) (*v1.APIKey, error) {
+	orgRole, err := findOrgRole(s, k.OrganizationID, k.UserID)
+	if err != nil {
+		return nil, err
+	}
+	projectRole, err := findProjectRole(s, k.ProjectID, k.UserID)
+	if err != nil {
+		return nil, err
+	}
+
 	kp := &v1.APIKey{
 		Id:        k.APIKeyID,
 		CreatedAt: k.CreatedAt.UTC().Unix(),
@@ -229,9 +255,35 @@ func toAPIKeyProto(k *store.APIKey, internalUserID string, includeSecret bool) *
 		Project: &v1.Project{
 			Id: k.ProjectID,
 		},
+		OrganizationRole: orgRole,
+		ProjectRole:      projectRole,
 	}
 	if includeSecret {
 		kp.Secret = k.Secret
 	}
-	return kp
+	return kp, nil
+}
+
+func findOrgRole(s *store.S, orgID, userID string) (v1.OrganizationRole, error) {
+	ou, err := s.GetOrganizationUser(orgID, userID)
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return v1.OrganizationRole_ORGANIZATION_ROLE_UNSPECIFIED, err
+		}
+		return v1.OrganizationRole_ORGANIZATION_ROLE_UNSPECIFIED, nil
+	}
+
+	return v1.OrganizationRole(v1.OrganizationRole_value[ou.Role]), nil
+}
+
+func findProjectRole(s *store.S, projectID, userID string) (v1.ProjectRole, error) {
+	pu, err := s.GetProjectUser(projectID, userID)
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return v1.ProjectRole_PROJECT_ROLE_UNSPECIFIED, err
+		}
+		return v1.ProjectRole_PROJECT_ROLE_UNSPECIFIED, nil
+	}
+
+	return v1.ProjectRole(v1.ProjectRole_value[pu.Role]), nil
 }

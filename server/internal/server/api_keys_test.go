@@ -55,14 +55,20 @@ func TestAPIKey(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	assert.Len(t, lresp.Data, 1)
+	key := lresp.Data[0]
+	assert.Empty(t, key.User.InternalId)
+	assert.Equal(t, v1.OrganizationRole_ORGANIZATION_ROLE_OWNER, key.OrganizationRole)
+	assert.Equal(t, v1.ProjectRole_PROJECT_ROLE_OWNER, key.ProjectRole)
 
 	ilresp, err := isrv.ListInternalAPIKeys(ctx, &v1.ListInternalAPIKeysRequest{})
 	assert.NoError(t, err)
 	assert.Len(t, ilresp.ApiKeys, 1)
-	key := ilresp.ApiKeys[0].ApiKey
+	key = ilresp.ApiKeys[0].ApiKey
 	u, err := st.GetUserByUserID(key.User.Id)
 	assert.NoError(t, err, "failed to get user by user id", key.User.Id)
 	assert.Equal(t, u.InternalUserID, key.User.InternalId)
+	assert.Equal(t, v1.OrganizationRole_ORGANIZATION_ROLE_OWNER, key.OrganizationRole)
+	assert.Equal(t, v1.ProjectRole_PROJECT_ROLE_OWNER, key.ProjectRole)
 
 	_, err = srv.DeleteAPIKey(ctx, &v1.DeleteAPIKeyRequest{
 		Id:             cresp.Id,
