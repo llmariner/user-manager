@@ -3,6 +3,8 @@ module github.com/llmariner/user-manager
 go 1.23.1
 
 require (
+	github.com/go-logr/logr v1.4.1
+	github.com/go-logr/stdr v1.2.2
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0
 	github.com/llmariner/common v0.7.0
 	github.com/llmariner/rbac-manager v0.101.0
@@ -19,7 +21,6 @@ require (
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect

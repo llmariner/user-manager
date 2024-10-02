@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 
 	gerrors "github.com/llmariner/common/pkg/gormlib/errors"
 	"github.com/llmariner/common/pkg/id"
@@ -356,7 +355,7 @@ func (s *S) CreateDefaultProject(ctx context.Context, c *config.DefaultProjectCo
 		return err
 	}
 
-	log.Printf("Creating default project %q", c.Title)
+	s.log.Info("Creating default project", "title", c.Title)
 	if _, err := s.createProject(ctx,
 		c.Title,
 		orgID,
