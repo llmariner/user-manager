@@ -67,6 +67,27 @@ func (c *AuthConfig) validate() error {
 	return nil
 }
 
+// KMSConfig is AWS KMS configuration.
+type KMSConfig struct {
+	Enable   bool   `yaml:"enable"`
+	KeyAlias string `yaml:"keyAlias"`
+	Region   string `yaml:"region"`
+}
+
+// validate validates the configuration.
+func (c *KMSConfig) validate() error {
+	if !c.Enable {
+		return nil
+	}
+	if c.KeyAlias == "" {
+		return fmt.Errorf("keyAlias must be set")
+	}
+	if c.Region == "" {
+		return fmt.Errorf("region must be set")
+	}
+	return nil
+}
+
 // Config is the configuration.
 type Config struct {
 	GRPCPort         int `yaml:"grpcPort"`
@@ -79,6 +100,8 @@ type Config struct {
 
 	DefaultOrganization DefaultOrganizationConfig `yaml:"defaultOrganization"`
 	DefaultProject      DefaultProjectConfig      `yaml:"defaultProject"`
+
+	KMSConfig KMSConfig `yaml:"kms"`
 
 	Debug DebugConfig `yaml:"debug"`
 }
@@ -116,6 +139,9 @@ func (c *Config) Validate() error {
 		return err
 	}
 	if err := c.UsageSender.Validate(); err != nil {
+		return err
+	}
+	if err := c.KMSConfig.validate(); err != nil {
 		return err
 	}
 	return nil

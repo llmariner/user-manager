@@ -34,5 +34,6 @@ func autoMigrate(db *gorm.DB) error {
 		&Project{},
 		&ProjectUser{},
 		&User{},
+		&DataKey{},
 	)
 }

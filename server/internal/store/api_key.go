@@ -18,7 +18,10 @@ type APIKey struct {
 	ProjectID      string
 	UserID         string `gorm:"uniqueIndex:idx_api_key_name_user_id"`
 
+	// Secret is set when kms encryption is disabled.
 	Secret string
+	// EncryptedSecret is encrypted by data key, and it is set when kms encryption is enabled.
+	EncryptedSecret []byte
 
 	// TODO(kenji): Associate roles.
 }
@@ -33,6 +36,8 @@ type APIKeySpec struct {
 
 	Name   string
 	Secret string
+	// EncryptedSecret is encrypted by data key.
+	EncryptedSecret []byte
 }
 
 // CreateAPIKey creates a new API key.
@@ -44,8 +49,9 @@ func (s *S) CreateAPIKey(spec APIKeySpec) (*APIKey, error) {
 		ProjectID:      spec.ProjectID,
 		UserID:         spec.UserID,
 
-		Name:   spec.Name,
-		Secret: spec.Secret,
+		Name:            spec.Name,
+		Secret:          spec.Secret,
+		EncryptedSecret: spec.EncryptedSecret,
 	}
 	if err := s.db.Create(k).Error; err != nil {
 		return nil, err

@@ -20,8 +20,8 @@ func TestProject(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()
 
-	srv := New(st, testr.New(t))
-	isrv := NewInternal(st, testr.New(t))
+	srv := New(st, nil, testr.New(t))
+	isrv := NewInternal(st, nil, testr.New(t))
 	ctx := fakeAuthInto(context.Background())
 
 	var orgs []*v1.Organization
@@ -83,8 +83,8 @@ func TestProjectUser(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()
 
-	srv := New(st, testr.New(t))
-	isrv := NewInternal(st, testr.New(t))
+	srv := New(st, nil, testr.New(t))
+	isrv := NewInternal(st, nil, testr.New(t))
 
 	ctx := metadata.NewIncomingContext(fakeAuthInto(context.Background()), metadata.Pairs("Authorization", "dummy"))
 	org, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
@@ -155,7 +155,7 @@ func TestCreateProject_UniqueConstraintViolation(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()
 
-	srv := New(st, testr.New(t))
+	srv := New(st, nil, testr.New(t))
 	ctx := fakeAuthInto(context.Background())
 
 	o, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
@@ -183,7 +183,7 @@ func TestCreateProjectUser_UniqueConstraintViolation(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()
 
-	srv := New(st, testr.New(t))
+	srv := New(st, nil, testr.New(t))
 	ctx := fakeAuthInto(context.Background())
 
 	o, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
@@ -220,7 +220,7 @@ func TestCreateDefaultProject(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()
 
-	srv := New(st, testr.New(t))
+	srv := New(st, nil, testr.New(t))
 	ctx := fakeAuthInto(context.Background())
 
 	org, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
@@ -278,7 +278,7 @@ func TestCreateProject_EnableAuth(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()
 
-	srv := New(st, testr.New(t))
+	srv := New(st, nil, testr.New(t))
 	srv.enableAuth = true
 
 	o := createDefaultOrg(t, srv, "u0")
@@ -309,7 +309,7 @@ func TestListProjects_EnableAuth(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()
 
-	srv := New(st, testr.New(t))
+	srv := New(st, nil, testr.New(t))
 	srv.enableAuth = true
 
 	o := createDefaultOrg(t, srv, "u0")
@@ -343,7 +343,7 @@ func TestDeleteProject_EnableAuth(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()
 
-	srv := New(st, testr.New(t))
+	srv := New(st, nil, testr.New(t))
 	srv.enableAuth = true
 
 	o := createDefaultOrg(t, srv, "u0")
@@ -378,7 +378,7 @@ func TestProjectUser_EnableAuth(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()
 
-	srv := New(st, testr.New(t))
+	srv := New(st, nil, testr.New(t))
 	srv.enableAuth = true
 
 	o := createDefaultOrg(t, srv, "user0")

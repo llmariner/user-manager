@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/go-logr/logr/testr"
+	"github.com/llmariner/common/pkg/aws"
 	"github.com/llmariner/rbac-manager/pkg/auth"
 	v1 "github.com/llmariner/user-manager/api/v1"
 	"github.com/llmariner/user-manager/server/internal/store"
@@ -14,82 +15,123 @@ import (
 )
 
 func TestAPIKey(t *testing.T) {
-	st, tearDown := store.NewTest(t)
-	defer tearDown()
+	tcs := []struct {
+		name      string
+		enableKMS bool
+		secret    string
+	}{
+		{
+			name:      "enable kms",
+			enableKMS: true,
+			secret:    "secret",
+		},
+		{
+			name:      "disable kms",
+			enableKMS: false,
+			secret:    "secret",
+		},
+	}
 
-	srv := New(st, testr.New(t))
-	isrv := NewInternal(st, testr.New(t))
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			st, tearDown := store.NewTest(t)
+			defer tearDown()
 
-	ctx := fakeAuthInto(context.Background())
-	org, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
-		Title: "Test organization",
-	})
-	assert.NoError(t, err)
+			kmsClient := aws.NewMockKMSClient()
+			var dataKey []byte
+			if tc.enableKMS {
+				dataKey = kmsClient.DataKey
+			}
+			srv := New(st, dataKey, testr.New(t))
+			isrv := NewInternal(st, dataKey, testr.New(t))
 
-	proj, err := srv.CreateProject(ctx, &v1.CreateProjectRequest{
-		Title:               "Test project",
-		OrganizationId:      org.Id,
-		KubernetesNamespace: "test",
-	})
-	assert.NoError(t, err)
+			ctx := fakeAuthInto(context.Background())
+			org, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
+				Title: "Test organization",
+			})
+			assert.NoError(t, err)
 
-	cresp, err := srv.CreateAPIKey(ctx, &v1.CreateAPIKeyRequest{
-		Name:           "dummy",
-		OrganizationId: org.Id,
-		ProjectId:      proj.Id,
-	})
-	assert.NoError(t, err)
-	assert.Equal(t, "dummy", cresp.Name)
+			proj, err := srv.CreateProject(ctx, &v1.CreateProjectRequest{
+				Title:               "Test project",
+				OrganizationId:      org.Id,
+				KubernetesNamespace: "test",
+			})
+			assert.NoError(t, err)
 
-	_, err = srv.CreateAPIKey(ctx, &v1.CreateAPIKeyRequest{
-		Name:           "dummy",
-		OrganizationId: org.Id,
-		ProjectId:      proj.Id,
-	})
-	assert.Error(t, err)
-	assert.Equal(t, codes.AlreadyExists, status.Code(err))
+			cresp, err := srv.CreateAPIKey(ctx, &v1.CreateAPIKeyRequest{
+				Name:           "dummy",
+				OrganizationId: org.Id,
+				ProjectId:      proj.Id,
+			})
+			assert.NoError(t, err)
+			assert.Equal(t, "dummy", cresp.Name)
+			if tc.enableKMS {
+				apiKey, err := st.GetAPIKey(cresp.Id, proj.Id)
+				assert.NoError(t, err)
+				assert.NotEmpty(t, apiKey.EncryptedSecret)
+				assert.Empty(t, apiKey.Secret)
+				secret, err := aws.Decrypt(ctx, apiKey.EncryptedSecret, apiKey.APIKeyID, kmsClient.DataKey)
+				assert.NoError(t, err)
+				assert.Equal(t, secret, cresp.Secret)
+			} else {
+				apiKey, err := st.GetAPIKey(cresp.Id, proj.Id)
+				assert.NoError(t, err)
+				assert.Empty(t, apiKey.EncryptedSecret)
+				assert.NotEmpty(t, apiKey.Secret)
+				assert.Equal(t, apiKey.Secret, cresp.Secret)
+			}
 
-	lresp, err := srv.ListAPIKeys(ctx, &v1.ListAPIKeysRequest{
-		OrganizationId: org.Id,
-		ProjectId:      proj.Id,
-	})
-	assert.NoError(t, err)
-	assert.Len(t, lresp.Data, 1)
-	key := lresp.Data[0]
-	assert.Empty(t, key.User.InternalId)
-	assert.Equal(t, v1.OrganizationRole_ORGANIZATION_ROLE_OWNER, key.OrganizationRole)
-	assert.Equal(t, v1.ProjectRole_PROJECT_ROLE_OWNER, key.ProjectRole)
+			_, err = srv.CreateAPIKey(ctx, &v1.CreateAPIKeyRequest{
+				Name:           "dummy",
+				OrganizationId: org.Id,
+				ProjectId:      proj.Id,
+			})
+			assert.Error(t, err)
+			assert.Equal(t, codes.AlreadyExists, status.Code(err))
 
-	ilresp, err := isrv.ListInternalAPIKeys(ctx, &v1.ListInternalAPIKeysRequest{})
-	assert.NoError(t, err)
-	assert.Len(t, ilresp.ApiKeys, 1)
-	key = ilresp.ApiKeys[0].ApiKey
-	u, err := st.GetUserByUserID(key.User.Id)
-	assert.NoError(t, err, "failed to get user by user id", key.User.Id)
-	assert.Equal(t, u.InternalUserID, key.User.InternalId)
-	assert.Equal(t, v1.OrganizationRole_ORGANIZATION_ROLE_OWNER, key.OrganizationRole)
-	assert.Equal(t, v1.ProjectRole_PROJECT_ROLE_OWNER, key.ProjectRole)
+			lresp, err := srv.ListAPIKeys(ctx, &v1.ListAPIKeysRequest{
+				OrganizationId: org.Id,
+				ProjectId:      proj.Id,
+			})
+			assert.NoError(t, err)
+			assert.Len(t, lresp.Data, 1)
+			key := lresp.Data[0]
+			assert.Empty(t, key.User.InternalId)
+			assert.Equal(t, v1.OrganizationRole_ORGANIZATION_ROLE_OWNER, key.OrganizationRole)
+			assert.Equal(t, v1.ProjectRole_PROJECT_ROLE_OWNER, key.ProjectRole)
 
-	_, err = srv.DeleteAPIKey(ctx, &v1.DeleteAPIKeyRequest{
-		Id:             cresp.Id,
-		OrganizationId: org.Id,
-		ProjectId:      proj.Id,
-	})
-	assert.NoError(t, err)
+			ilresp, err := isrv.ListInternalAPIKeys(ctx, &v1.ListInternalAPIKeysRequest{})
+			assert.NoError(t, err)
+			assert.Len(t, ilresp.ApiKeys, 1)
+			key = ilresp.ApiKeys[0].ApiKey
+			u, err := st.GetUserByUserID(key.User.Id)
+			assert.NoError(t, err, "failed to get user by user id", key.User.Id)
+			assert.Equal(t, u.InternalUserID, key.User.InternalId)
+			assert.Equal(t, v1.OrganizationRole_ORGANIZATION_ROLE_OWNER, key.OrganizationRole)
+			assert.Equal(t, v1.ProjectRole_PROJECT_ROLE_OWNER, key.ProjectRole)
 
-	lresp, err = srv.ListAPIKeys(ctx, &v1.ListAPIKeysRequest{
-		OrganizationId: org.Id,
-		ProjectId:      proj.Id,
-	})
-	assert.NoError(t, err)
-	assert.Empty(t, lresp.Data)
+			_, err = srv.DeleteAPIKey(ctx, &v1.DeleteAPIKeyRequest{
+				Id:             cresp.Id,
+				OrganizationId: org.Id,
+				ProjectId:      proj.Id,
+			})
+			assert.NoError(t, err)
+
+			lresp, err = srv.ListAPIKeys(ctx, &v1.ListAPIKeysRequest{
+				OrganizationId: org.Id,
+				ProjectId:      proj.Id,
+			})
+			assert.NoError(t, err)
+			assert.Empty(t, lresp.Data)
+		})
+	}
 }
 
 func TestAPIKey_EnableAuth(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()
 
-	srv := New(st, testr.New(t))
+	srv := New(st, nil, testr.New(t))
 	srv.enableAuth = true
 	org := createDefaultOrg(t, srv, "u0")
 

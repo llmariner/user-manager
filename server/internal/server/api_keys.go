@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/llmariner/common/pkg/aws"
 	gerrors "github.com/llmariner/common/pkg/gormlib/errors"
 	"github.com/llmariner/common/pkg/id"
 	"github.com/llmariner/rbac-manager/pkg/auth"
@@ -60,8 +61,17 @@ func (s *S) CreateAPIKey(
 		ProjectID:      req.ProjectId,
 		UserID:         userInfo.UserID,
 		Name:           req.Name,
-		Secret:         secKey,
 	}
+	if len(s.dataKey) > 0 {
+		encryptedAPIKey, err := aws.Encrypt(ctx, secKey, trackID, s.dataKey)
+		if err != nil {
+			return nil, err
+		}
+		spec.EncryptedSecret = encryptedAPIKey
+	} else {
+		spec.Secret = secKey
+	}
+
 	k, err := s.store.CreateAPIKey(spec)
 	if err != nil {
 		if gerrors.IsUniqueConstraintViolation(err) {
@@ -70,7 +80,7 @@ func (s *S) CreateAPIKey(
 		return nil, status.Errorf(codes.Internal, "create api key: %s", err)
 	}
 	// Do not populate the internal User ID for non-internal gRPC.
-	kProto, err := toAPIKeyProto(s.store, k, "", true)
+	kProto, err := toAPIKeyProto(ctx, s.store, s.dataKey, k, "", true)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "to api key proto")
 	}
@@ -120,7 +130,7 @@ func (s *S) ListAPIKeys(
 	var apiKeyProtos []*v1.APIKey
 	for _, k := range filtered {
 		// Do not populate the internal User ID for non-internal gRPC.
-		kp, err := toAPIKeyProto(s.store, k, "", false)
+		kp, err := toAPIKeyProto(ctx, s.store, s.dataKey, k, "", false)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "to api key proto")
 		}
@@ -210,8 +220,8 @@ func (s *IS) ListInternalAPIKeys(
 		id, ok := internalUserIDs[k.UserID]
 		if !ok {
 			return nil, status.Errorf(codes.Internal, "internal user ID not found for user %q", k.UserID)
-    }
-		kp, err := toAPIKeyProto(s.store, k, id, true)
+		}
+		kp, err := toAPIKeyProto(ctx, s.store, s.dataKey, k, id, true)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "to api key proto")
 		}
@@ -226,7 +236,9 @@ func (s *IS) ListInternalAPIKeys(
 }
 
 func toAPIKeyProto(
+	ctx context.Context,
 	s *store.S,
+	dataKey []byte,
 	k *store.APIKey,
 	internalUserID string,
 	includeSecret bool,
@@ -259,7 +271,15 @@ func toAPIKeyProto(
 		ProjectRole:      projectRole,
 	}
 	if includeSecret {
-		kp.Secret = k.Secret
+		if len(dataKey) > 0 {
+			secret, err := aws.Decrypt(ctx, k.EncryptedSecret, k.APIKeyID, dataKey)
+			if err != nil {
+				return nil, err
+			}
+			kp.Secret = secret
+		} else {
+			kp.Secret = k.Secret
+		}
 	}
 	return kp, nil
 }

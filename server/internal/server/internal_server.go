@@ -12,10 +12,15 @@ import (
 )
 
 // NewInternal creates an internal server.
-func NewInternal(store *store.S, log logr.Logger) *IS {
+func NewInternal(
+	store *store.S,
+	dataKey []byte,
+	log logr.Logger,
+) *IS {
 	return &IS{
-		store: store,
-		log:   log.WithName("internal"),
+		dataKey: dataKey,
+		store:   store,
+		log:     log.WithName("internal"),
 	}
 }
 
@@ -24,8 +29,9 @@ type IS struct {
 	v1.UnimplementedUsersInternalServiceServer
 	srv *grpc.Server
 
-	store *store.S
-	log   logr.Logger
+	dataKey []byte
+	store   *store.S
+	log     logr.Logger
 }
 
 // Run starts the gRPC server.
