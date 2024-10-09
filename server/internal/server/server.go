@@ -27,10 +27,15 @@ const (
 )
 
 // New creates a server.
-func New(store *store.S, log logr.Logger) *S {
+func New(
+	store *store.S,
+	dataKey []byte,
+	log logr.Logger,
+) *S {
 	return &S{
-		store: store,
-		log:   log.WithName("grpc"),
+		store:     store,
+		dataKey:   dataKey,
+		log:       log.WithName("grpc"),
 	}
 }
 
@@ -40,8 +45,9 @@ type S struct {
 
 	srv *grpc.Server
 
-	store *store.S
-	log   logr.Logger
+	dataKey   []byte
+	store     *store.S
+	log       logr.Logger
 
 	enableAuth bool
 }

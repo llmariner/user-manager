@@ -35,3 +35,7 @@ data:
       rbacInternalServerAddr: {{ .Values.global.auth.rbacInternalServerAddr }}
     usageSender:
       {{- toYaml .Values.global.usageSender | nindent 6 }}
+    kms:
+      enable: {{ .Values.kms.enable }}
+      keyAlias: {{ .Values.kms.keyAlias }}
+      region:  {{ .Values.kms.region }}

@@ -46,6 +46,11 @@ defaultProject:
   userIds:
   - admin@example.com
 
+kms:
+  enable: false
+  keyAlias:
+  region:
+
 replicaCount: 1
 image:
   repository: public.ecr.aws/cloudnatix/llmariner/user-manager-server

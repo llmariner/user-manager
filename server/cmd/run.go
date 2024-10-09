@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -9,6 +10,7 @@ import (
 	"github.com/go-logr/stdr"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/llmariner/api-usage/pkg/sender"
+	"github.com/llmariner/common/pkg/aws"
 	"github.com/llmariner/common/pkg/db"
 	"github.com/llmariner/rbac-manager/pkg/auth"
 	v1 "github.com/llmariner/user-manager/api/v1"
@@ -107,7 +109,33 @@ func run(ctx context.Context, c *config.Config) error {
 	}
 	go func() { usage.Run(ctx) }()
 
-	s := server.New(st, logger)
+	var dataKey []byte
+	if c.KMSConfig.Enable {
+		kmsClient, err := aws.NewKMSClient(
+			ctx,
+			aws.NewConfigOptions{
+				Region: c.KMSConfig.Region,
+			},
+			c.KMSConfig.KeyAlias,
+		)
+		if err != nil {
+			return err
+		}
+		dk, err := st.GetDataKey(ctx, kmsClient)
+		if err != nil {
+			if !errors.Is(err, gorm.ErrRecordNotFound) {
+				return err
+			}
+			log.Info("Creating a data key")
+			dk, err = st.CreateDataKey(ctx, kmsClient)
+			if err != nil {
+				return err
+			}
+		}
+		dataKey = dk
+	}
+
+	s := server.New(st, dataKey, logger)
 	go func() {
 		errCh <- s.Run(ctx, c.GRPCPort, c.AuthConfig, usage)
 	}()
@@ -121,7 +149,7 @@ func run(ctx context.Context, c *config.Config) error {
 	}
 
 	go func() {
-		s := server.NewInternal(st, logger)
+		s := server.NewInternal(st, dataKey, logger)
 		errCh <- s.Run(c.InternalGRPCPort)
 	}()
 
