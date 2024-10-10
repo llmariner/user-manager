@@ -39,3 +39,10 @@ data:
       enable: {{ .Values.kms.enable }}
       keyAlias: {{ .Values.kms.keyAlias }}
       region:  {{ .Values.kms.region }}
+      {{- with .Values.kms.assumeRole }}
+      {{- if .roleArn }}
+      assumeRole:
+        roleArn: {{ .roleArn }}
+        externalId: {{ .externalId }}
+      {{- end }}
+      {{- end }}

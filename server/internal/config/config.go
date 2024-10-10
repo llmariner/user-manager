@@ -67,11 +67,25 @@ func (c *AuthConfig) validate() error {
 	return nil
 }
 
+// AssumeRoleConfig is the assume role configuration.
+type AssumeRoleConfig struct {
+	RoleARN    string `yaml:"roleArn"`
+	ExternalID string `yaml:"externalId"`
+}
+
+func (c *AssumeRoleConfig) validate() error {
+	if c.RoleARN == "" {
+		return fmt.Errorf("roleArn must be set")
+	}
+	return nil
+}
+
 // KMSConfig is AWS KMS configuration.
 type KMSConfig struct {
-	Enable   bool   `yaml:"enable"`
-	KeyAlias string `yaml:"keyAlias"`
-	Region   string `yaml:"region"`
+	Enable     bool              `yaml:"enable"`
+	KeyAlias   string            `yaml:"keyAlias"`
+	Region     string            `yaml:"region"`
+	AssumeRole *AssumeRoleConfig `yaml:"assumeRole"`
 }
 
 // validate validates the configuration.
@@ -84,6 +98,11 @@ func (c *KMSConfig) validate() error {
 	}
 	if c.Region == "" {
 		return fmt.Errorf("region must be set")
+	}
+	if ar := c.AssumeRole; ar != nil {
+		if err := ar.validate(); err != nil {
+			return fmt.Errorf("assumeRole: %s", err)
+		}
 	}
 	return nil
 }
