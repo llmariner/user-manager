@@ -50,6 +50,7 @@ kms:
   enable: false
   keyAlias:
   region:
+  assumeRole:
 
 replicaCount: 1
 image:

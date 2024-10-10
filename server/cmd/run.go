@@ -111,13 +111,16 @@ func run(ctx context.Context, c *config.Config) error {
 
 	var dataKey []byte
 	if c.KMSConfig.Enable {
-		kmsClient, err := aws.NewKMSClient(
-			ctx,
-			aws.NewConfigOptions{
-				Region: c.KMSConfig.Region,
-			},
-			c.KMSConfig.KeyAlias,
-		)
+		opts := aws.NewConfigOptions{
+			Region: c.KMSConfig.Region,
+		}
+		if ar := c.KMSConfig.AssumeRole; ar != nil {
+			opts.AssumeRole = &aws.AssumeRole{
+				RoleARN:    ar.RoleARN,
+				ExternalID: ar.ExternalID,
+			}
+		}
+		kmsClient, err := aws.NewKMSClient(ctx, opts, c.KMSConfig.KeyAlias)
 		if err != nil {
 			return err
 		}
