@@ -147,10 +147,15 @@ func run(ctx context.Context, c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	if err := s.CreateDefaultProject(ctx, &c.DefaultProject, org.OrganizationID, c.DefaultOrganization.TenantID); err != nil {
+	project, err := s.CreateDefaultProject(ctx, &c.DefaultProject, org.OrganizationID, c.DefaultOrganization.TenantID)
+	if err != nil {
 		return err
 	}
-
+	if k := c.DefaultAPIKey; k != nil {
+		if err := s.CreateDefaultAPIKey(ctx, k, org.OrganizationID, project.ProjectID, c.DefaultOrganization.TenantID); err != nil {
+			return err
+		}
+	}
 	go func() {
 		s := server.NewInternal(st, dataKey, logger)
 		errCh <- s.Run(c.InternalGRPCPort)

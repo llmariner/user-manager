@@ -10,6 +10,7 @@ import (
 	"github.com/llmariner/common/pkg/id"
 	"github.com/llmariner/rbac-manager/pkg/auth"
 	v1 "github.com/llmariner/user-manager/api/v1"
+	"github.com/llmariner/user-manager/server/internal/config"
 	"github.com/llmariner/user-manager/server/internal/store"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -23,7 +24,7 @@ func (s *S) CreateAPIKey(
 ) (*v1.APIKey, error) {
 	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
 	if !ok {
-		return nil, fmt.Errorf("failed to extract user info from context")
+		return nil, status.Errorf(codes.Internal, "failed to extract user info from context")
 	}
 
 	if req.Name == "" {
@@ -44,23 +45,40 @@ func (s *S) CreateAPIKey(
 		return nil, err
 	}
 
-	trackID, err := id.GenerateID("key_", 16)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "generate api key id: %s", err)
-	}
 	// TODO(kenji): Make sure this gives sufficient randomness.
 	secKey, err := id.GenerateID("sk-", 48)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "generate secret key: %s", err)
+		return nil, status.Errorf(codes.Internal, "generate api key id: %s", err)
+	}
+
+	k, err := s.createAPIKey(ctx, req.Name, secKey, userInfo.UserID, req.OrganizationId, req.ProjectId, userInfo.TenantID)
+	if err != nil {
+		return nil, err
+	}
+	return k, nil
+}
+
+func (s *S) createAPIKey(
+	ctx context.Context,
+	name string,
+	secKey string,
+	userID string,
+	organizationID string,
+	projectID string,
+	tenantID string,
+) (*v1.APIKey, error) {
+	trackID, err := id.GenerateID("key_", 16)
+	if err != nil {
+		return nil, fmt.Errorf("generate api key id: %s", err)
 	}
 
 	spec := store.APIKeySpec{
 		APIKeyID:       trackID,
-		TenantID:       userInfo.TenantID,
-		OrganizationID: req.OrganizationId,
-		ProjectID:      req.ProjectId,
-		UserID:         userInfo.UserID,
-		Name:           req.Name,
+		TenantID:       tenantID,
+		OrganizationID: organizationID,
+		ProjectID:      projectID,
+		UserID:         userID,
+		Name:           name,
 	}
 	if len(s.dataKey) > 0 {
 		encryptedAPIKey, err := aws.Encrypt(ctx, secKey, trackID, s.dataKey)
@@ -75,14 +93,14 @@ func (s *S) CreateAPIKey(
 	k, err := s.store.CreateAPIKey(spec)
 	if err != nil {
 		if gerrors.IsUniqueConstraintViolation(err) {
-			return nil, status.Errorf(codes.AlreadyExists, "api key %q already exists", req.Name)
+			return nil, status.Errorf(codes.AlreadyExists, "api key %q already exists", name)
 		}
 		return nil, status.Errorf(codes.Internal, "create api key: %s", err)
 	}
 	// Do not populate the internal User ID for non-internal gRPC.
 	kProto, err := toAPIKeyProto(ctx, s.store, s.dataKey, k, "", true)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "to api key proto")
+		return nil, status.Errorf(codes.Internal, "to api key proto: %s", err)
 	}
 	return kProto, nil
 }
@@ -94,7 +112,7 @@ func (s *S) ListAPIKeys(
 ) (*v1.ListAPIKeysResponse, error) {
 	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
 	if !ok {
-		return nil, fmt.Errorf("failed to extract user info from context")
+		return nil, status.Errorf(codes.Internal, "failed to extract user info from context")
 	}
 
 	if req.ProjectId == "" {
@@ -194,6 +212,20 @@ func (s *S) DeleteAPIKey(
 		Object:  "users.api_key",
 		Deleted: true,
 	}, nil
+}
+
+// CreateDefaultAPIKey creates a default API key.
+func (s *S) CreateDefaultAPIKey(ctx context.Context, c *config.DefaultAPIKeyConfig, orgID, projectID, tenantID string) error {
+	if _, err := s.store.GetAPIKeyByNameAndUserID(c.Name, c.UserID); err == nil {
+		// Do nothing.
+		return nil
+	}
+
+	if _, err := s.createAPIKey(ctx, c.Name, c.Secret, c.UserID, orgID, projectID, tenantID); err != nil {
+		return fmt.Errorf("create api key: %s", err)
+	}
+
+	return nil
 }
 
 // ListInternalAPIKeys lists all API keys.

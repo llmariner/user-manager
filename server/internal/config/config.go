@@ -44,6 +44,27 @@ func (c *DefaultProjectConfig) validate() error {
 	return nil
 }
 
+// DefaultAPIKeyConfig is the default API key configuration.
+type DefaultAPIKeyConfig struct {
+	Name   string `yaml:"name"`
+	Secret string `yaml:"secret"`
+	UserID string `yaml:"userId"`
+}
+
+// validate validates the configuration.
+func (c *DefaultAPIKeyConfig) validate() error {
+	if c.Name == "" {
+		return fmt.Errorf("name must be set")
+	}
+	if c.Secret == "" {
+		return fmt.Errorf("secret must be set")
+	}
+	if c.UserID == "" {
+		return fmt.Errorf("userId must be set")
+	}
+	return nil
+}
+
 // DebugConfig is the debug configuration.
 type DebugConfig struct {
 	Standalone bool   `yaml:"standalone"`
@@ -119,6 +140,7 @@ type Config struct {
 
 	DefaultOrganization DefaultOrganizationConfig `yaml:"defaultOrganization"`
 	DefaultProject      DefaultProjectConfig      `yaml:"defaultProject"`
+	DefaultAPIKey       *DefaultAPIKeyConfig      `yaml:"defaultApiKey"`
 
 	KMSConfig KMSConfig `yaml:"kms"`
 
@@ -152,6 +174,11 @@ func (c *Config) Validate() error {
 	}
 	if err := c.DefaultProject.validate(); err != nil {
 		return err
+	}
+	if k := c.DefaultAPIKey; k != nil {
+		if err := k.validate(); err != nil {
+			return fmt.Errorf("defaultApiKey: %s", err)
+		}
 	}
 
 	if err := c.AuthConfig.validate(); err != nil {

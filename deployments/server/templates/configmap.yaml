@@ -19,6 +19,14 @@ data:
       kubernetesNamespace: {{ .Values.defaultProject.kubernetesNamespace }}
       userIds:
       {{- toYaml .Values.defaultProject.userIds | nindent 6 }}
+    {{- with .Values.defaultApiKey }}
+    {{- if .name }}
+    defaultApiKey:
+      name: {{ .name }}
+      secret: {{ .secret }}
+      userId: {{ .userId }}
+    {{- end }}
+    {{- end }}
     database:
       host: {{ .Values.global.database.host }}
       port: {{ .Values.global.database.port }}

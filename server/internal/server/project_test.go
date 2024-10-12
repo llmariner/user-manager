@@ -252,7 +252,7 @@ func TestCreateDefaultProject(t *testing.T) {
 		Title:               "Default project",
 		KubernetesNamespace: "ns",
 	}
-	err = srv.CreateDefaultProject(ctx, c, org.Id, defaultTenantID)
+	_, err = srv.CreateDefaultProject(ctx, c, org.Id, defaultTenantID)
 	assert.NoError(t, err)
 
 	p, err := st.GetDefaultProject(defaultTenantID)
