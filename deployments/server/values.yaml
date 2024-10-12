@@ -46,6 +46,11 @@ defaultProject:
   userIds:
   - admin@example.com
 
+defaultApiKey:
+  name:
+  secret:
+  userId:
+
 kms:
   enable: false
   keyAlias:

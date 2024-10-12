@@ -345,15 +345,15 @@ func (s *S) validateProjectID(projectID, orgID, tenantID string) (*store.Project
 // CreateDefaultProject creates the default org.
 // TODO(kenji): This is not the best place for this function as there is nothing related to
 // the server itself.
-func (s *S) CreateDefaultProject(ctx context.Context, c *config.DefaultProjectConfig, orgID, tenantID string) error {
-	_, err := s.store.GetDefaultProject(tenantID)
+func (s *S) CreateDefaultProject(ctx context.Context, c *config.DefaultProjectConfig, orgID, tenantID string) (*store.Project, error) {
+	p, err := s.store.GetDefaultProject(tenantID)
 	if err == nil {
 		// Do nothing.
-		return nil
+		return p, nil
 	}
 
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
-		return err
+		return nil, err
 	}
 
 	s.log.Info("Creating default project", "title", c.Title)
@@ -364,10 +364,10 @@ func (s *S) CreateDefaultProject(ctx context.Context, c *config.DefaultProjectCo
 		true,
 		tenantID,
 	); err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return p, nil
 }
 
 // ListProjects lists all projects.
