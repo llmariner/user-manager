@@ -33,9 +33,9 @@ func New(
 	log logr.Logger,
 ) *S {
 	return &S{
-		store:     store,
-		dataKey:   dataKey,
-		log:       log.WithName("grpc"),
+		store:   store,
+		dataKey: dataKey,
+		log:     log.WithName("grpc"),
 	}
 }
 
@@ -45,9 +45,9 @@ type S struct {
 
 	srv *grpc.Server
 
-	dataKey   []byte
-	store     *store.S
-	log       logr.Logger
+	dataKey []byte
+	store   *store.S
+	log     logr.Logger
 
 	enableAuth bool
 }
