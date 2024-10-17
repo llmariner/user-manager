@@ -40,7 +40,7 @@ func (s *S) CreateOrganization(ctx context.Context, req *v1.CreateOrganizationRe
 
 	// Create a new organization. Add a creator as an owner. Othewise, there is no owner in the org, and no one can access.
 
-	org, err := s.createOrganization(ctx, req.Title, false, userInfo.TenantID, []string{userid.Normalize(userInfo.UserID)})
+	org, err := createOrganization(ctx, s.store, req.Title, false, userInfo.TenantID, []string{userid.Normalize(userInfo.UserID)})
 	if err != nil {
 		if gerrors.IsUniqueConstraintViolation(err) {
 			return nil, status.Errorf(codes.AlreadyExists, "organizatione %q already exists", req.Title)
@@ -67,14 +67,14 @@ func (s *S) canCreateOrganization(userInfo *auth.UserInfo) (bool, error) {
 	return s.organizationRole(org.OrganizationID, userInfo.UserID) == v1.OrganizationRole_ORGANIZATION_ROLE_OWNER, nil
 }
 
-func (s *S) createOrganization(ctx context.Context, title string, isDefault bool, tenantID string, userIDs []string) (*store.Organization, error) {
+func createOrganization(ctx context.Context, st *store.S, title string, isDefault bool, tenantID string, userIDs []string) (*store.Organization, error) {
 	orgID, err := id.GenerateID("org-", 24)
 	if err != nil {
 		return nil, err
 	}
 
 	var org *store.Organization
-	if err := s.store.Transaction(func(tx *gorm.DB) error {
+	if err := st.Transaction(func(tx *gorm.DB) error {
 		org, err = store.CreateOrganizationInTransaction(tx, tenantID, orgID, title, isDefault)
 		if err != nil {
 			return err
@@ -136,7 +136,7 @@ func (s *S) DeleteOrganization(ctx context.Context, req *v1.DeleteOrganizationRe
 		return nil, status.Error(codes.InvalidArgument, "organization id is required")
 	}
 
-	o, err := s.validateOrganizationID(req.Id, userInfo.TenantID)
+	o, err := validateOrganizationID(s.store, req.Id, userInfo.TenantID)
 	if err != nil {
 		return nil, err
 	}
@@ -201,7 +201,7 @@ func (s *S) CreateOrganizationUser(ctx context.Context, req *v1.CreateOrganizati
 		return nil, status.Error(codes.InvalidArgument, "role is required")
 	}
 
-	if _, err := s.validateOrganizationID(req.OrganizationId, userInfo.TenantID); err != nil {
+	if _, err := validateOrganizationID(s.store, req.OrganizationId, userInfo.TenantID); err != nil {
 		return nil, err
 	}
 
@@ -247,7 +247,7 @@ func (s *S) ListOrganizationUsers(ctx context.Context, req *v1.ListOrganizationU
 		return nil, status.Error(codes.InvalidArgument, "organization id is required")
 	}
 
-	if _, err := s.validateOrganizationID(req.OrganizationId, userInfo.TenantID); err != nil {
+	if _, err := validateOrganizationID(s.store, req.OrganizationId, userInfo.TenantID); err != nil {
 		return nil, err
 	}
 
@@ -284,7 +284,7 @@ func (s *S) DeleteOrganizationUser(ctx context.Context, req *v1.DeleteOrganizati
 		return nil, status.Error(codes.InvalidArgument, "user id is required")
 	}
 
-	if _, err := s.validateOrganizationID(req.OrganizationId, userInfo.TenantID); err != nil {
+	if _, err := validateOrganizationID(s.store, req.OrganizationId, userInfo.TenantID); err != nil {
 		return nil, err
 	}
 
@@ -329,8 +329,8 @@ func (s *S) DeleteOrganizationUser(ctx context.Context, req *v1.DeleteOrganizati
 	return &emptypb.Empty{}, nil
 }
 
-func (s *S) validateOrganizationID(orgID, tenantID string) (*store.Organization, error) {
-	o, err := s.store.GetOrganizationByTenantIDAndOrgID(tenantID, orgID)
+func validateOrganizationID(st *store.S, orgID, tenantID string) (*store.Organization, error) {
+	o, err := st.GetOrganizationByTenantIDAndOrgID(tenantID, orgID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Errorf(codes.FailedPrecondition, "organization %q not found", orgID)
@@ -354,7 +354,7 @@ func (s *S) CreateDefaultOrganization(ctx context.Context, c *config.DefaultOrga
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
-	org, err := s.createOrganization(ctx, c.Title, true, c.TenantID, c.UserIDs)
+	org, err := createOrganization(ctx, s.store, c.Title, true, c.TenantID, c.UserIDs)
 	if err != nil {
 		return nil, err
 	}
