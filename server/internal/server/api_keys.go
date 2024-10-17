@@ -37,7 +37,7 @@ func (s *S) CreateAPIKey(
 		return nil, status.Error(codes.InvalidArgument, "organization id is required")
 	}
 
-	if _, err := s.validateProjectID(req.ProjectId, req.OrganizationId, userInfo.TenantID); err != nil {
+	if _, err := validateProjectID(s.store, req.ProjectId, req.OrganizationId, userInfo.TenantID); err != nil {
 		return nil, err
 	}
 
@@ -51,15 +51,17 @@ func (s *S) CreateAPIKey(
 		return nil, status.Errorf(codes.Internal, "generate api key id: %s", err)
 	}
 
-	k, err := s.createAPIKey(ctx, req.Name, secKey, userInfo.UserID, req.OrganizationId, req.ProjectId, userInfo.TenantID)
+	k, err := createAPIKey(ctx, s.store, s.dataKey, req.Name, secKey, userInfo.UserID, req.OrganizationId, req.ProjectId, userInfo.TenantID)
 	if err != nil {
 		return nil, err
 	}
 	return k, nil
 }
 
-func (s *S) createAPIKey(
+func createAPIKey(
 	ctx context.Context,
+	st *store.S,
+	dataKey []byte,
 	name string,
 	secKey string,
 	userID string,
@@ -80,8 +82,8 @@ func (s *S) createAPIKey(
 		UserID:         userID,
 		Name:           name,
 	}
-	if len(s.dataKey) > 0 {
-		encryptedAPIKey, err := aws.Encrypt(ctx, secKey, trackID, s.dataKey)
+	if len(dataKey) > 0 {
+		encryptedAPIKey, err := aws.Encrypt(ctx, secKey, trackID, dataKey)
 		if err != nil {
 			return nil, err
 		}
@@ -90,7 +92,7 @@ func (s *S) createAPIKey(
 		spec.Secret = secKey
 	}
 
-	k, err := s.store.CreateAPIKey(spec)
+	k, err := st.CreateAPIKey(spec)
 	if err != nil {
 		if gerrors.IsUniqueConstraintViolation(err) {
 			return nil, status.Errorf(codes.AlreadyExists, "api key %q already exists", name)
@@ -98,7 +100,7 @@ func (s *S) createAPIKey(
 		return nil, status.Errorf(codes.Internal, "create api key: %s", err)
 	}
 	// Do not populate the internal User ID for non-internal gRPC.
-	kProto, err := toAPIKeyProto(ctx, s.store, s.dataKey, k, "", true)
+	kProto, err := toAPIKeyProto(ctx, st, dataKey, k, "", true)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "to api key proto: %s", err)
 	}
@@ -122,7 +124,7 @@ func (s *S) ListAPIKeys(
 		return nil, status.Error(codes.InvalidArgument, "organization id is required")
 	}
 
-	if _, err := s.validateProjectID(req.ProjectId, req.OrganizationId, userInfo.TenantID); err != nil {
+	if _, err := validateProjectID(s.store, req.ProjectId, req.OrganizationId, userInfo.TenantID); err != nil {
 		return nil, err
 	}
 
@@ -180,7 +182,7 @@ func (s *S) DeleteAPIKey(
 		return nil, status.Error(codes.InvalidArgument, "organization id is required")
 	}
 
-	if _, err := s.validateProjectID(req.ProjectId, req.OrganizationId, userInfo.TenantID); err != nil {
+	if _, err := validateProjectID(s.store, req.ProjectId, req.OrganizationId, userInfo.TenantID); err != nil {
 		return nil, err
 	}
 
@@ -221,7 +223,7 @@ func (s *S) CreateDefaultAPIKey(ctx context.Context, c *config.DefaultAPIKeyConf
 		return nil
 	}
 
-	if _, err := s.createAPIKey(ctx, c.Name, c.Secret, c.UserID, orgID, projectID, tenantID); err != nil {
+	if _, err := createAPIKey(ctx, s.store, s.dataKey, c.Name, c.Secret, c.UserID, orgID, projectID, tenantID); err != nil {
 		return fmt.Errorf("create api key: %s", err)
 	}
 

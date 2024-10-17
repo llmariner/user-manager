@@ -216,6 +216,13 @@ export type ListInternalOrganizationsResponse = {
   organizations?: InternalOrganization[]
 }
 
+export type CreateUserInternalRequest = {
+  tenantId?: string
+  title?: string
+  userId?: string
+  kubernetesNamespac?: string
+}
+
 export class UsersService {
   static CreateAPIKey(req: CreateAPIKeyRequest, initReq?: fm.InitReq): Promise<APIKey> {
     return fm.fetchReq<CreateAPIKeyRequest, APIKey>(`/v1/organizations/${req["organizationId"]}/projects/${req["projectId"]}/api_keys`, {...initReq, method: "POST", body: JSON.stringify(req)})
@@ -278,5 +285,8 @@ export class UsersInternalService {
   }
   static ListProjectUsers(req: ListProjectUsersRequest, initReq?: fm.InitReq): Promise<ListProjectUsersResponse> {
     return fm.fetchReq<ListProjectUsersRequest, ListProjectUsersResponse>(`/llmariner.users.server.v1.UsersInternalService/ListProjectUsers`, {...initReq, method: "POST", body: JSON.stringify(req)})
+  }
+  static CreateUserInternal(req: CreateUserInternalRequest, initReq?: fm.InitReq): Promise<GoogleProtobufEmpty.Empty> {
+    return fm.fetchReq<CreateUserInternalRequest, GoogleProtobufEmpty.Empty>(`/llmariner.users.server.v1.UsersInternalService/CreateUserInternal`, {...initReq, method: "POST", body: JSON.stringify(req)})
   }
 }

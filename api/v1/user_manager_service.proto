@@ -316,6 +316,14 @@ message ListInternalOrganizationsResponse {
   repeated InternalOrganization organizations = 1;
 }
 
+message CreateUserInternalRequest {
+  string tenant_id = 1;
+  // title is used for both orgnization and project.
+  string title = 2;
+  string user_id = 3;
+  string kubernetes_namespac= 4;
+}
+
 service UsersInternalService {
   rpc ListInternalAPIKeys(ListInternalAPIKeysRequest) returns (ListInternalAPIKeysResponse) {
   }
@@ -326,5 +334,7 @@ service UsersInternalService {
   rpc ListProjects(ListProjectsRequest) returns (ListProjectsResponse) {
   }
   rpc ListProjectUsers(ListProjectUsersRequest) returns (ListProjectUsersResponse) {
+  }
+  rpc CreateUserInternal(CreateUserInternalRequest) returns (google.protobuf.Empty) {
   }
 }
