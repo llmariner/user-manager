@@ -40,7 +40,8 @@ func (s *S) CreateProject(ctx context.Context, req *v1.CreateProjectRequest) (*v
 		return nil, err
 	}
 
-	return s.createProject(ctx,
+	return createProject(ctx,
+		s.store,
 		req.Title,
 		req.OrganizationId,
 		req.KubernetesNamespace,
@@ -49,15 +50,16 @@ func (s *S) CreateProject(ctx context.Context, req *v1.CreateProjectRequest) (*v
 	)
 }
 
-func (s *S) createProject(
+func createProject(
 	ctx context.Context,
+	st *store.S,
 	title string,
 	organizationID string,
 	kubernetesNamespace string,
 	isDefault bool,
 	tenantID string,
 ) (*v1.Project, error) {
-	if _, err := s.validateOrganizationID(organizationID, tenantID); err != nil {
+	if _, err := validateOrganizationID(st, organizationID, tenantID); err != nil {
 		return nil, err
 	}
 
@@ -70,13 +72,13 @@ func (s *S) createProject(
 		return nil, status.Errorf(codes.Internal, "generate project id: %s", err)
 	}
 
-	orgUsers, err := s.store.ListOrganizationUsersByOrganizationID(organizationID)
+	orgUsers, err := st.ListOrganizationUsersByOrganizationID(organizationID)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "list organization users: %s", err)
 	}
 
 	var p *store.Project
-	if err := s.store.Transaction(func(tx *gorm.DB) error {
+	if err := st.Transaction(func(tx *gorm.DB) error {
 		p, err = store.CreateProjectInTransaction(tx, store.CreateProjectParams{
 			TenantID:            tenantID,
 			ProjectID:           projectID,
@@ -127,7 +129,7 @@ func (s *S) ListProjects(ctx context.Context, req *v1.ListProjectsRequest) (*v1.
 		return nil, status.Error(codes.InvalidArgument, "organization id is required")
 	}
 
-	if _, err := s.validateOrganizationID(req.OrganizationId, userInfo.TenantID); err != nil {
+	if _, err := validateOrganizationID(s.store, req.OrganizationId, userInfo.TenantID); err != nil {
 		return nil, err
 	}
 
@@ -166,7 +168,7 @@ func (s *S) DeleteProject(ctx context.Context, req *v1.DeleteProjectRequest) (*v
 		return nil, status.Error(codes.InvalidArgument, "project id is required")
 	}
 
-	p, err := s.validateProjectID(req.Id, req.OrganizationId, userInfo.TenantID)
+	p, err := validateProjectID(s.store, req.Id, req.OrganizationId, userInfo.TenantID)
 	if err != nil {
 		return nil, err
 	}
@@ -218,7 +220,7 @@ func (s *S) CreateProjectUser(ctx context.Context, req *v1.CreateProjectUserRequ
 		return nil, status.Error(codes.InvalidArgument, "role is required")
 	}
 
-	if _, err := s.validateProjectID(req.ProjectId, req.OrganizationId, userInfo.TenantID); err != nil {
+	if _, err := validateProjectID(s.store, req.ProjectId, req.OrganizationId, userInfo.TenantID); err != nil {
 		return nil, err
 	}
 
@@ -264,7 +266,7 @@ func (s *S) ListProjectUsers(ctx context.Context, req *v1.ListProjectUsersReques
 		return nil, status.Error(codes.InvalidArgument, "organization id is required")
 	}
 
-	if _, err := s.validateProjectID(req.ProjectId, req.OrganizationId, userInfo.TenantID); err != nil {
+	if _, err := validateProjectID(s.store, req.ProjectId, req.OrganizationId, userInfo.TenantID); err != nil {
 		return nil, err
 	}
 
@@ -303,7 +305,7 @@ func (s *S) DeleteProjectUser(ctx context.Context, req *v1.DeleteProjectUserRequ
 		return nil, status.Error(codes.InvalidArgument, "user id is required")
 	}
 
-	if _, err := s.validateProjectID(req.ProjectId, req.OrganizationId, userInfo.TenantID); err != nil {
+	if _, err := validateProjectID(s.store, req.ProjectId, req.OrganizationId, userInfo.TenantID); err != nil {
 		return nil, err
 	}
 
@@ -322,12 +324,12 @@ func (s *S) DeleteProjectUser(ctx context.Context, req *v1.DeleteProjectUserRequ
 	return &emptypb.Empty{}, nil
 }
 
-func (s *S) validateProjectID(projectID, orgID, tenantID string) (*store.Project, error) {
-	if _, err := s.validateOrganizationID(orgID, tenantID); err != nil {
+func validateProjectID(st *store.S, projectID, orgID, tenantID string) (*store.Project, error) {
+	if _, err := validateOrganizationID(st, orgID, tenantID); err != nil {
 		return nil, err
 	}
 
-	p, err := s.store.GetProject(store.GetProjectParams{
+	p, err := st.GetProject(store.GetProjectParams{
 		TenantID:       tenantID,
 		OrganizationID: orgID,
 		ProjectID:      projectID,
@@ -357,7 +359,8 @@ func (s *S) CreateDefaultProject(ctx context.Context, c *config.DefaultProjectCo
 	}
 
 	s.log.Info("Creating default project", "title", c.Title)
-	if _, err := s.createProject(ctx,
+	if _, err := createProject(ctx,
+		s.store,
 		c.Title,
 		orgID,
 		c.KubernetesNamespace,
