@@ -167,6 +167,12 @@ export type ListInternalOrganizationsRequest = {};
 export type ListInternalOrganizationsResponse = {
     organizations?: InternalOrganization[];
 };
+export type CreateUserInternalRequest = {
+    tenantId?: string;
+    title?: string;
+    userId?: string;
+    kubernetesNamespac?: string;
+};
 export declare class UsersService {
     static CreateAPIKey(req: CreateAPIKeyRequest, initReq?: fm.InitReq): Promise<APIKey>;
     static ListAPIKeys(req: ListAPIKeysRequest, initReq?: fm.InitReq): Promise<ListAPIKeysResponse>;
@@ -190,4 +196,5 @@ export declare class UsersInternalService {
     static ListOrganizationUsers(req: ListOrganizationUsersRequest, initReq?: fm.InitReq): Promise<ListOrganizationUsersResponse>;
     static ListProjects(req: ListProjectsRequest, initReq?: fm.InitReq): Promise<ListProjectsResponse>;
     static ListProjectUsers(req: ListProjectUsersRequest, initReq?: fm.InitReq): Promise<ListProjectUsersResponse>;
+    static CreateUserInternal(req: CreateUserInternalRequest, initReq?: fm.InitReq): Promise<GoogleProtobufEmpty.Empty>;
 }
