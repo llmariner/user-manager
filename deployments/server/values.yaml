@@ -227,15 +227,6 @@ resources:
   limits:
     cpu: "250m"
 
-livenessProbe:
-  httpGet:
-    path: /healthz
-    port: http
-    scheme: HTTP
-  initialDelaySeconds: 3
-  failureThreshold: 5
-  timeoutSeconds: 3
-
 # LivenessProbe settings for the user-manager-server pod.
 # For more information, see [Liveness, Readiness, and Startup Probes](https://kubernetes.io/docs/concepts/configuration/liveness-readiness-startup-probes/)
 livenessProbe:
