@@ -34,4 +34,5 @@ generate-chart-schema: check-helm-tool
 
 .PHONY: helm-lint
 helm-lint: generate-chart-schema
+	cd ./deployments/server && helm-tool lint
 	helm lint ./deployments/server
