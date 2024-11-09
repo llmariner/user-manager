@@ -34,6 +34,7 @@ type UsersServiceClient interface {
 	CreateProjectUser(ctx context.Context, in *CreateProjectUserRequest, opts ...grpc.CallOption) (*ProjectUser, error)
 	ListProjectUsers(ctx context.Context, in *ListProjectUsersRequest, opts ...grpc.CallOption) (*ListProjectUsersResponse, error)
 	DeleteProjectUser(ctx context.Context, in *DeleteProjectUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GetUserSelf(ctx context.Context, in *GetUserSelfRequest, opts ...grpc.CallOption) (*User, error)
 }
 
 type usersServiceClient struct {
@@ -179,6 +180,15 @@ func (c *usersServiceClient) DeleteProjectUser(ctx context.Context, in *DeletePr
 	return out, nil
 }
 
+func (c *usersServiceClient) GetUserSelf(ctx context.Context, in *GetUserSelfRequest, opts ...grpc.CallOption) (*User, error) {
+	out := new(User)
+	err := c.cc.Invoke(ctx, "/llmariner.users.server.v1.UsersService/GetUserSelf", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UsersServiceServer is the server API for UsersService service.
 // All implementations must embed UnimplementedUsersServiceServer
 // for forward compatibility
@@ -198,6 +208,7 @@ type UsersServiceServer interface {
 	CreateProjectUser(context.Context, *CreateProjectUserRequest) (*ProjectUser, error)
 	ListProjectUsers(context.Context, *ListProjectUsersRequest) (*ListProjectUsersResponse, error)
 	DeleteProjectUser(context.Context, *DeleteProjectUserRequest) (*emptypb.Empty, error)
+	GetUserSelf(context.Context, *GetUserSelfRequest) (*User, error)
 	mustEmbedUnimplementedUsersServiceServer()
 }
 
@@ -249,6 +260,9 @@ func (UnimplementedUsersServiceServer) ListProjectUsers(context.Context, *ListPr
 }
 func (UnimplementedUsersServiceServer) DeleteProjectUser(context.Context, *DeleteProjectUserRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteProjectUser not implemented")
+}
+func (UnimplementedUsersServiceServer) GetUserSelf(context.Context, *GetUserSelfRequest) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserSelf not implemented")
 }
 func (UnimplementedUsersServiceServer) mustEmbedUnimplementedUsersServiceServer() {}
 
@@ -533,6 +547,24 @@ func _UsersService_DeleteProjectUser_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UsersService_GetUserSelf_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserSelfRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServiceServer).GetUserSelf(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/llmariner.users.server.v1.UsersService/GetUserSelf",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServiceServer).GetUserSelf(ctx, req.(*GetUserSelfRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UsersService_ServiceDesc is the grpc.ServiceDesc for UsersService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -599,6 +631,10 @@ var UsersService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteProjectUser",
 			Handler:    _UsersService_DeleteProjectUser_Handler,
+		},
+		{
+			MethodName: "GetUserSelf",
+			Handler:    _UsersService_GetUserSelf_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -192,6 +192,9 @@ export type DeleteProjectUserResponse = {
   deleted?: boolean
 }
 
+export type GetUserSelfRequest = {
+}
+
 export type InternalAPIKey = {
   apiKey?: APIKey
   tenantId?: string
@@ -268,6 +271,9 @@ export class UsersService {
   }
   static DeleteProjectUser(req: DeleteProjectUserRequest, initReq?: fm.InitReq): Promise<GoogleProtobufEmpty.Empty> {
     return fm.fetchReq<DeleteProjectUserRequest, GoogleProtobufEmpty.Empty>(`/v1/organizations/${req["organizationId"]}/projects/${req["projectId"]}/users/${req["userId"]}`, {...initReq, method: "DELETE"})
+  }
+  static GetUserSelf(req: GetUserSelfRequest, initReq?: fm.InitReq): Promise<User> {
+    return fm.fetchReq<GetUserSelfRequest, User>(`/v1/users:getSelf?${fm.renderURLSearchParams(req, [])}`, {...initReq, method: "GET"})
   }
 }
 export class UsersInternalService {

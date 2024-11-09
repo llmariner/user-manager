@@ -575,6 +575,28 @@
           "UsersService"
         ]
       }
+    },
+    "/v1/users:getSelf": {
+      "get": {
+        "operationId": "UsersService_GetUserSelf",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1User"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "UsersService"
+        ]
+      }
     }
   },
   "definitions": {

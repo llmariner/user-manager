@@ -202,6 +202,9 @@ message DeleteProjectUserResponse {
   bool deleted = 3;
 }
 
+message GetUserSelfRequest {
+}
+
 service UsersService {
   rpc CreateAPIKey(CreateAPIKeyRequest) returns (APIKey) {
     option (google.api.http) = {
@@ -290,6 +293,11 @@ service UsersService {
     };
   }
 
+  rpc GetUserSelf(GetUserSelfRequest) returns (User) {
+    option (google.api.http) = {
+      get: "/v1/users:getSelf"
+    };
+  }
 }
 
 message InternalAPIKey {
