@@ -26,8 +26,8 @@ spec:
             name: {{ include "user-manager-server.fullname" . }}-http
             port:
               number: {{ .Values.httpPort }}
-      - path: /v1/users
-        pathType: Prefix
+      - path: /v1/users:getSelf
+        pathType: Exact
         backend:
           service:
             name: {{ include "user-manager-server.fullname" . }}-http
