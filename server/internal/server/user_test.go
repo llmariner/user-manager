@@ -11,6 +11,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestGetUserSelf(t *testing.T) {
+	st, tearDown := store.NewTest(t)
+	defer tearDown()
+
+	srv := New(st, nil, testr.New(t))
+	ctx := fakeAuthInto(context.Background())
+
+	user, err := srv.GetUserSelf(ctx, &v1.GetUserSelfRequest{})
+	assert.NoError(t, err)
+	assert.Equal(t, "defaultuser", user.Id)
+}
+
 func TestCreateUserInternal(t *testing.T) {
 	tcs := []struct {
 		name          string

@@ -2,8 +2,10 @@ package server
 
 import (
 	"context"
+	"fmt"
 
 	gerrors "github.com/llmariner/common/pkg/gormlib/errors"
+	"github.com/llmariner/rbac-manager/pkg/auth"
 	v1 "github.com/llmariner/user-manager/api/v1"
 	"github.com/llmariner/user-manager/pkg/userid"
 	"github.com/llmariner/user-manager/server/internal/store"
@@ -12,6 +14,18 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 	"gorm.io/gorm"
 )
+
+// GetUserSelf gets a self-user.
+func (s *S) GetUserSelf(ctx context.Context, req *v1.GetUserSelfRequest) (*v1.User, error) {
+	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("failed to extract user info from context")
+	}
+
+	return &v1.User{
+		Id: userInfo.UserID,
+	}, nil
+}
 
 // CreateUserInternal creates a new user and related organization and project.
 func (s *IS) CreateUserInternal(ctx context.Context, req *v1.CreateUserInternalRequest) (*emptypb.Empty, error) {

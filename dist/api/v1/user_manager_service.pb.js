@@ -62,6 +62,9 @@ export class UsersService {
     static DeleteProjectUser(req, initReq) {
         return fm.fetchReq(`/v1/organizations/${req["organizationId"]}/projects/${req["projectId"]}/users/${req["userId"]}`, Object.assign(Object.assign({}, initReq), { method: "DELETE" }));
     }
+    static GetUserSelf(req, initReq) {
+        return fm.fetchReq(`/v1/users:getSelf?${fm.renderURLSearchParams(req, [])}`, Object.assign(Object.assign({}, initReq), { method: "GET" }));
+    }
 }
 export class UsersInternalService {
     static ListInternalAPIKeys(req, initReq) {
