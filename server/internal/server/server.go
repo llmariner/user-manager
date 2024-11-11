@@ -77,6 +77,8 @@ func (s *S) Run(ctx context.Context, port int, authConfig config.AuthConfig, usa
 					return "api.organizations.projects"
 				case "CreateProjectUser", "DeleteProjectUser", "ListProjectUsers":
 					return "api.organizations.projects.users"
+				case "GetUserSelf":
+					return "api.selfuser"
 				default:
 					return "unknown"
 				}
