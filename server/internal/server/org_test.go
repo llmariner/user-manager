@@ -389,36 +389,125 @@ func TestListOrganizations_EnableAuth(t *testing.T) {
 	})
 	assert.NoError(t, err)
 
+	p1, err := srv.CreateProject(u0Ctx, &v1.CreateProjectRequest{
+		Title:               fmt.Sprintf("Test project 1"),
+		OrganizationId:      o1.Id,
+		KubernetesNamespace: "test",
+	})
+	assert.NoError(t, err)
+
 	_, err = srv.CreateOrganizationUser(u0Ctx, &v1.CreateOrganizationUserRequest{
 		OrganizationId: o1.Id,
 		UserId:         "user1",
+		Role:           v1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
+	})
+	assert.NoError(t, err)
+
+	_, err = srv.CreateOrganizationUser(u0Ctx, &v1.CreateOrganizationUserRequest{
+		OrganizationId: o1.Id,
+		UserId:         "user2",
 		Role:           v1.OrganizationRole_ORGANIZATION_ROLE_READER,
 	})
 	assert.NoError(t, err)
 
-	resp, err := srv.ListOrganizations(u0Ctx, &v1.ListOrganizationsRequest{})
+	_, err = srv.CreateOrganizationUser(u0Ctx, &v1.CreateOrganizationUserRequest{
+		OrganizationId: o1.Id,
+		UserId:         "user3",
+		Role:           v1.OrganizationRole_ORGANIZATION_ROLE_READER,
+	})
+	assert.NoError(t, err)
+
+	pu0, err := srv.CreateProjectUser(u0Ctx, &v1.CreateProjectUserRequest{
+		ProjectId:      p1.Id,
+		OrganizationId: o1.Id,
+		UserId:         "user3",
+		Role:           v1.ProjectRole_PROJECT_ROLE_OWNER,
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, "user3", pu0.UserId)
+
+	resp, err := srv.ListOrganizations(u0Ctx, &v1.ListOrganizationsRequest{
+		IncludeSummaries: true,
+	})
 	assert.NoError(t, err)
 	assert.Len(t, resp.Organizations, 2)
-	var ids []string
+	var numFound int
 	for _, o := range resp.Organizations {
-		ids = append(ids, o.Id)
+		if o.Id == o0.OrganizationID {
+			numFound++
+			assert.NotNil(t, o.Summary)
+			assert.Equal(t, int32(0), o.Summary.ProjectCount)
+			// Only user0
+			assert.Equal(t, int32(1), o.Summary.UserCount)
+		} else if o.Id == o1.Id {
+			numFound++
+			assert.NotNil(t, o.Summary)
+			assert.Equal(t, int32(1), o.Summary.ProjectCount)
+			assert.Equal(t, int32(4), o.Summary.UserCount)
+		} else {
+			t.Fatalf("unexpected org %q", o.Id)
+		}
 	}
-	assert.ElementsMatch(t, []string{o0.OrganizationID, o1.Id}, ids)
+	assert.Equal(t, 2, numFound)
 
-	ui = auth.UserInfo{
-		UserID: "user1",
-	}
-	u1Ctx := auth.AppendUserInfoToContext(context.Background(), ui)
-	resp, err = srv.ListOrganizations(u1Ctx, &v1.ListOrganizationsRequest{})
+	u1Ctx := auth.AppendUserInfoToContext(
+		context.Background(),
+		auth.UserInfo{
+			UserID: "user1",
+		},
+	)
+	resp, err = srv.ListOrganizations(u1Ctx, &v1.ListOrganizationsRequest{
+		IncludeSummaries: true,
+	})
 	assert.NoError(t, err)
 	assert.Len(t, resp.Organizations, 1)
 	assert.Equal(t, resp.Organizations[0].Id, o1.Id)
+	assert.NotNil(t, resp.Organizations[0].Summary)
+	// Since user1 is an owner of the organization, the user can see the project.
+	assert.Equal(t, int32(1), resp.Organizations[0].Summary.ProjectCount)
+	assert.Equal(t, int32(4), resp.Organizations[0].Summary.UserCount)
 
-	ui = auth.UserInfo{
-		UserID: "u2",
-	}
-	u2Ctx := auth.AppendUserInfoToContext(context.Background(), ui)
-	resp, err = srv.ListOrganizations(u2Ctx, &v1.ListOrganizationsRequest{})
+	u2Ctx := auth.AppendUserInfoToContext(
+		context.Background(),
+		auth.UserInfo{
+			UserID: "user2",
+		},
+	)
+	resp, err = srv.ListOrganizations(u2Ctx, &v1.ListOrganizationsRequest{
+		IncludeSummaries: true,
+	})
+	assert.NoError(t, err)
+	assert.Len(t, resp.Organizations, 1)
+	assert.Equal(t, resp.Organizations[0].Id, o1.Id)
+	assert.NotNil(t, resp.Organizations[0].Summary)
+	// Since user2 is only a reader of the organization, the user cannot see the project.
+	assert.Equal(t, int32(0), resp.Organizations[0].Summary.ProjectCount)
+	assert.Equal(t, int32(4), resp.Organizations[0].Summary.UserCount)
+
+	u3Ctx := auth.AppendUserInfoToContext(
+		context.Background(),
+		auth.UserInfo{
+			UserID: "user3",
+		},
+	)
+	resp, err = srv.ListOrganizations(u3Ctx, &v1.ListOrganizationsRequest{
+		IncludeSummaries: true,
+	})
+	assert.NoError(t, err)
+	assert.Len(t, resp.Organizations, 1)
+	assert.Equal(t, resp.Organizations[0].Id, o1.Id)
+	assert.NotNil(t, resp.Organizations[0].Summary)
+	// Though user2 is only a reader of the organization, the user can see the project because the user is an owner of the project.
+	assert.Equal(t, int32(1), resp.Organizations[0].Summary.ProjectCount)
+	assert.Equal(t, int32(4), resp.Organizations[0].Summary.UserCount)
+
+	u4Ctx := auth.AppendUserInfoToContext(
+		context.Background(),
+		auth.UserInfo{
+			UserID: "user4",
+		},
+	)
+	resp, err = srv.ListOrganizations(u4Ctx, &v1.ListOrganizationsRequest{})
 	assert.NoError(t, err)
 	assert.Empty(t, resp.Organizations)
 }
