@@ -103,7 +103,7 @@ func (s *IS) CreateUserInternal(ctx context.Context, req *v1.CreateUserInternalR
 
 	// create new organization and project, and add user to them.
 	if err := s.store.Transaction(func(tx *gorm.DB) error {
-		org, err := createOrganization(ctx, s.store, req.Title, false, req.TenantId, []string{userID})
+		org, err := createOrganization(s.store, req.Title, false, req.TenantId, []string{userID})
 		if err != nil {
 			if gerrors.IsUniqueConstraintViolation(err) {
 				return status.Errorf(codes.AlreadyExists, "organizatione %q already exists", req.Title)
@@ -111,7 +111,7 @@ func (s *IS) CreateUserInternal(ctx context.Context, req *v1.CreateUserInternalR
 			return status.Error(codes.Internal, err.Error())
 		}
 
-		if _, err = createProject(ctx, s.store, req.Title, org.OrganizationID, req.KubernetesNamespac, false, org.TenantID); err != nil {
+		if _, err = createProject(s.store, req.Title, org.OrganizationID, req.KubernetesNamespac, false, org.TenantID); err != nil {
 			return err
 		}
 		return nil
