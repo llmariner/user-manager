@@ -128,14 +128,22 @@ func (s *S) ListOrganizations(ctx context.Context, req *v1.ListOrganizationsRequ
 				return nil, status.Errorf(codes.Internal, "list projects: %s", err)
 			}
 
-			org.ProjectCount = int32(len(ps))
+			var visiblePjCount int32
+			for _, p := range ps {
+				if s.validateProjectMember(p.ProjectID, p.OrganizationID, userInfo.UserID) == nil {
+					visiblePjCount++
+				}
+			}
 
 			us, err := s.store.ListOrganizationUsersByOrganizationID(org.Id)
 			if err != nil {
 				return nil, status.Errorf(codes.Internal, "list organization users: %s", err)
 			}
 
-			org.UserCount = int32(len(us))
+			org.Summary = &v1.Organization_Summary{
+				ProjectCount: visiblePjCount,
+				UserCount:    int32(len(us)),
+			}
 		}
 	}
 

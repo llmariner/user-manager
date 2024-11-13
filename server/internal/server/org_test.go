@@ -23,6 +23,7 @@ func TestOrganization(t *testing.T) {
 	isrv := NewInternal(st, nil, testr.New(t))
 	ctx := fakeAuthInto(context.Background())
 
+	var projects []*v1.Project
 	for i := 0; i < 2; i++ {
 		title := fmt.Sprintf("test %d", i)
 		cresp, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
@@ -44,11 +45,33 @@ func TestOrganization(t *testing.T) {
 			Role:           v1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
 		})
 		assert.NoError(t, err)
+
+		project, err := srv.CreateProject(ctx, &v1.CreateProjectRequest{
+			Title:               fmt.Sprintf("Test project %d", i),
+			OrganizationId:      cresp.Id,
+			KubernetesNamespace: "test",
+		})
+		assert.NoError(t, err)
+		projects = append(projects, project)
 	}
 
 	lresp, err := srv.ListOrganizations(ctx, &v1.ListOrganizationsRequest{})
 	assert.NoError(t, err)
 	assert.Len(t, lresp.Organizations, 2)
+	assert.Nil(t, lresp.Organizations[0].Summary)
+	assert.Nil(t, lresp.Organizations[1].Summary)
+
+	lSumResp, err := srv.ListOrganizations(ctx, &v1.ListOrganizationsRequest{
+		IncludeSummaries: true,
+	})
+	assert.NoError(t, err)
+	assert.Len(t, lSumResp.Organizations, 2)
+	assert.NotNil(t, lSumResp.Organizations[0].Summary)
+	assert.Equal(t, int32(1), lSumResp.Organizations[0].Summary.ProjectCount)
+	assert.Equal(t, int32(1), lSumResp.Organizations[0].Summary.UserCount)
+	assert.NotNil(t, lSumResp.Organizations[1].Summary)
+	assert.Equal(t, int32(1), lSumResp.Organizations[1].Summary.ProjectCount)
+	assert.Equal(t, int32(1), lSumResp.Organizations[1].Summary.UserCount)
 
 	ilresp, err := isrv.ListInternalOrganizations(ctx, &v1.ListInternalOrganizationsRequest{})
 	assert.NoError(t, err)
@@ -57,6 +80,12 @@ func TestOrganization(t *testing.T) {
 	laresp, err := isrv.store.ListAllOrganizationUsers()
 	assert.NoError(t, err)
 	assert.Len(t, laresp, 2)
+
+	_, err = srv.DeleteProject(ctx, &v1.DeleteProjectRequest{
+		OrganizationId: lresp.Organizations[0].Id,
+		Id:             projects[0].Id,
+	})
+	assert.NoError(t, err)
 
 	_, err = srv.DeleteOrganization(ctx, &v1.DeleteOrganizationRequest{
 		Id: lresp.Organizations[0].Id,
@@ -312,7 +341,7 @@ func TestCreateDefaultOrganization(t *testing.T) {
 	assert.Equal(t, codes.InvalidArgument, status.Code(err))
 }
 
-func TestCreateOrganization_EnableAuth(t *testing.T) {
+func TestCreateOrganizations_EnableAuth(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()
 
@@ -341,7 +370,7 @@ func TestCreateOrganization_EnableAuth(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestListOrganization_EnableAuth(t *testing.T) {
+func TestListOrganizations_EnableAuth(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()
 
