@@ -117,7 +117,7 @@ message CreateOrganizationRequest {
 }
 
 message ListOrganizationsRequest {
-  bool include_summaries = 1;
+  bool include_summary = 1;
 }
 
 message ListOrganizationsResponse {
