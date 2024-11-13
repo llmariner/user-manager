@@ -82,7 +82,7 @@ export type CreateOrganizationRequest = {
     title?: string;
 };
 export type ListOrganizationsRequest = {
-    includeSummaries?: boolean;
+    includeSummary?: boolean;
 };
 export type ListOrganizationsResponse = {
     organizations?: Organization[];

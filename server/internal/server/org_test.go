@@ -62,7 +62,7 @@ func TestOrganization(t *testing.T) {
 	assert.Nil(t, lresp.Organizations[1].Summary)
 
 	lSumResp, err := srv.ListOrganizations(ctx, &v1.ListOrganizationsRequest{
-		IncludeSummaries: true,
+		IncludeSummary: true,
 	})
 	assert.NoError(t, err)
 	assert.Len(t, lSumResp.Organizations, 2)
@@ -427,7 +427,7 @@ func TestListOrganizations_EnableAuth(t *testing.T) {
 	assert.Equal(t, "user3", pu0.UserId)
 
 	resp, err := srv.ListOrganizations(u0Ctx, &v1.ListOrganizationsRequest{
-		IncludeSummaries: true,
+		IncludeSummary: true,
 	})
 	assert.NoError(t, err)
 	assert.Len(t, resp.Organizations, 2)
@@ -457,7 +457,7 @@ func TestListOrganizations_EnableAuth(t *testing.T) {
 		},
 	)
 	resp, err = srv.ListOrganizations(u1Ctx, &v1.ListOrganizationsRequest{
-		IncludeSummaries: true,
+		IncludeSummary: true,
 	})
 	assert.NoError(t, err)
 	assert.Len(t, resp.Organizations, 1)
@@ -474,7 +474,7 @@ func TestListOrganizations_EnableAuth(t *testing.T) {
 		},
 	)
 	resp, err = srv.ListOrganizations(u2Ctx, &v1.ListOrganizationsRequest{
-		IncludeSummaries: true,
+		IncludeSummary: true,
 	})
 	assert.NoError(t, err)
 	assert.Len(t, resp.Organizations, 1)
@@ -482,7 +482,7 @@ func TestListOrganizations_EnableAuth(t *testing.T) {
 	assert.NotNil(t, resp.Organizations[0].Summary)
 	// Since user2 is only a reader of the organization, the user cannot see the project.
 	assert.Equal(t, int32(0), resp.Organizations[0].Summary.ProjectCount)
-	assert.Equal(t, int32(4), resp.Organizations[0].Summary.UserCount)
+	assert.Equal(t, int32(0), resp.Organizations[0].Summary.UserCount)
 
 	u3Ctx := auth.AppendUserInfoToContext(
 		context.Background(),
@@ -491,7 +491,7 @@ func TestListOrganizations_EnableAuth(t *testing.T) {
 		},
 	)
 	resp, err = srv.ListOrganizations(u3Ctx, &v1.ListOrganizationsRequest{
-		IncludeSummaries: true,
+		IncludeSummary: true,
 	})
 	assert.NoError(t, err)
 	assert.Len(t, resp.Organizations, 1)
@@ -499,7 +499,7 @@ func TestListOrganizations_EnableAuth(t *testing.T) {
 	assert.NotNil(t, resp.Organizations[0].Summary)
 	// Though user2 is only a reader of the organization, the user can see the project because the user is an owner of the project.
 	assert.Equal(t, int32(1), resp.Organizations[0].Summary.ProjectCount)
-	assert.Equal(t, int32(4), resp.Organizations[0].Summary.UserCount)
+	assert.Equal(t, int32(0), resp.Organizations[0].Summary.UserCount)
 
 	u4Ctx := auth.AppendUserInfoToContext(
 		context.Background(),

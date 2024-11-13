@@ -64,7 +64,7 @@ message Organization {
   }
 
   // Summary holds summary information about the organization.
-  // This field is filled only when `include_summaries` is set to true.
+  // This field is filled only when `include_summary` is set to true.
   Summary summary = 4;
 }
 

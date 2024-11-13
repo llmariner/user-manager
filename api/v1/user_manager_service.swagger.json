@@ -38,7 +38,7 @@
         },
         "parameters": [
           {
-            "name": "includeSummaries",
+            "name": "includeSummary",
             "in": "query",
             "required": false,
             "type": "boolean"
@@ -854,7 +854,7 @@
         },
         "summary": {
           "$ref": "#/definitions/OrganizationSummary",
-          "description": "Summary holds summary information about the organization.\nThis field is filled only when `include_summaries` is set to true."
+          "description": "Summary holds summary information about the organization.\nThis field is filled only when `include_summary` is set to true."
         }
       }
     },

@@ -121,7 +121,7 @@ func (s *S) ListOrganizations(ctx context.Context, req *v1.ListOrganizationsRequ
 		orgProtos = append(orgProtos, org.ToProto())
 	}
 
-	if req.IncludeSummaries {
+	if req.IncludeSummary {
 		for _, org := range orgProtos {
 			ps, err := s.store.ListProjectsByTenantIDAndOrganizationID(userInfo.TenantID, org.Id)
 			if err != nil {
@@ -135,14 +135,18 @@ func (s *S) ListOrganizations(ctx context.Context, req *v1.ListOrganizationsRequ
 				}
 			}
 
-			us, err := s.store.ListOrganizationUsersByOrganizationID(org.Id)
-			if err != nil {
-				return nil, status.Errorf(codes.Internal, "list organization users: %s", err)
+			var visibleUserCount int32
+			if s.validateOrganizationOwner(org.Id, userInfo.UserID) == nil {
+				us, err := s.store.ListOrganizationUsersByOrganizationID(org.Id)
+				if err != nil {
+					return nil, status.Errorf(codes.Internal, "list organization users: %s", err)
+				}
+				visibleUserCount = int32(len(us))
 			}
 
 			org.Summary = &v1.Organization_Summary{
 				ProjectCount: visiblePjCount,
-				UserCount:    int32(len(us)),
+				UserCount:    visibleUserCount,
 			}
 		}
 	}

@@ -104,7 +104,7 @@ export type CreateOrganizationRequest = {
 }
 
 export type ListOrganizationsRequest = {
-  includeSummaries?: boolean
+  includeSummary?: boolean
 }
 
 export type ListOrganizationsResponse = {
