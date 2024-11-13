@@ -100,7 +100,7 @@ func createOrganization(ctx context.Context, st *store.S, title string, isDefaul
 func (s *S) ListOrganizations(ctx context.Context, req *v1.ListOrganizationsRequest) (*v1.ListOrganizationsResponse, error) {
 	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
 	if !ok {
-		return nil, fmt.Errorf("failed to extract user info from context")
+		return nil, status.Errorf(codes.Internal, "failed to extract user info from context")
 	}
 
 	orgs, err := s.store.ListOrganizations(userInfo.TenantID)
@@ -109,17 +109,36 @@ func (s *S) ListOrganizations(ctx context.Context, req *v1.ListOrganizationsRequ
 	}
 
 	// Only show orgs that the user is a owner/reader of.
-	var filtered []*store.Organization
+	var visibleOrgs []*store.Organization
 	for _, org := range orgs {
 		if s.organizationRole(org.OrganizationID, userInfo.UserID) != v1.OrganizationRole_ORGANIZATION_ROLE_UNSPECIFIED {
-			filtered = append(filtered, org)
+			visibleOrgs = append(visibleOrgs, org)
 		}
 	}
 
 	var orgProtos []*v1.Organization
-	for _, org := range filtered {
+	for _, org := range visibleOrgs {
 		orgProtos = append(orgProtos, org.ToProto())
 	}
+
+	if req.IncludeSummaries {
+		for _, org := range orgProtos {
+			ps, err := s.store.ListProjectsByTenantIDAndOrganizationID(userInfo.TenantID, org.Id)
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "list projects: %s", err)
+			}
+
+			org.ProjectCount = int32(len(ps))
+
+			us, err := s.store.ListOrganizationUsersByOrganizationID(org.Id)
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "list organization users: %s", err)
+			}
+
+			org.UserCount = int32(len(us))
+		}
+	}
+
 	return &v1.ListOrganizationsResponse{
 		Organizations: orgProtos,
 	}, nil

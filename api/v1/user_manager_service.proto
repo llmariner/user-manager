@@ -55,6 +55,13 @@ message Organization {
   string id = 1;
   string title = 2;
   int64 created_at = 3;
+
+  // project_count is the number of projects in the organization.
+  // This field is filled only when `include_summaries` is set to true.
+  int32 project_count = 4;
+  // user_count is the number of users in the organization.
+  // This field is filled only when `include_summaries` is set to true.
+  int32 user_count = 5;
 }
 
 message ProjectUser {
@@ -106,6 +113,7 @@ message CreateOrganizationRequest {
 }
 
 message ListOrganizationsRequest {
+  bool include_summaries = 1;
 }
 
 message ListOrganizationsResponse {

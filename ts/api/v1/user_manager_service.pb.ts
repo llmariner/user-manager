@@ -48,6 +48,8 @@ export type Organization = {
   id?: string
   title?: string
   createdAt?: string
+  projectCount?: number
+  userCount?: number
 }
 
 export type ProjectUser = {
@@ -98,6 +100,7 @@ export type CreateOrganizationRequest = {
 }
 
 export type ListOrganizationsRequest = {
+  includeSummaries?: boolean
 }
 
 export type ListOrganizationsResponse = {

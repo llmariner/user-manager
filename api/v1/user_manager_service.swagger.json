@@ -36,6 +36,14 @@
             }
           }
         },
+        "parameters": [
+          {
+            "name": "includeSummaries",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
         "tags": [
           "UsersService"
         ]
@@ -828,6 +836,16 @@
         "createdAt": {
           "type": "string",
           "format": "int64"
+        },
+        "projectCount": {
+          "type": "integer",
+          "format": "int32",
+          "description": "project_count is the number of projects in the organization.\nThis field is filled only when `include_summaries` is set to true."
+        },
+        "userCount": {
+          "type": "integer",
+          "format": "int32",
+          "description": "user_count is the number of users in the organization.\nThis field is filled only when `include_summaries` is set to true."
         }
       }
     },
