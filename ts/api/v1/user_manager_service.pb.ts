@@ -44,10 +44,16 @@ export type OrganizationUser = {
   role?: OrganizationRole
 }
 
+export type OrganizationSummary = {
+  projectCount?: number
+  userCount?: number
+}
+
 export type Organization = {
   id?: string
   title?: string
   createdAt?: string
+  summary?: OrganizationSummary
 }
 
 export type ProjectUser = {
@@ -98,6 +104,7 @@ export type CreateOrganizationRequest = {
 }
 
 export type ListOrganizationsRequest = {
+  includeSummary?: boolean
 }
 
 export type ListOrganizationsResponse = {

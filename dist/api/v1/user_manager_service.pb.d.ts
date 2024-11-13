@@ -32,10 +32,15 @@ export type OrganizationUser = {
     organizationId?: string;
     role?: OrganizationRole;
 };
+export type OrganizationSummary = {
+    projectCount?: number;
+    userCount?: number;
+};
 export type Organization = {
     id?: string;
     title?: string;
     createdAt?: string;
+    summary?: OrganizationSummary;
 };
 export type ProjectUser = {
     userId?: string;
@@ -76,7 +81,9 @@ export type DeleteAPIKeyResponse = {
 export type CreateOrganizationRequest = {
     title?: string;
 };
-export type ListOrganizationsRequest = {};
+export type ListOrganizationsRequest = {
+    includeSummary?: boolean;
+};
 export type ListOrganizationsResponse = {
     organizations?: Organization[];
 };

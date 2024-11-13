@@ -36,6 +36,14 @@
             }
           }
         },
+        "parameters": [
+          {
+            "name": "includeSummary",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
         "tags": [
           "UsersService"
         ]
@@ -600,6 +608,21 @@
     }
   },
   "definitions": {
+    "OrganizationSummary": {
+      "type": "object",
+      "properties": {
+        "projectCount": {
+          "type": "integer",
+          "format": "int32",
+          "description": "project_count is the number of projects in the organization."
+        },
+        "userCount": {
+          "type": "integer",
+          "format": "int32",
+          "description": "user_count is the number of users in the organization."
+        }
+      }
+    },
     "protobufAny": {
       "type": "object",
       "properties": {
@@ -828,6 +851,10 @@
         "createdAt": {
           "type": "string",
           "format": "int64"
+        },
+        "summary": {
+          "$ref": "#/definitions/OrganizationSummary",
+          "description": "Summary holds summary information about the organization.\nThis field is filled only when `include_summary` is set to true."
         }
       }
     },
