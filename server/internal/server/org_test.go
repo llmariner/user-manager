@@ -390,7 +390,7 @@ func TestListOrganizations_EnableAuth(t *testing.T) {
 	assert.NoError(t, err)
 
 	p1, err := srv.CreateProject(u0Ctx, &v1.CreateProjectRequest{
-		Title:               fmt.Sprintf("Test project 1"),
+		Title:               "Test project 1",
 		OrganizationId:      o1.Id,
 		KubernetesNamespace: "test",
 	})
