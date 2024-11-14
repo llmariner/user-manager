@@ -151,7 +151,7 @@ func (s *S) ListProjects(ctx context.Context, req *v1.ListProjectsRequest) (*v1.
 		if req.IncludeSummary {
 			numUsers, err := s.store.CountProjectUsersByProjectID(p.ProjectID)
 			if err != nil {
-				return nil, status.Errorf(codes.Internal, "list project users: %s", err)
+				return nil, status.Errorf(codes.Internal, "count project users by project ID: %s", err)
 			}
 			pProto.Summary = &v1.Project_Summary{
 				UserCount: int32(numUsers),
