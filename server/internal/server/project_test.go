@@ -317,26 +317,95 @@ func TestListProjects_EnableAuth(t *testing.T) {
 	u0Ctx := auth.AppendUserInfoToContext(context.Background(), auth.UserInfo{
 		UserID: "u0",
 	})
-	_, err := srv.CreateProject(u0Ctx, &v1.CreateProjectRequest{
+	p0, err := srv.CreateProject(u0Ctx, &v1.CreateProjectRequest{
 		Title:               "title",
 		OrganizationId:      o.OrganizationID,
 		KubernetesNamespace: "n0",
 	})
 	assert.NoError(t, err)
 
-	req := &v1.ListProjectsRequest{
+	_, err = srv.CreateOrganizationUser(u0Ctx, &v1.CreateOrganizationUserRequest{
 		OrganizationId: o.OrganizationID,
-	}
-	resp, err := srv.ListProjects(u0Ctx, req)
+		UserId:         "u1",
+		Role:           v1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
+	})
+	assert.NoError(t, err)
+
+	_, err = srv.CreateOrganizationUser(u0Ctx, &v1.CreateOrganizationUserRequest{
+		OrganizationId: o.OrganizationID,
+		UserId:         "u2",
+		Role:           v1.OrganizationRole_ORGANIZATION_ROLE_READER,
+	})
+	assert.NoError(t, err)
+
+	_, err = srv.CreateProjectUser(u0Ctx, &v1.CreateProjectUserRequest{
+		ProjectId:      p0.Id,
+		OrganizationId: o.OrganizationID,
+		UserId:         "u2",
+		Role:           v1.ProjectRole_PROJECT_ROLE_MEMBER,
+	})
+	assert.NoError(t, err)
+
+	_, err = srv.CreateOrganizationUser(u0Ctx, &v1.CreateOrganizationUserRequest{
+		OrganizationId: o.OrganizationID,
+		UserId:         "u3",
+		Role:           v1.OrganizationRole_ORGANIZATION_ROLE_READER,
+	})
+	assert.NoError(t, err)
+
+	resp, err := srv.ListProjects(u0Ctx, &v1.ListProjectsRequest{
+		OrganizationId: o.OrganizationID,
+	})
 	assert.NoError(t, err)
 	assert.Len(t, resp.Projects, 1)
+
+	respWithSum, err := srv.ListProjects(u0Ctx, &v1.ListProjectsRequest{
+		OrganizationId: o.OrganizationID,
+		IncludeSummary: true,
+	})
+	assert.NoError(t, err)
+	assert.Len(t, respWithSum.Projects, 1)
+	assert.NotNil(t, respWithSum.Projects[0].Summary)
+	// 2 users:
+	// - u0 who created the project
+	// - u2
+	assert.Equal(t, int32(2), respWithSum.Projects[0].Summary.UserCount)
 
 	u1Ctx := auth.AppendUserInfoToContext(context.Background(), auth.UserInfo{
 		UserID: "u1",
 	})
-	resp, err = srv.ListProjects(u1Ctx, req)
+	resp, err = srv.ListProjects(u1Ctx, &v1.ListProjectsRequest{
+		OrganizationId: o.OrganizationID,
+	})
 	assert.NoError(t, err)
-	assert.Empty(t, 0, resp.Projects)
+	assert.Len(t, resp.Projects, 1)
+
+	u2Ctx := auth.AppendUserInfoToContext(context.Background(), auth.UserInfo{
+		UserID: "u2",
+	})
+	resp, err = srv.ListProjects(u2Ctx, &v1.ListProjectsRequest{
+		OrganizationId: o.OrganizationID,
+	})
+	assert.NoError(t, err)
+	assert.Len(t, resp.Projects, 1)
+
+	u3Ctx := auth.AppendUserInfoToContext(context.Background(), auth.UserInfo{
+		UserID: "u3",
+	})
+	resp, err = srv.ListProjects(u3Ctx, &v1.ListProjectsRequest{
+		OrganizationId: o.OrganizationID,
+	})
+	assert.NoError(t, err)
+	assert.Empty(t, resp.Projects)
+
+	u4Ctx := auth.AppendUserInfoToContext(context.Background(), auth.UserInfo{
+		UserID: "u4",
+	})
+	resp, err = srv.ListProjects(u4Ctx, &v1.ListProjectsRequest{
+		OrganizationId: o.OrganizationID,
+	})
+	assert.NoError(t, err)
+	assert.Empty(t, resp.Projects)
 }
 
 func TestDeleteProject_EnableAuth(t *testing.T) {

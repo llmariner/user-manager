@@ -82,6 +82,15 @@ message Project {
   string kubernetes_namespace = 3;
   string organization_id = 4;
   int64 created_at = 5;
+
+  message Summary {
+    // user_count is the number of users in the project.
+    int32 user_count = 1;
+  }
+
+  // Summary holds summary information about the project.
+  // This field is filled only when `include_summary` is set to true.
+  Summary summary = 6;
 }
 
 message CreateAPIKeyRequest {
@@ -167,7 +176,9 @@ message CreateProjectRequest {
 }
 
 message ListProjectsRequest {
-    string organization_id = 1;
+  string organization_id = 1;
+
+  bool include_summary = 2;
 }
 
 message ListProjectsResponse {

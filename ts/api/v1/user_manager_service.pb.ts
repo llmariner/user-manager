@@ -63,12 +63,17 @@ export type ProjectUser = {
   role?: ProjectRole
 }
 
+export type ProjectSummary = {
+  userCount?: number
+}
+
 export type Project = {
   id?: string
   title?: string
   kubernetesNamespace?: string
   organizationId?: string
   createdAt?: string
+  summary?: ProjectSummary
 }
 
 export type CreateAPIKeyRequest = {
@@ -154,6 +159,7 @@ export type CreateProjectRequest = {
 
 export type ListProjectsRequest = {
   organizationId?: string
+  includeSummary?: boolean
 }
 
 export type ListProjectsResponse = {
