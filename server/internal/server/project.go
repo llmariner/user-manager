@@ -228,7 +228,7 @@ func (s *S) CreateProjectUser(ctx context.Context, req *v1.CreateProjectUserRequ
 	}
 
 	userID := userid.Normalize(req.UserId)
-	if s.organizationRole(req.OrganizationId, userID) == v1.OrganizationRole_ORGANIZATION_ROLE_UNSPECIFIED {
+	if !s.isOrganizationMember(req.OrganizationId, userID) {
 		return nil, status.Errorf(codes.FailedPrecondition, "user %q is not a member of the organization", userID)
 	}
 
@@ -323,6 +323,9 @@ func (s *S) DeleteProjectUser(ctx context.Context, req *v1.DeleteProjectUserRequ
 	return &emptypb.Empty{}, nil
 }
 
+// validateProjectID validates that:
+// - the specified project exists
+// - the projects belongs to the specified organization and tenant
 func validateProjectID(st *store.S, projectID, orgID, tenantID string) (*store.Project, error) {
 	if _, err := validateOrganizationID(st, orgID, tenantID); err != nil {
 		return nil, err
@@ -337,7 +340,7 @@ func validateProjectID(st *store.S, projectID, orgID, tenantID string) (*store.P
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Errorf(codes.FailedPrecondition, "project %q not found", orgID)
 		}
-		return nil, status.Errorf(codes.Internal, "get project: %s", err)
+		return nil, status.Errorf(codes.Internal, "failed to get project: %s", err)
 	}
 
 	return p, nil

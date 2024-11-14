@@ -64,7 +64,7 @@ func (s *S) canCreateOrganization(userInfo *auth.UserInfo) (bool, error) {
 	if err != nil {
 		return false, status.Errorf(codes.Internal, "get default organizations: %s", err)
 	}
-	return s.organizationRole(org.OrganizationID, userInfo.UserID) == v1.OrganizationRole_ORGANIZATION_ROLE_OWNER, nil
+	return s.isOrganizationOwner(org.OrganizationID, userInfo.UserID), nil
 }
 
 func createOrganization(st *store.S, title string, isDefault bool, tenantID string, userIDs []string) (*store.Organization, error) {
@@ -111,7 +111,7 @@ func (s *S) ListOrganizations(ctx context.Context, req *v1.ListOrganizationsRequ
 	// Only show orgs that the user is a owner/reader of.
 	var visibleOrgs []*store.Organization
 	for _, org := range orgs {
-		if s.organizationRole(org.OrganizationID, userInfo.UserID) != v1.OrganizationRole_ORGANIZATION_ROLE_UNSPECIFIED {
+		if s.isOrganizationMember(org.OrganizationID, userInfo.UserID) {
 			visibleOrgs = append(visibleOrgs, org)
 		}
 	}
@@ -136,7 +136,7 @@ func (s *S) ListOrganizations(ctx context.Context, req *v1.ListOrganizationsRequ
 			}
 
 			var visibleUserCount int32
-			if s.validateOrganizationOwner(org.Id, userInfo.UserID) == nil {
+			if s.isOrganizationOwner(org.Id, userInfo.UserID) {
 				us, err := s.store.ListOrganizationUsersByOrganizationID(org.Id)
 				if err != nil {
 					return nil, status.Errorf(codes.Internal, "list organization users: %s", err)
@@ -366,7 +366,7 @@ func validateOrganizationID(st *store.S, orgID, tenantID string) (*store.Organiz
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Errorf(codes.FailedPrecondition, "organization %q not found", orgID)
 		}
-		return nil, status.Errorf(codes.Internal, "get organization: %s", err)
+		return nil, status.Errorf(codes.Internal, "failed to get organization: %s", err)
 	}
 
 	return o, nil

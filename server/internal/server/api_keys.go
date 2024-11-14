@@ -128,7 +128,7 @@ func (s *S) ListAPIKeys(
 		return nil, err
 	}
 
-	// TODO(kenji): Do not allow a project member to delete other users' API keys.
+	// TODO(kenji): Do not allow a project member to read other users' API keys.
 	if err := s.validateProjectMember(req.ProjectId, req.OrganizationId, userInfo.UserID); err != nil {
 		return nil, err
 	}
