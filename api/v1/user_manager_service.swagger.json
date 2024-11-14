@@ -132,6 +132,12 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "includeSummary",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "tags": [
@@ -608,21 +614,6 @@
     }
   },
   "definitions": {
-    "OrganizationSummary": {
-      "type": "object",
-      "properties": {
-        "projectCount": {
-          "type": "integer",
-          "format": "int32",
-          "description": "project_count is the number of projects in the organization."
-        },
-        "userCount": {
-          "type": "integer",
-          "format": "int32",
-          "description": "user_count is the number of users in the organization."
-        }
-      }
-    },
     "protobufAny": {
       "type": "object",
       "properties": {
@@ -853,7 +844,7 @@
           "format": "int64"
         },
         "summary": {
-          "$ref": "#/definitions/OrganizationSummary",
+          "$ref": "#/definitions/v1OrganizationSummary",
           "description": "Summary holds summary information about the organization.\nThis field is filled only when `include_summary` is set to true."
         }
       }
@@ -866,6 +857,21 @@
         "ORGANIZATION_ROLE_READER"
       ],
       "default": "ORGANIZATION_ROLE_UNSPECIFIED"
+    },
+    "v1OrganizationSummary": {
+      "type": "object",
+      "properties": {
+        "projectCount": {
+          "type": "integer",
+          "format": "int32",
+          "description": "project_count is the number of projects in the organization."
+        },
+        "userCount": {
+          "type": "integer",
+          "format": "int32",
+          "description": "user_count is the number of users in the organization."
+        }
+      }
     },
     "v1OrganizationUser": {
       "type": "object",
@@ -904,6 +910,10 @@
         "createdAt": {
           "type": "string",
           "format": "int64"
+        },
+        "summary": {
+          "$ref": "#/definitions/v1ProjectSummary",
+          "description": "Summary holds summary information about the project.\nThis field is filled only when `include_summary` is set to true."
         }
       }
     },
@@ -915,6 +925,16 @@
         "PROJECT_ROLE_MEMBER"
       ],
       "default": "PROJECT_ROLE_UNSPECIFIED"
+    },
+    "v1ProjectSummary": {
+      "type": "object",
+      "properties": {
+        "userCount": {
+          "type": "integer",
+          "format": "int32",
+          "description": "user_count is the number of users in the project."
+        }
+      }
     },
     "v1ProjectUser": {
       "type": "object",

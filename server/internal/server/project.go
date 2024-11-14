@@ -146,7 +146,19 @@ func (s *S) ListProjects(ctx context.Context, req *v1.ListProjectsRequest) (*v1.
 
 	var pProtos []*v1.Project
 	for _, p := range filtered {
-		pProtos = append(pProtos, p.ToProto())
+		pProto := p.ToProto()
+
+		if req.IncludeSummary {
+			numUsers, err := s.store.CountProjectUsersByProjectID(p.ProjectID)
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "list project users: %s", err)
+			}
+			pProto.Summary = &v1.Project_Summary{
+				UserCount: int32(numUsers),
+			}
+		}
+
+		pProtos = append(pProtos, pProto)
 	}
 	return &v1.ListProjectsResponse{
 		Projects: pProtos,
