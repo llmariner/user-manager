@@ -40,7 +40,7 @@ func (s *S) CreateOrganization(ctx context.Context, req *v1.CreateOrganizationRe
 
 	// Create a new organization. Add a creator as an owner. Othewise, there is no owner in the org, and no one can access.
 
-	org, err := createOrganization(ctx, s.store, req.Title, false, userInfo.TenantID, []string{userid.Normalize(userInfo.UserID)})
+	org, err := createOrganization(s.store, req.Title, false, userInfo.TenantID, []string{userid.Normalize(userInfo.UserID)})
 	if err != nil {
 		if gerrors.IsUniqueConstraintViolation(err) {
 			return nil, status.Errorf(codes.AlreadyExists, "organizatione %q already exists", req.Title)
@@ -67,7 +67,7 @@ func (s *S) canCreateOrganization(userInfo *auth.UserInfo) (bool, error) {
 	return s.organizationRole(org.OrganizationID, userInfo.UserID) == v1.OrganizationRole_ORGANIZATION_ROLE_OWNER, nil
 }
 
-func createOrganization(ctx context.Context, st *store.S, title string, isDefault bool, tenantID string, userIDs []string) (*store.Organization, error) {
+func createOrganization(st *store.S, title string, isDefault bool, tenantID string, userIDs []string) (*store.Organization, error) {
 	orgID, err := id.GenerateID("org-", 24)
 	if err != nil {
 		return nil, err
@@ -385,7 +385,7 @@ func (s *S) CreateDefaultOrganization(ctx context.Context, c *config.DefaultOrga
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
-	org, err := createOrganization(ctx, s.store, c.Title, true, c.TenantID, c.UserIDs)
+	org, err := createOrganization(s.store, c.Title, true, c.TenantID, c.UserIDs)
 	if err != nil {
 		return nil, err
 	}

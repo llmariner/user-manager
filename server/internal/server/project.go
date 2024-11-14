@@ -40,7 +40,7 @@ func (s *S) CreateProject(ctx context.Context, req *v1.CreateProjectRequest) (*v
 		return nil, err
 	}
 
-	return createProject(ctx,
+	return createProject(
 		s.store,
 		req.Title,
 		req.OrganizationId,
@@ -51,7 +51,6 @@ func (s *S) CreateProject(ctx context.Context, req *v1.CreateProjectRequest) (*v
 }
 
 func createProject(
-	ctx context.Context,
 	st *store.S,
 	title string,
 	organizationID string,
@@ -359,7 +358,7 @@ func (s *S) CreateDefaultProject(ctx context.Context, c *config.DefaultProjectCo
 	}
 
 	s.log.Info("Creating default project", "title", c.Title)
-	if _, err := createProject(ctx,
+	if _, err := createProject(
 		s.store,
 		c.Title,
 		orgID,
