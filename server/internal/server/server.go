@@ -139,10 +139,6 @@ func fakeAuthInto(ctx context.Context) context.Context {
 
 // organizationRole returns a role that the given user has for the given organization.
 func (s *S) organizationRole(orgID, userID string) v1.OrganizationRole {
-	if !s.enableAuth {
-		return v1.OrganizationRole_ORGANIZATION_ROLE_OWNER
-	}
-
 	ou, err := s.store.GetOrganizationUser(orgID, userID)
 	if err != nil {
 		return v1.OrganizationRole_ORGANIZATION_ROLE_UNSPECIFIED
@@ -154,7 +150,33 @@ func (s *S) organizationRole(orgID, userID string) v1.OrganizationRole {
 	return v1.OrganizationRole(r)
 }
 
-func (s *S) validateOrganizationOwner(orgID, userID string) error {
+func (s *S) canReadOrganization(orgID, userID string) bool {
+	if !s.enableAuth {
+		return true
+	}
+
+	return s.organizationRole(orgID, userID) != v1.OrganizationRole_ORGANIZATION_ROLE_UNSPECIFIED
+}
+
+func (s *S) canManageOrganization(orgID, userID string) bool {
+	if !s.enableAuth {
+		return true
+	}
+
+	return s.organizationRole(orgID, userID) == v1.OrganizationRole_ORGANIZATION_ROLE_OWNER
+}
+
+// validateUserForManagingOrg checks if the user has the permission to manage the organization.
+//
+// If the authorization is enabled, this passes only when the user is an owner of the organization.
+//
+// If the authorization is disabled, this passes.
+// Note that in that case, the existence of the organization is not checked.
+func (s *S) validateUserForManagingOrg(orgID, userID string) error {
+	if !s.enableAuth {
+		return nil
+	}
+
 	r := s.organizationRole(orgID, userID)
 	switch r {
 	case v1.OrganizationRole_ORGANIZATION_ROLE_UNSPECIFIED:
@@ -171,10 +193,6 @@ func (s *S) validateOrganizationOwner(orgID, userID string) error {
 
 // projectRole returns a role that the given user has for the given project.
 func (s *S) projectRole(projectID, userID string) v1.ProjectRole {
-	if !s.enableAuth {
-		return v1.ProjectRole_PROJECT_ROLE_OWNER
-	}
-
 	pu, err := s.store.GetProjectUser(projectID, userID)
 	if err != nil {
 		return v1.ProjectRole_PROJECT_ROLE_UNSPECIFIED
@@ -186,8 +204,18 @@ func (s *S) projectRole(projectID, userID string) v1.ProjectRole {
 	return v1.ProjectRole(r)
 }
 
-func (s *S) validateProjectOwner(projectID, orgID, userID string) error {
-	if s.organizationRole(orgID, userID) == v1.OrganizationRole_ORGANIZATION_ROLE_OWNER {
+// validateUserForManagingProject checks if the user has the permission to manage the project.
+// If the user can manage the specified organization, this passes.
+// If the user can manage the specified project, this passes.
+//
+// Note that this function doesn't check if the specified project belongs to the specified organization.
+// If the organization ID is coming from an external source, it needs to be validated first.
+func (s *S) validateUserForManagingProject(projectID, orgID, userID string) error {
+	if !s.enableAuth {
+		return nil
+	}
+
+	if s.canManageOrganization(orgID, userID) {
 		return nil
 	}
 
@@ -205,8 +233,12 @@ func (s *S) validateProjectOwner(projectID, orgID, userID string) error {
 	}
 }
 
-func (s *S) validateProjectMember(projectID, orgID, userID string) error {
-	if s.organizationRole(orgID, userID) == v1.OrganizationRole_ORGANIZATION_ROLE_OWNER {
+func (s *S) validateUserForReadingProject(projectID, orgID, userID string) error {
+	if !s.enableAuth {
+		return nil
+	}
+
+	if s.canManageOrganization(orgID, userID) {
 		return nil
 	}
 
@@ -217,7 +249,6 @@ func (s *S) validateProjectMember(projectID, orgID, userID string) error {
 		return status.Errorf(codes.FailedPrecondition, "project %q not found", projectID)
 	case v1.ProjectRole_PROJECT_ROLE_OWNER, v1.ProjectRole_PROJECT_ROLE_MEMBER:
 		return nil
-
 	default:
 		return status.Errorf(codes.Internal, "unknown role %q", r.String())
 	}
