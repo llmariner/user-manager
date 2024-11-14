@@ -41,7 +41,7 @@ func (s *S) CreateAPIKey(
 		return nil, err
 	}
 
-	if err := s.validateUserForReadingProject(req.ProjectId, req.OrganizationId, userInfo.UserID); err != nil {
+	if err := s.validateProjectMember(req.ProjectId, req.OrganizationId, userInfo.UserID); err != nil {
 		return nil, err
 	}
 
@@ -129,7 +129,7 @@ func (s *S) ListAPIKeys(
 	}
 
 	// TODO(kenji): Do not allow a project member to read other users' API keys.
-	if err := s.validateUserForReadingProject(req.ProjectId, req.OrganizationId, userInfo.UserID); err != nil {
+	if err := s.validateProjectMember(req.ProjectId, req.OrganizationId, userInfo.UserID); err != nil {
 		return nil, err
 	}
 
@@ -140,7 +140,7 @@ func (s *S) ListAPIKeys(
 
 	// Show all API keys if the user is an owner. Otherwise only show API keys owned by the user.
 	var filtered []*store.APIKey
-	isOwner := s.validateUserForManagingProject(req.ProjectId, req.OrganizationId, userInfo.UserID) == nil
+	isOwner := s.validateProjectOwner(req.ProjectId, req.OrganizationId, userInfo.UserID) == nil
 	for _, k := range ks {
 		if isOwner || k.UserID == userInfo.UserID {
 			filtered = append(filtered, k)
@@ -187,7 +187,7 @@ func (s *S) DeleteAPIKey(
 	}
 
 	// TODO(kenji): Do not allow a project member to delete other users' API keys.
-	if err := s.validateUserForReadingProject(req.ProjectId, req.OrganizationId, userInfo.UserID); err != nil {
+	if err := s.validateProjectMember(req.ProjectId, req.OrganizationId, userInfo.UserID); err != nil {
 		return nil, err
 	}
 
@@ -201,7 +201,7 @@ func (s *S) DeleteAPIKey(
 		return nil, status.Errorf(codes.Internal, "get api key: %s", err)
 	}
 
-	isOwner := s.validateUserForManagingProject(req.ProjectId, req.OrganizationId, userInfo.UserID) == nil
+	isOwner := s.validateProjectOwner(req.ProjectId, req.OrganizationId, userInfo.UserID) == nil
 	if !isOwner && userInfo.UserID != key.UserID {
 		return nil, status.Errorf(codes.NotFound, "api key %q not found", req.Id)
 	}

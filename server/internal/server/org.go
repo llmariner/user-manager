@@ -64,7 +64,7 @@ func (s *S) canCreateOrganization(userInfo *auth.UserInfo) (bool, error) {
 	if err != nil {
 		return false, status.Errorf(codes.Internal, "get default organizations: %s", err)
 	}
-	return s.canManageOrganization(org.OrganizationID, userInfo.UserID), nil
+	return s.isOrganizationOwner(org.OrganizationID, userInfo.UserID), nil
 }
 
 func createOrganization(st *store.S, title string, isDefault bool, tenantID string, userIDs []string) (*store.Organization, error) {
@@ -111,7 +111,7 @@ func (s *S) ListOrganizations(ctx context.Context, req *v1.ListOrganizationsRequ
 	// Only show orgs that the user is a owner/reader of.
 	var visibleOrgs []*store.Organization
 	for _, org := range orgs {
-		if s.canReadOrganization(org.OrganizationID, userInfo.UserID) {
+		if s.isOrganizationMember(org.OrganizationID, userInfo.UserID) {
 			visibleOrgs = append(visibleOrgs, org)
 		}
 	}
@@ -130,13 +130,13 @@ func (s *S) ListOrganizations(ctx context.Context, req *v1.ListOrganizationsRequ
 
 			var visiblePjCount int32
 			for _, p := range ps {
-				if s.validateUserForReadingProject(p.ProjectID, p.OrganizationID, userInfo.UserID) == nil {
+				if s.validateProjectMember(p.ProjectID, p.OrganizationID, userInfo.UserID) == nil {
 					visiblePjCount++
 				}
 			}
 
 			var visibleUserCount int32
-			if s.canManageOrganization(org.Id, userInfo.UserID) {
+			if s.isOrganizationOwner(org.Id, userInfo.UserID) {
 				us, err := s.store.ListOrganizationUsersByOrganizationID(org.Id)
 				if err != nil {
 					return nil, status.Errorf(codes.Internal, "list organization users: %s", err)
@@ -172,7 +172,7 @@ func (s *S) DeleteOrganization(ctx context.Context, req *v1.DeleteOrganizationRe
 		return nil, err
 	}
 
-	if err := s.validateUserForManagingOrg(req.Id, userInfo.UserID); err != nil {
+	if err := s.validateOrganizationOwner(req.Id, userInfo.UserID); err != nil {
 		return nil, err
 	}
 
@@ -236,7 +236,7 @@ func (s *S) CreateOrganizationUser(ctx context.Context, req *v1.CreateOrganizati
 		return nil, err
 	}
 
-	if err := s.validateUserForManagingOrg(req.OrganizationId, userInfo.UserID); err != nil {
+	if err := s.validateOrganizationOwner(req.OrganizationId, userInfo.UserID); err != nil {
 		return nil, err
 	}
 
@@ -282,7 +282,7 @@ func (s *S) ListOrganizationUsers(ctx context.Context, req *v1.ListOrganizationU
 		return nil, err
 	}
 
-	if err := s.validateUserForManagingOrg(req.OrganizationId, userInfo.UserID); err != nil {
+	if err := s.validateOrganizationOwner(req.OrganizationId, userInfo.UserID); err != nil {
 		return nil, err
 	}
 
@@ -319,7 +319,7 @@ func (s *S) DeleteOrganizationUser(ctx context.Context, req *v1.DeleteOrganizati
 		return nil, err
 	}
 
-	if err := s.validateUserForManagingOrg(req.OrganizationId, userInfo.UserID); err != nil {
+	if err := s.validateOrganizationOwner(req.OrganizationId, userInfo.UserID); err != nil {
 		return nil, err
 	}
 
