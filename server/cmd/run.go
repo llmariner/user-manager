@@ -103,11 +103,17 @@ func run(ctx context.Context, c *config.Config) error {
 		errCh <- http.ListenAndServe(fmt.Sprintf(":%d", c.HTTPPort), mux)
 	}()
 
-	usage, err := sender.New(ctx, c.UsageSender, grpc.WithTransportCredentials(insecure.NewCredentials()), logger)
-	if err != nil {
-		return err
+	var usageSetter sender.UsageSetter
+	if c.UsageSender.Enable {
+		usage, err := sender.New(ctx, c.UsageSender, grpc.WithTransportCredentials(insecure.NewCredentials()), logger)
+		if err != nil {
+			return err
+		}
+		go func() { usage.Run(ctx) }()
+		usageSetter = usage
+	} else {
+		usageSetter = sender.NoopUsageSetter{}
 	}
-	go func() { usage.Run(ctx) }()
 
 	var dataKey []byte
 	if c.KMSConfig.Enable {
@@ -140,7 +146,7 @@ func run(ctx context.Context, c *config.Config) error {
 
 	s := server.New(st, dataKey, logger)
 	go func() {
-		errCh <- s.Run(ctx, c.GRPCPort, c.AuthConfig, usage)
+		errCh <- s.Run(ctx, c.GRPCPort, c.AuthConfig, usageSetter)
 	}()
 
 	org, err := s.CreateDefaultOrganization(ctx, &c.DefaultOrganization)

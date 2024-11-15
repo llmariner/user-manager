@@ -77,7 +77,11 @@ global:
     #   hosts: []
     #   secretName: ""
 
+  # Settings for sending usage data to the usage API server.
+  # +docs:property
   usageSender:
+    # The flag to enable sender.
+    enable: true
     # The address for the api-usage-server to send API usage data.
     apiUsageInternalServerAddr: api-usage-server-internal-grpc:8082
 
@@ -241,10 +245,10 @@ livenessProbe:
   # liveness or readiness probes are initiated.
   # +docs:type=number
   initialDelaySeconds: 3
-  # How often (in seconds) to perform the probe. Default to 10 seconds. 
+  # How often (in seconds) to perform the probe. Default to 10 seconds.
   # +docs:type=number
   periodSeconds: 10
-  # Number of seconds after which the probe times out. 
+  # Number of seconds after which the probe times out.
   # +docs:type=number
   timeoutSeconds: 3
   # Minimum consecutive successes for the probe to be considered
@@ -253,7 +257,7 @@ livenessProbe:
   successThreshold: 1
   # After a probe fails `failureThreshold` times in a row, Kubernetes
   # considers that the overall check has failed: the container is not
-  # ready/healthy/live. 
+  # ready/healthy/live.
   # +docs:type=number
   failureThreshold: 5
 
