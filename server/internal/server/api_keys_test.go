@@ -240,3 +240,20 @@ func TestAPIKey_EnableAuth(t *testing.T) {
 	})
 	assert.NoError(t, err)
 }
+
+func TestObfuscateSecret(t *testing.T) {
+	tcs := []struct {
+		secret string
+		want   string
+	}{
+		{
+			secret: "sk-1234567890abcdef",
+			want:   "sk-12************ef",
+		},
+	}
+	for _, tc := range tcs {
+		t.Run(tc.secret, func(t *testing.T) {
+			assert.Equal(t, tc.want, obfuscateSecret(tc.secret))
+		})
+	}
+}

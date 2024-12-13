@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/llmariner/common/pkg/aws"
 	gerrors "github.com/llmariner/common/pkg/gormlib/errors"
@@ -275,7 +276,7 @@ func toAPIKeyProto(
 	dataKey []byte,
 	k *store.APIKey,
 	internalUserID string,
-	includeSecret bool,
+	showFullSecret bool,
 ) (*v1.APIKey, error) {
 	orgRole, err := findOrgRole(s, k.OrganizationID, k.UserID)
 	if err != nil {
@@ -286,7 +287,21 @@ func toAPIKeyProto(
 		return nil, err
 	}
 
-	kp := &v1.APIKey{
+	var secret string
+	if len(dataKey) > 0 {
+		secret, err = aws.Decrypt(ctx, k.EncryptedSecret, k.APIKeyID, dataKey)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		secret = k.Secret
+	}
+
+	if !showFullSecret {
+		secret = obfuscateSecret(secret)
+	}
+
+	return &v1.APIKey{
 		Id:        k.APIKeyID,
 		CreatedAt: k.CreatedAt.UTC().Unix(),
 		Name:      k.Name,
@@ -303,19 +318,8 @@ func toAPIKeyProto(
 		},
 		OrganizationRole: orgRole,
 		ProjectRole:      projectRole,
-	}
-	if includeSecret {
-		if len(dataKey) > 0 {
-			secret, err := aws.Decrypt(ctx, k.EncryptedSecret, k.APIKeyID, dataKey)
-			if err != nil {
-				return nil, err
-			}
-			kp.Secret = secret
-		} else {
-			kp.Secret = k.Secret
-		}
-	}
-	return kp, nil
+		Secret:           secret,
+	}, nil
 }
 
 func findOrgRole(s *store.S, orgID, userID string) (v1.OrganizationRole, error) {
@@ -340,4 +344,14 @@ func findProjectRole(s *store.S, projectID, userID string) (v1.ProjectRole, erro
 	}
 
 	return v1.ProjectRole(v1.ProjectRole_value[pu.Role]), nil
+}
+
+// obfuscateSecret obfuscates the secret.
+// The function returns the first 5 characters and the last 2 characters of the secret
+// The rest of the characters are replaced with '*'.
+func obfuscateSecret(secret string) string {
+	prefix := secret[0:5]
+	suffix := secret[len(secret)-2:]
+	obfuscated := strings.Repeat("*", len(secret)-7)
+	return prefix + obfuscated + suffix
 }
