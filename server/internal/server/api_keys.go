@@ -87,10 +87,15 @@ func (s *S) ListAPIKeys(
 		}
 	}
 
+	orgsByID, projectsByID, err := getOrgsAndProjects(s.store, userInfo.TenantID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "get orgs and projects: %s", err)
+	}
+
 	var apiKeyProtos []*v1.APIKey
 	for _, k := range filtered {
 		// Do not populate the internal User ID for non-internal gRPC.
-		kp, err := toAPIKeyProto(ctx, s.store, s.dataKey, k, "", false)
+		kp, err := toAPIKeyProto(ctx, s.store, s.dataKey, k, "", false, orgsByID, projectsByID)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "to api key proto")
 		}
@@ -184,8 +189,14 @@ func createAPIKey(
 		}
 		return nil, status.Errorf(codes.Internal, "create api key: %s", err)
 	}
+
+	orgsByID, projectsByID, err := getOrgAndProject(st, tenantID, organizationID, projectID)
+	if err != nil {
+		return nil, err
+	}
+
 	// Do not populate the internal User ID for non-internal gRPC.
-	kProto, err := toAPIKeyProto(ctx, st, dataKey, k, "", true)
+	kProto, err := toAPIKeyProto(ctx, st, dataKey, k, "", true, orgsByID, projectsByID)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "to api key proto: %s", err)
 	}
@@ -231,10 +242,15 @@ func (s *S) ListProjectAPIKeys(
 		}
 	}
 
+	orgsByID, projectsByID, err := getOrgAndProject(s.store, userInfo.TenantID, req.OrganizationId, req.ProjectId)
+	if err != nil {
+		return nil, err
+	}
+
 	var apiKeyProtos []*v1.APIKey
 	for _, k := range filtered {
 		// Do not populate the internal User ID for non-internal gRPC.
-		kp, err := toAPIKeyProto(ctx, s.store, s.dataKey, k, "", false)
+		kp, err := toAPIKeyProto(ctx, s.store, s.dataKey, k, "", false, orgsByID, projectsByID)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "to api key proto")
 		}
@@ -338,7 +354,7 @@ func (s *IS) ListInternalAPIKeys(
 		if !ok {
 			return nil, status.Errorf(codes.Internal, "internal user ID not found for user %q", k.UserID)
 		}
-		kp, err := toAPIKeyProto(ctx, s.store, s.dataKey, k, id, true)
+		kp, err := toAPIKeyProto(ctx, s.store, s.dataKey, k, id, true, nil, nil)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "to api key proto")
 		}
@@ -352,6 +368,46 @@ func (s *IS) ListInternalAPIKeys(
 	}, nil
 }
 
+func getOrgsAndProjects(s *store.S, tenantID string) (map[string]*store.Organization, map[string]*store.Project, error) {
+	orgs, err := s.ListOrganizations(tenantID)
+	if err != nil {
+		return nil, nil, err
+	}
+	orgsByID := map[string]*store.Organization{}
+	for _, o := range orgs {
+		orgsByID[o.OrganizationID] = o
+	}
+
+	projects, err := s.ListProjectsByTenantID(tenantID)
+	if err != nil {
+		return nil, nil, err
+	}
+	projectsByID := map[string]*store.Project{}
+	for _, p := range projects {
+		projectsByID[p.ProjectID] = p
+	}
+
+	return orgsByID, projectsByID, nil
+}
+
+func getOrgAndProject(st *store.S, tenantID, organizationID, projectID string) (map[string]*store.Organization, map[string]*store.Project, error) {
+	org, err := st.GetOrganizationByTenantIDAndOrgID(tenantID, organizationID)
+	if err != nil {
+		return nil, nil, status.Errorf(codes.Internal, "get organization: %s", err)
+	}
+	orgsByID := map[string]*store.Organization{organizationID: org}
+	project, err := st.GetProject(store.GetProjectParams{
+		TenantID:       tenantID,
+		OrganizationID: organizationID,
+		ProjectID:      projectID,
+	})
+	if err != nil {
+		return nil, nil, status.Errorf(codes.Internal, "get project: %s", err)
+	}
+	projectsByID := map[string]*store.Project{projectID: project}
+	return orgsByID, projectsByID, nil
+}
+
 func toAPIKeyProto(
 	ctx context.Context,
 	s *store.S,
@@ -359,6 +415,8 @@ func toAPIKeyProto(
 	k *store.APIKey,
 	internalUserID string,
 	showFullSecret bool,
+	orgsByID map[string]*store.Organization,
+	projectsByID map[string]*store.Project,
 ) (*v1.APIKey, error) {
 	orgRole, err := findOrgRole(s, k.OrganizationID, k.UserID)
 	if err != nil {
@@ -383,6 +441,23 @@ func toAPIKeyProto(
 		secret = obfuscateSecret(secret)
 	}
 
+	var orgTitle string
+	if orgsByID != nil {
+		org, ok := orgsByID[k.OrganizationID]
+		if !ok {
+			return nil, fmt.Errorf("organization %q not found", k.OrganizationID)
+		}
+		orgTitle = org.Title
+	}
+	var projectTitle string
+	if projectsByID != nil {
+		project, ok := projectsByID[k.ProjectID]
+		if !ok {
+			return nil, fmt.Errorf("project %q not found", k.ProjectID)
+		}
+		projectTitle = project.Title
+	}
+
 	return &v1.APIKey{
 		Id:        k.APIKeyID,
 		CreatedAt: k.CreatedAt.UTC().Unix(),
@@ -393,10 +468,12 @@ func toAPIKeyProto(
 			InternalId: internalUserID,
 		},
 		Organization: &v1.Organization{
-			Id: k.OrganizationID,
+			Id:    k.OrganizationID,
+			Title: orgTitle,
 		},
 		Project: &v1.Project{
-			Id: k.ProjectID,
+			Id:    k.ProjectID,
+			Title: projectTitle,
 		},
 		OrganizationRole: orgRole,
 		ProjectRole:      projectRole,

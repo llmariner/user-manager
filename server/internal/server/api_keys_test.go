@@ -191,6 +191,10 @@ func TestProjectAPIKey(t *testing.T) {
 			assert.Empty(t, key.User.InternalId)
 			assert.Equal(t, v1.OrganizationRole_ORGANIZATION_ROLE_OWNER, key.OrganizationRole)
 			assert.Equal(t, v1.ProjectRole_PROJECT_ROLE_OWNER, key.ProjectRole)
+			assert.Equal(t, org.Id, key.Organization.Id)
+			assert.Equal(t, org.Title, key.Organization.Title)
+			assert.Equal(t, proj.Id, key.Project.Id)
+			assert.Equal(t, proj.Title, key.Project.Title)
 
 			ilresp, err := isrv.ListInternalAPIKeys(ctx, &v1.ListInternalAPIKeysRequest{})
 			assert.NoError(t, err)
