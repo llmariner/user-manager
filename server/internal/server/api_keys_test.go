@@ -43,6 +43,98 @@ func TestAPIKey(t *testing.T) {
 				dataKey = kmsClient.DataKey
 			}
 			srv := New(st, dataKey, testr.New(t))
+
+			ctx := fakeAuthInto(context.Background())
+			org, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
+				Title: "Test organization",
+			})
+			assert.NoError(t, err)
+
+			proj, err := srv.CreateProject(ctx, &v1.CreateProjectRequest{
+				Title:               "Test project",
+				OrganizationId:      org.Id,
+				KubernetesNamespace: "test",
+			})
+			assert.NoError(t, err)
+
+			cresp, err := srv.CreateAPIKey(ctx, &v1.CreateAPIKeyRequest{
+				Name:           "dummy",
+				OrganizationId: org.Id,
+				ProjectId:      proj.Id,
+			})
+			assert.NoError(t, err)
+			assert.Equal(t, "dummy", cresp.Name)
+			if tc.enableKMS {
+				apiKey, err := st.GetAPIKey(cresp.Id, proj.Id)
+				assert.NoError(t, err)
+				assert.NotEmpty(t, apiKey.EncryptedSecret)
+				assert.Empty(t, apiKey.Secret)
+				secret, err := aws.Decrypt(ctx, apiKey.EncryptedSecret, apiKey.APIKeyID, kmsClient.DataKey)
+				assert.NoError(t, err)
+				assert.Equal(t, secret, cresp.Secret)
+			} else {
+				apiKey, err := st.GetAPIKey(cresp.Id, proj.Id)
+				assert.NoError(t, err)
+				assert.Empty(t, apiKey.EncryptedSecret)
+				assert.NotEmpty(t, apiKey.Secret)
+				assert.Equal(t, apiKey.Secret, cresp.Secret)
+			}
+
+			_, err = srv.CreateAPIKey(ctx, &v1.CreateAPIKeyRequest{
+				Name:           "dummy",
+				OrganizationId: org.Id,
+				ProjectId:      proj.Id,
+			})
+			assert.Error(t, err)
+			assert.Equal(t, codes.AlreadyExists, status.Code(err))
+
+			lresp, err := srv.ListAPIKeys(ctx, &v1.ListAPIKeysRequest{})
+			assert.NoError(t, err)
+			assert.Len(t, lresp.Data, 1)
+			key := lresp.Data[0]
+			assert.Empty(t, key.User.InternalId)
+			assert.Equal(t, v1.OrganizationRole_ORGANIZATION_ROLE_OWNER, key.OrganizationRole)
+			assert.Equal(t, v1.ProjectRole_PROJECT_ROLE_OWNER, key.ProjectRole)
+
+			_, err = srv.DeleteAPIKey(ctx, &v1.DeleteAPIKeyRequest{Id: cresp.Id})
+			assert.NoError(t, err)
+
+			lresp, err = srv.ListAPIKeys(ctx, &v1.ListAPIKeysRequest{})
+			assert.NoError(t, err)
+			assert.Empty(t, lresp.Data)
+		})
+	}
+}
+
+func TestProjectAPIKey(t *testing.T) {
+	tcs := []struct {
+		name      string
+		enableKMS bool
+		secret    string
+	}{
+		{
+			name:      "enable kms",
+			enableKMS: true,
+			secret:    "secret",
+		},
+		{
+			name:      "disable kms",
+			enableKMS: false,
+			secret:    "secret",
+		},
+	}
+
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			st, tearDown := store.NewTest(t)
+			defer tearDown()
+
+			kmsClient := aws.NewMockKMSClient()
+			var dataKey []byte
+			if tc.enableKMS {
+				dataKey = kmsClient.DataKey
+			}
+			srv := New(st, dataKey, testr.New(t))
 			isrv := NewInternal(st, dataKey, testr.New(t))
 
 			ctx := fakeAuthInto(context.Background())

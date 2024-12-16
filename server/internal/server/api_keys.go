@@ -18,6 +18,90 @@ import (
 	"gorm.io/gorm"
 )
 
+// CreateAPIKey creates an API key.
+func (s *S) CreateAPIKey(
+	ctx context.Context,
+	req *v1.CreateAPIKeyRequest,
+) (*v1.APIKey, error) {
+	return s.CreateProjectAPIKey(ctx, req)
+}
+
+// DeleteAPIKey deletes an API key.
+func (s *S) DeleteAPIKey(
+	ctx context.Context,
+	req *v1.DeleteAPIKeyRequest,
+) (*v1.DeleteAPIKeyResponse, error) {
+	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("failed to extract user info from context")
+	}
+
+	if req.Id == "" {
+		return nil, status.Error(codes.InvalidArgument, "id is required")
+	}
+
+	key, err := s.store.GetAPIKeyByID(req.Id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, status.Errorf(codes.NotFound, "api key %q not found", req.Id)
+		}
+		return nil, status.Errorf(codes.Internal, "get api key: %s", err)
+	}
+
+	isOwner := s.validateProjectOwner(key.ProjectID, key.OrganizationID, userInfo.UserID) == nil
+	if !isOwner && userInfo.UserID != key.UserID {
+		return nil, status.Errorf(codes.NotFound, "api key %q not found", req.Id)
+	}
+
+	if err := s.store.DeleteAPIKey(req.Id, key.ProjectID); err != nil {
+		return nil, status.Errorf(codes.Internal, "delete api key: %s", err)
+	}
+	return &v1.DeleteAPIKeyResponse{
+		Id:      req.Id,
+		Object:  "users.api_key",
+		Deleted: true,
+	}, nil
+}
+
+// ListAPIKeys lists API keys.
+func (s *S) ListAPIKeys(
+	ctx context.Context,
+	req *v1.ListAPIKeysRequest,
+) (*v1.ListAPIKeysResponse, error) {
+	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
+	if !ok {
+		return nil, status.Errorf(codes.Internal, "failed to extract user info from context")
+	}
+
+	ks, err := s.store.ListAPIKeysByTenantID(userInfo.TenantID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "list api keys: %s", err)
+	}
+
+	// Show all API keys if the user is an owner. Otherwise only show API keys owned by the user.
+	var filtered []*store.APIKey
+	for _, k := range ks {
+		isOwner := s.validateProjectOwner(k.ProjectID, k.OrganizationID, userInfo.UserID) == nil
+		if isOwner || k.UserID == userInfo.UserID {
+			filtered = append(filtered, k)
+		}
+	}
+
+	var apiKeyProtos []*v1.APIKey
+	for _, k := range filtered {
+		// Do not populate the internal User ID for non-internal gRPC.
+		kp, err := toAPIKeyProto(ctx, s.store, s.dataKey, k, "", false)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "to api key proto")
+		}
+		apiKeyProtos = append(apiKeyProtos, kp)
+	}
+	return &v1.ListAPIKeysResponse{
+		Object: "list",
+		Data:   apiKeyProtos,
+	}, nil
+}
+
 // CreateProjectAPIKey creates an API key.
 func (s *S) CreateProjectAPIKey(
 	ctx context.Context,
@@ -129,7 +213,6 @@ func (s *S) ListProjectAPIKeys(
 		return nil, err
 	}
 
-	// TODO(kenji): Do not allow a project member to read other users' API keys.
 	if err := s.validateProjectMember(req.ProjectId, req.OrganizationId, userInfo.UserID); err != nil {
 		return nil, err
 	}
@@ -187,7 +270,6 @@ func (s *S) DeleteProjectAPIKey(
 		return nil, err
 	}
 
-	// TODO(kenji): Do not allow a project member to delete other users' API keys.
 	if err := s.validateProjectMember(req.ProjectId, req.OrganizationId, userInfo.UserID); err != nil {
 		return nil, err
 	}

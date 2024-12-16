@@ -68,6 +68,15 @@ func (s *S) ListAPIKeysByProjectID(projectID string) ([]*APIKey, error) {
 	return ks, nil
 }
 
+// ListAPIKeysByTenantID lists API keys by a tenant ID.
+func (s *S) ListAPIKeysByTenantID(tenantID string) ([]*APIKey, error) {
+	var ks []*APIKey
+	if err := s.db.Where("tenant_id = ?", tenantID).Find(&ks).Error; err != nil {
+		return nil, err
+	}
+	return ks, nil
+}
+
 // GetAPIKeyByNameAndUserID gets an API key by its name and user ID.
 func (s *S) GetAPIKeyByNameAndUserID(name, userID string) (*APIKey, error) {
 	var k APIKey
@@ -81,6 +90,15 @@ func (s *S) GetAPIKeyByNameAndUserID(name, userID string) (*APIKey, error) {
 func (s *S) GetAPIKey(id, projectID string) (*APIKey, error) {
 	var k APIKey
 	if err := s.db.Where("api_key_id = ? AND project_id = ?", id, projectID).Take(&k).Error; err != nil {
+		return nil, err
+	}
+	return &k, nil
+}
+
+// GetAPIKeyByID gets an API key by its ID.
+func (s *S) GetAPIKeyByID(id string) (*APIKey, error) {
+	var k APIKey
+	if err := s.db.Where("api_key_id = ?", id).Take(&k).Error; err != nil {
 		return nil, err
 	}
 	return &k, nil
