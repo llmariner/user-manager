@@ -58,7 +58,7 @@ func TestAPIKey(t *testing.T) {
 			})
 			assert.NoError(t, err)
 
-			cresp, err := srv.CreateAPIKey(ctx, &v1.CreateAPIKeyRequest{
+			cresp, err := srv.CreateProjectAPIKey(ctx, &v1.CreateAPIKeyRequest{
 				Name:           "dummy",
 				OrganizationId: org.Id,
 				ProjectId:      proj.Id,
@@ -81,7 +81,7 @@ func TestAPIKey(t *testing.T) {
 				assert.Equal(t, apiKey.Secret, cresp.Secret)
 			}
 
-			_, err = srv.CreateAPIKey(ctx, &v1.CreateAPIKeyRequest{
+			_, err = srv.CreateProjectAPIKey(ctx, &v1.CreateAPIKeyRequest{
 				Name:           "dummy",
 				OrganizationId: org.Id,
 				ProjectId:      proj.Id,
@@ -89,7 +89,7 @@ func TestAPIKey(t *testing.T) {
 			assert.Error(t, err)
 			assert.Equal(t, codes.AlreadyExists, status.Code(err))
 
-			lresp, err := srv.ListAPIKeys(ctx, &v1.ListAPIKeysRequest{
+			lresp, err := srv.ListProjectAPIKeys(ctx, &v1.ListProjectAPIKeysRequest{
 				OrganizationId: org.Id,
 				ProjectId:      proj.Id,
 			})
@@ -110,14 +110,14 @@ func TestAPIKey(t *testing.T) {
 			assert.Equal(t, v1.OrganizationRole_ORGANIZATION_ROLE_OWNER, key.OrganizationRole)
 			assert.Equal(t, v1.ProjectRole_PROJECT_ROLE_OWNER, key.ProjectRole)
 
-			_, err = srv.DeleteAPIKey(ctx, &v1.DeleteAPIKeyRequest{
+			_, err = srv.DeleteProjectAPIKey(ctx, &v1.DeleteProjectAPIKeyRequest{
 				Id:             cresp.Id,
 				OrganizationId: org.Id,
 				ProjectId:      proj.Id,
 			})
 			assert.NoError(t, err)
 
-			lresp, err = srv.ListAPIKeys(ctx, &v1.ListAPIKeysRequest{
+			lresp, err = srv.ListProjectAPIKeys(ctx, &v1.ListProjectAPIKeysRequest{
 				OrganizationId: org.Id,
 				ProjectId:      proj.Id,
 			})
@@ -178,33 +178,33 @@ func TestAPIKey_EnableAuth(t *testing.T) {
 		ProjectId:      proj.Id,
 	}
 
-	key0, err := srv.CreateAPIKey(u0Ctx, req)
+	key0, err := srv.CreateProjectAPIKey(u0Ctx, req)
 	assert.NoError(t, err)
 
-	_, err = srv.CreateAPIKey(u1Ctx, req)
+	_, err = srv.CreateProjectAPIKey(u1Ctx, req)
 	assert.Error(t, err)
 	assert.Equal(t, codes.FailedPrecondition, status.Code(err))
 
-	key2, err := srv.CreateAPIKey(u2Ctx, req)
+	key2, err := srv.CreateProjectAPIKey(u2Ctx, req)
 	assert.NoError(t, err)
 
 	// List API keys.
 
-	resp, err := srv.ListAPIKeys(u0Ctx, &v1.ListAPIKeysRequest{
+	resp, err := srv.ListProjectAPIKeys(u0Ctx, &v1.ListProjectAPIKeysRequest{
 		OrganizationId: org.OrganizationID,
 		ProjectId:      proj.Id,
 	})
 	assert.NoError(t, err)
 	assert.Len(t, resp.Data, 2)
 
-	_, err = srv.ListAPIKeys(u1Ctx, &v1.ListAPIKeysRequest{
+	_, err = srv.ListProjectAPIKeys(u1Ctx, &v1.ListProjectAPIKeysRequest{
 		OrganizationId: org.OrganizationID,
 		ProjectId:      proj.Id,
 	})
 	assert.Error(t, err)
 	assert.Equal(t, codes.FailedPrecondition, status.Code(err))
 
-	resp, err = srv.ListAPIKeys(u2Ctx, &v1.ListAPIKeysRequest{
+	resp, err = srv.ListProjectAPIKeys(u2Ctx, &v1.ListProjectAPIKeysRequest{
 		OrganizationId: org.OrganizationID,
 		ProjectId:      proj.Id,
 	})
@@ -215,7 +215,7 @@ func TestAPIKey_EnableAuth(t *testing.T) {
 	// Delete API keys.
 
 	// "u2" cannot delete the API key.
-	_, err = srv.DeleteAPIKey(u1Ctx, &v1.DeleteAPIKeyRequest{
+	_, err = srv.DeleteProjectAPIKey(u1Ctx, &v1.DeleteProjectAPIKeyRequest{
 		OrganizationId: org.OrganizationID,
 		ProjectId:      proj.Id,
 		Id:             key0.Id,
@@ -224,7 +224,7 @@ func TestAPIKey_EnableAuth(t *testing.T) {
 	assert.Equal(t, codes.FailedPrecondition, status.Code(err))
 
 	// "u2" cannot delete the API key created by "u0".
-	_, err = srv.DeleteAPIKey(u2Ctx, &v1.DeleteAPIKeyRequest{
+	_, err = srv.DeleteProjectAPIKey(u2Ctx, &v1.DeleteProjectAPIKeyRequest{
 		OrganizationId: org.OrganizationID,
 		ProjectId:      proj.Id,
 		Id:             key0.Id,
@@ -233,7 +233,7 @@ func TestAPIKey_EnableAuth(t *testing.T) {
 	assert.Equal(t, codes.NotFound, status.Code(err))
 
 	// "u2" can delete the API key created by "u2".
-	_, err = srv.DeleteAPIKey(u2Ctx, &v1.DeleteAPIKeyRequest{
+	_, err = srv.DeleteProjectAPIKey(u2Ctx, &v1.DeleteProjectAPIKeyRequest{
 		OrganizationId: org.OrganizationID,
 		ProjectId:      proj.Id,
 		Id:             key2.Id,

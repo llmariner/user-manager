@@ -18,12 +18,21 @@ export var ProjectRole;
 })(ProjectRole || (ProjectRole = {}));
 export class UsersService {
     static CreateAPIKey(req, initReq) {
-        return fm.fetchReq(`/v1/organizations/${req["organizationId"]}/projects/${req["projectId"]}/api_keys`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
+        return fm.fetchReq(`/v1/api_keys`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
     }
     static ListAPIKeys(req, initReq) {
-        return fm.fetchReq(`/v1/organizations/${req["organizationId"]}/projects/${req["projectId"]}/api_keys?${fm.renderURLSearchParams(req, ["organizationId", "projectId"])}`, Object.assign(Object.assign({}, initReq), { method: "GET" }));
+        return fm.fetchReq(`/v1/api_keys?${fm.renderURLSearchParams(req, [])}`, Object.assign(Object.assign({}, initReq), { method: "GET" }));
     }
     static DeleteAPIKey(req, initReq) {
+        return fm.fetchReq(`/v1/api_keys/${req["id"]}`, Object.assign(Object.assign({}, initReq), { method: "DELETE" }));
+    }
+    static CreateProjectAPIKey(req, initReq) {
+        return fm.fetchReq(`/v1/organizations/${req["organizationId"]}/projects/${req["projectId"]}/api_keys`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
+    }
+    static ListProjectAPIKeys(req, initReq) {
+        return fm.fetchReq(`/v1/organizations/${req["organizationId"]}/projects/${req["projectId"]}/api_keys?${fm.renderURLSearchParams(req, ["organizationId", "projectId"])}`, Object.assign(Object.assign({}, initReq), { method: "GET" }));
+    }
+    static DeleteProjectAPIKey(req, initReq) {
         return fm.fetchReq(`/v1/organizations/${req["organizationId"]}/projects/${req["projectId"]}/api_keys/${req["id"]}`, Object.assign(Object.assign({}, initReq), { method: "DELETE" }));
     }
     static CreateOrganization(req, initReq) {

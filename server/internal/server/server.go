@@ -67,7 +67,7 @@ func (s *S) Run(ctx context.Context, port int, authConfig config.AuthConfig, usa
 				ms := strings.Split(fullMethod, "/")
 				method := ms[len(ms)-1]
 				switch method {
-				case "CreateAPIKey", "DeleteAPIKey", "ListAPIKeys":
+				case "CreateAPIKey", "DeleteAPIKey", "ListAPIKeys", "CreateProjectAPIKey", "DeleteProjectAPIKey", "ListProjectAPIKeys":
 					return "api.organizations.projects.api_keys"
 				case "CreateOrganization", "DeleteOrganization", "ListOrganizations":
 					return "api.organizations"

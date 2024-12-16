@@ -82,9 +82,12 @@ export type CreateAPIKeyRequest = {
   organizationId?: string
 }
 
-export type ListAPIKeysRequest = {
+export type ListProjectAPIKeysRequest = {
   projectId?: string
   organizationId?: string
+}
+
+export type ListAPIKeysRequest = {
 }
 
 export type ListAPIKeysResponse = {
@@ -93,6 +96,10 @@ export type ListAPIKeysResponse = {
 }
 
 export type DeleteAPIKeyRequest = {
+  id?: string
+}
+
+export type DeleteProjectAPIKeyRequest = {
   id?: string
   projectId?: string
   organizationId?: string
@@ -241,13 +248,22 @@ export type CreateUserInternalRequest = {
 
 export class UsersService {
   static CreateAPIKey(req: CreateAPIKeyRequest, initReq?: fm.InitReq): Promise<APIKey> {
-    return fm.fetchReq<CreateAPIKeyRequest, APIKey>(`/v1/organizations/${req["organizationId"]}/projects/${req["projectId"]}/api_keys`, {...initReq, method: "POST", body: JSON.stringify(req)})
+    return fm.fetchReq<CreateAPIKeyRequest, APIKey>(`/v1/api_keys`, {...initReq, method: "POST", body: JSON.stringify(req)})
   }
   static ListAPIKeys(req: ListAPIKeysRequest, initReq?: fm.InitReq): Promise<ListAPIKeysResponse> {
-    return fm.fetchReq<ListAPIKeysRequest, ListAPIKeysResponse>(`/v1/organizations/${req["organizationId"]}/projects/${req["projectId"]}/api_keys?${fm.renderURLSearchParams(req, ["organizationId", "projectId"])}`, {...initReq, method: "GET"})
+    return fm.fetchReq<ListAPIKeysRequest, ListAPIKeysResponse>(`/v1/api_keys?${fm.renderURLSearchParams(req, [])}`, {...initReq, method: "GET"})
   }
   static DeleteAPIKey(req: DeleteAPIKeyRequest, initReq?: fm.InitReq): Promise<DeleteAPIKeyResponse> {
-    return fm.fetchReq<DeleteAPIKeyRequest, DeleteAPIKeyResponse>(`/v1/organizations/${req["organizationId"]}/projects/${req["projectId"]}/api_keys/${req["id"]}`, {...initReq, method: "DELETE"})
+    return fm.fetchReq<DeleteAPIKeyRequest, DeleteAPIKeyResponse>(`/v1/api_keys/${req["id"]}`, {...initReq, method: "DELETE"})
+  }
+  static CreateProjectAPIKey(req: CreateAPIKeyRequest, initReq?: fm.InitReq): Promise<APIKey> {
+    return fm.fetchReq<CreateAPIKeyRequest, APIKey>(`/v1/organizations/${req["organizationId"]}/projects/${req["projectId"]}/api_keys`, {...initReq, method: "POST", body: JSON.stringify(req)})
+  }
+  static ListProjectAPIKeys(req: ListProjectAPIKeysRequest, initReq?: fm.InitReq): Promise<ListAPIKeysResponse> {
+    return fm.fetchReq<ListProjectAPIKeysRequest, ListAPIKeysResponse>(`/v1/organizations/${req["organizationId"]}/projects/${req["projectId"]}/api_keys?${fm.renderURLSearchParams(req, ["organizationId", "projectId"])}`, {...initReq, method: "GET"})
+  }
+  static DeleteProjectAPIKey(req: DeleteProjectAPIKeyRequest, initReq?: fm.InitReq): Promise<DeleteAPIKeyResponse> {
+    return fm.fetchReq<DeleteProjectAPIKeyRequest, DeleteAPIKeyResponse>(`/v1/organizations/${req["organizationId"]}/projects/${req["projectId"]}/api_keys/${req["id"]}`, {...initReq, method: "DELETE"})
   }
   static CreateOrganization(req: CreateOrganizationRequest, initReq?: fm.InitReq): Promise<Organization> {
     return fm.fetchReq<CreateOrganizationRequest, Organization>(`/v1/organizations`, {...initReq, method: "POST", body: JSON.stringify(req)})

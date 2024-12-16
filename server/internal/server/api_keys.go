@@ -18,8 +18,8 @@ import (
 	"gorm.io/gorm"
 )
 
-// CreateAPIKey creates an API key.
-func (s *S) CreateAPIKey(
+// CreateProjectAPIKey creates an API key.
+func (s *S) CreateProjectAPIKey(
 	ctx context.Context,
 	req *v1.CreateAPIKeyRequest,
 ) (*v1.APIKey, error) {
@@ -108,10 +108,10 @@ func createAPIKey(
 	return kProto, nil
 }
 
-// ListAPIKeys lists API keys.
-func (s *S) ListAPIKeys(
+// ListProjectAPIKeys lists API keys.
+func (s *S) ListProjectAPIKeys(
 	ctx context.Context,
-	req *v1.ListAPIKeysRequest,
+	req *v1.ListProjectAPIKeysRequest,
 ) (*v1.ListAPIKeysResponse, error) {
 	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
 	if !ok {
@@ -163,10 +163,10 @@ func (s *S) ListAPIKeys(
 	}, nil
 }
 
-// DeleteAPIKey deletes an API key.
-func (s *S) DeleteAPIKey(
+// DeleteProjectAPIKey deletes an API key.
+func (s *S) DeleteProjectAPIKey(
 	ctx context.Context,
-	req *v1.DeleteAPIKeyRequest,
+	req *v1.DeleteProjectAPIKeyRequest,
 ) (*v1.DeleteAPIKeyResponse, error) {
 	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
 	if !ok {

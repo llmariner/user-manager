@@ -64,15 +64,19 @@ export type CreateAPIKeyRequest = {
     projectId?: string;
     organizationId?: string;
 };
-export type ListAPIKeysRequest = {
+export type ListProjectAPIKeysRequest = {
     projectId?: string;
     organizationId?: string;
 };
+export type ListAPIKeysRequest = {};
 export type ListAPIKeysResponse = {
     object?: string;
     data?: APIKey[];
 };
 export type DeleteAPIKeyRequest = {
+    id?: string;
+};
+export type DeleteProjectAPIKeyRequest = {
     id?: string;
     projectId?: string;
     organizationId?: string;
@@ -190,6 +194,9 @@ export declare class UsersService {
     static CreateAPIKey(req: CreateAPIKeyRequest, initReq?: fm.InitReq): Promise<APIKey>;
     static ListAPIKeys(req: ListAPIKeysRequest, initReq?: fm.InitReq): Promise<ListAPIKeysResponse>;
     static DeleteAPIKey(req: DeleteAPIKeyRequest, initReq?: fm.InitReq): Promise<DeleteAPIKeyResponse>;
+    static CreateProjectAPIKey(req: CreateAPIKeyRequest, initReq?: fm.InitReq): Promise<APIKey>;
+    static ListProjectAPIKeys(req: ListProjectAPIKeysRequest, initReq?: fm.InitReq): Promise<ListAPIKeysResponse>;
+    static DeleteProjectAPIKey(req: DeleteProjectAPIKeyRequest, initReq?: fm.InitReq): Promise<DeleteAPIKeyResponse>;
     static CreateOrganization(req: CreateOrganizationRequest, initReq?: fm.InitReq): Promise<Organization>;
     static ListOrganizations(req: ListOrganizationsRequest, initReq?: fm.InitReq): Promise<ListOrganizationsResponse>;
     static DeleteOrganization(req: DeleteOrganizationRequest, initReq?: fm.InitReq): Promise<DeleteOrganizationResponse>;
