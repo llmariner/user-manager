@@ -22,6 +22,10 @@ type UsersServiceClient interface {
 	CreateAPIKey(ctx context.Context, in *CreateAPIKeyRequest, opts ...grpc.CallOption) (*APIKey, error)
 	ListAPIKeys(ctx context.Context, in *ListAPIKeysRequest, opts ...grpc.CallOption) (*ListAPIKeysResponse, error)
 	DeleteAPIKey(ctx context.Context, in *DeleteAPIKeyRequest, opts ...grpc.CallOption) (*DeleteAPIKeyResponse, error)
+	// TODO(kenji): Remove the follwoing three RPC endpoints in favor of "/v1/api_keys".
+	CreateProjectAPIKey(ctx context.Context, in *CreateAPIKeyRequest, opts ...grpc.CallOption) (*APIKey, error)
+	ListProjectAPIKeys(ctx context.Context, in *ListProjectAPIKeysRequest, opts ...grpc.CallOption) (*ListAPIKeysResponse, error)
+	DeleteProjectAPIKey(ctx context.Context, in *DeleteProjectAPIKeyRequest, opts ...grpc.CallOption) (*DeleteAPIKeyResponse, error)
 	CreateOrganization(ctx context.Context, in *CreateOrganizationRequest, opts ...grpc.CallOption) (*Organization, error)
 	ListOrganizations(ctx context.Context, in *ListOrganizationsRequest, opts ...grpc.CallOption) (*ListOrganizationsResponse, error)
 	DeleteOrganization(ctx context.Context, in *DeleteOrganizationRequest, opts ...grpc.CallOption) (*DeleteOrganizationResponse, error)
@@ -66,6 +70,33 @@ func (c *usersServiceClient) ListAPIKeys(ctx context.Context, in *ListAPIKeysReq
 func (c *usersServiceClient) DeleteAPIKey(ctx context.Context, in *DeleteAPIKeyRequest, opts ...grpc.CallOption) (*DeleteAPIKeyResponse, error) {
 	out := new(DeleteAPIKeyResponse)
 	err := c.cc.Invoke(ctx, "/llmariner.users.server.v1.UsersService/DeleteAPIKey", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *usersServiceClient) CreateProjectAPIKey(ctx context.Context, in *CreateAPIKeyRequest, opts ...grpc.CallOption) (*APIKey, error) {
+	out := new(APIKey)
+	err := c.cc.Invoke(ctx, "/llmariner.users.server.v1.UsersService/CreateProjectAPIKey", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *usersServiceClient) ListProjectAPIKeys(ctx context.Context, in *ListProjectAPIKeysRequest, opts ...grpc.CallOption) (*ListAPIKeysResponse, error) {
+	out := new(ListAPIKeysResponse)
+	err := c.cc.Invoke(ctx, "/llmariner.users.server.v1.UsersService/ListProjectAPIKeys", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *usersServiceClient) DeleteProjectAPIKey(ctx context.Context, in *DeleteProjectAPIKeyRequest, opts ...grpc.CallOption) (*DeleteAPIKeyResponse, error) {
+	out := new(DeleteAPIKeyResponse)
+	err := c.cc.Invoke(ctx, "/llmariner.users.server.v1.UsersService/DeleteProjectAPIKey", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -196,6 +227,10 @@ type UsersServiceServer interface {
 	CreateAPIKey(context.Context, *CreateAPIKeyRequest) (*APIKey, error)
 	ListAPIKeys(context.Context, *ListAPIKeysRequest) (*ListAPIKeysResponse, error)
 	DeleteAPIKey(context.Context, *DeleteAPIKeyRequest) (*DeleteAPIKeyResponse, error)
+	// TODO(kenji): Remove the follwoing three RPC endpoints in favor of "/v1/api_keys".
+	CreateProjectAPIKey(context.Context, *CreateAPIKeyRequest) (*APIKey, error)
+	ListProjectAPIKeys(context.Context, *ListProjectAPIKeysRequest) (*ListAPIKeysResponse, error)
+	DeleteProjectAPIKey(context.Context, *DeleteProjectAPIKeyRequest) (*DeleteAPIKeyResponse, error)
 	CreateOrganization(context.Context, *CreateOrganizationRequest) (*Organization, error)
 	ListOrganizations(context.Context, *ListOrganizationsRequest) (*ListOrganizationsResponse, error)
 	DeleteOrganization(context.Context, *DeleteOrganizationRequest) (*DeleteOrganizationResponse, error)
@@ -224,6 +259,15 @@ func (UnimplementedUsersServiceServer) ListAPIKeys(context.Context, *ListAPIKeys
 }
 func (UnimplementedUsersServiceServer) DeleteAPIKey(context.Context, *DeleteAPIKeyRequest) (*DeleteAPIKeyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteAPIKey not implemented")
+}
+func (UnimplementedUsersServiceServer) CreateProjectAPIKey(context.Context, *CreateAPIKeyRequest) (*APIKey, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateProjectAPIKey not implemented")
+}
+func (UnimplementedUsersServiceServer) ListProjectAPIKeys(context.Context, *ListProjectAPIKeysRequest) (*ListAPIKeysResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListProjectAPIKeys not implemented")
+}
+func (UnimplementedUsersServiceServer) DeleteProjectAPIKey(context.Context, *DeleteProjectAPIKeyRequest) (*DeleteAPIKeyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteProjectAPIKey not implemented")
 }
 func (UnimplementedUsersServiceServer) CreateOrganization(context.Context, *CreateOrganizationRequest) (*Organization, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateOrganization not implemented")
@@ -327,6 +371,60 @@ func _UsersService_DeleteAPIKey_Handler(srv interface{}, ctx context.Context, de
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UsersServiceServer).DeleteAPIKey(ctx, req.(*DeleteAPIKeyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UsersService_CreateProjectAPIKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateAPIKeyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServiceServer).CreateProjectAPIKey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/llmariner.users.server.v1.UsersService/CreateProjectAPIKey",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServiceServer).CreateProjectAPIKey(ctx, req.(*CreateAPIKeyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UsersService_ListProjectAPIKeys_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListProjectAPIKeysRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServiceServer).ListProjectAPIKeys(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/llmariner.users.server.v1.UsersService/ListProjectAPIKeys",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServiceServer).ListProjectAPIKeys(ctx, req.(*ListProjectAPIKeysRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UsersService_DeleteProjectAPIKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteProjectAPIKeyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServiceServer).DeleteProjectAPIKey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/llmariner.users.server.v1.UsersService/DeleteProjectAPIKey",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServiceServer).DeleteProjectAPIKey(ctx, req.(*DeleteProjectAPIKeyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -583,6 +681,18 @@ var UsersService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteAPIKey",
 			Handler:    _UsersService_DeleteAPIKey_Handler,
+		},
+		{
+			MethodName: "CreateProjectAPIKey",
+			Handler:    _UsersService_CreateProjectAPIKey_Handler,
+		},
+		{
+			MethodName: "ListProjectAPIKeys",
+			Handler:    _UsersService_ListProjectAPIKeys_Handler,
+		},
+		{
+			MethodName: "DeleteProjectAPIKey",
+			Handler:    _UsersService_DeleteProjectAPIKey_Handler,
 		},
 		{
 			MethodName: "CreateOrganization",

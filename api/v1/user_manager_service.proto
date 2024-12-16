@@ -99,9 +99,12 @@ message CreateAPIKeyRequest {
   string organization_id = 3;
 }
 
-message ListAPIKeysRequest {
+message ListProjectAPIKeysRequest {
   string project_id = 1;
   string organization_id = 2;
+}
+
+message ListAPIKeysRequest {
 }
 
 message ListAPIKeysResponse {
@@ -110,6 +113,10 @@ message ListAPIKeysResponse {
 }
 
 message DeleteAPIKeyRequest {
+  string id = 1;
+}
+
+message DeleteProjectAPIKeyRequest {
   string id = 1;
   string project_id = 2;
   string organization_id = 3;
@@ -231,18 +238,38 @@ message GetUserSelfRequest {
 service UsersService {
   rpc CreateAPIKey(CreateAPIKeyRequest) returns (APIKey) {
     option (google.api.http) = {
-      post: "/v1/organizations/{organization_id}/projects/{project_id}/api_keys"
+      post: "/v1/api_keys"
       body: "*"
     };
   }
 
   rpc ListAPIKeys(ListAPIKeysRequest) returns (ListAPIKeysResponse) {
     option (google.api.http) = {
-      get: "/v1/organizations/{organization_id}/projects/{project_id}/api_keys"
+      get: "/v1/api_keys"
     };
   }
 
   rpc DeleteAPIKey(DeleteAPIKeyRequest) returns (DeleteAPIKeyResponse) {
+    option (google.api.http) = {
+      delete: "/v1/api_keys/{id}"
+    };
+  }
+
+  // TODO(kenji): Remove the follwoing three RPC endpoints in favor of "/v1/api_keys".
+  rpc CreateProjectAPIKey(CreateAPIKeyRequest) returns (APIKey) {
+    option (google.api.http) = {
+      post: "/v1/organizations/{organization_id}/projects/{project_id}/api_keys"
+      body: "*"
+    };
+  }
+
+  rpc ListProjectAPIKeys(ListProjectAPIKeysRequest) returns (ListAPIKeysResponse) {
+    option (google.api.http) = {
+      get: "/v1/organizations/{organization_id}/projects/{project_id}/api_keys"
+    };
+  }
+
+  rpc DeleteProjectAPIKey(DeleteProjectAPIKeyRequest) returns (DeleteAPIKeyResponse) {
     option (google.api.http) = {
       delete: "/v1/organizations/{organization_id}/projects/{project_id}/api_keys/{id}"
     };
@@ -305,6 +332,7 @@ service UsersService {
       body: "*"
     };
   }
+
   rpc ListProjectUsers(ListProjectUsersRequest) returns (ListProjectUsersResponse) {
     option (google.api.http) = {
       get: "/v1/organizations/{organization_id}/projects/{project_id}/users"

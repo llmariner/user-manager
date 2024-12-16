@@ -19,6 +19,88 @@
     "application/json"
   ],
   "paths": {
+    "/v1/api_keys": {
+      "get": {
+        "operationId": "UsersService_ListAPIKeys",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListAPIKeysResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "UsersService"
+        ]
+      },
+      "post": {
+        "operationId": "UsersService_CreateAPIKey",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1APIKey"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreateAPIKeyRequest"
+            }
+          }
+        ],
+        "tags": [
+          "UsersService"
+        ]
+      }
+    },
+    "/v1/api_keys/{id}": {
+      "delete": {
+        "operationId": "UsersService_DeleteAPIKey",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1DeleteAPIKeyResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "UsersService"
+        ]
+      }
+    },
     "/v1/organizations": {
       "get": {
         "operationId": "UsersService_ListOrganizations",
@@ -227,7 +309,7 @@
     },
     "/v1/organizations/{organizationId}/projects/{projectId}/api_keys": {
       "get": {
-        "operationId": "UsersService_ListAPIKeys",
+        "operationId": "UsersService_ListProjectAPIKeys",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -261,7 +343,8 @@
         ]
       },
       "post": {
-        "operationId": "UsersService_CreateAPIKey",
+        "summary": "TODO(kenji): Remove the follwoing three RPC endpoints in favor of \"/v1/api_keys\".",
+        "operationId": "UsersService_CreateProjectAPIKey",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -310,7 +393,7 @@
     },
     "/v1/organizations/{organizationId}/projects/{projectId}/api_keys/{id}": {
       "delete": {
-        "operationId": "UsersService_DeleteAPIKey",
+        "operationId": "UsersService_DeleteProjectAPIKey",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -675,6 +758,20 @@
         },
         "projectRole": {
           "$ref": "#/definitions/v1ProjectRole"
+        }
+      }
+    },
+    "v1CreateAPIKeyRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "projectId": {
+          "type": "string"
+        },
+        "organizationId": {
+          "type": "string"
         }
       }
     },
