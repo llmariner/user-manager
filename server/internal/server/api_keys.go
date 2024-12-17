@@ -125,6 +125,10 @@ func (s *S) UpdateAPIKey(
 		return nil, status.Error(codes.InvalidArgument, "id is required")
 	}
 
+	if req.ApiKey.Name == "" {
+		return nil, status.Error(codes.InvalidArgument, "name is required")
+	}
+
 	// Currently only support the update of the name field.
 	if req.UpdateMask == nil {
 		return nil, status.Error(codes.InvalidArgument, "update mask is required")

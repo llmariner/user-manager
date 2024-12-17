@@ -130,7 +130,7 @@ message DeleteAPIKeyResponse {
 }
 
 message UpdateAPIKeyRequest {
-  // key is the API key to update.
+  // api_key is the API key to update.
   //
   // The key's id is used to identify the key to update.
   APIKey api_key = 1;
@@ -268,8 +268,8 @@ service UsersService {
 
   rpc UpdateAPIKey(UpdateAPIKeyRequest) returns (APIKey) {
     option (google.api.http) = {
-      patch: "/v1/api_keys"
-      body: "*"
+      patch: "/v1/api_keys/{api_key.id}"
+      body: "api_key"
     };
   }
 
