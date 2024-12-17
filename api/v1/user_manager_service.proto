@@ -133,7 +133,7 @@ message UpdateAPIKeyRequest {
   // key is the API key to update.
   //
   // The key's id is used to identify the key to update.
-  APIKey key = 1;
+  APIKey api_key = 1;
 
   // The list of fields to update.
   google.protobuf.FieldMask update_mask = 2;

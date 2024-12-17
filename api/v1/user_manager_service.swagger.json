@@ -1083,7 +1083,7 @@
     "v1UpdateAPIKeyRequest": {
       "type": "object",
       "properties": {
-        "key": {
+        "apiKey": {
           "$ref": "#/definitions/v1APIKey",
           "description": "key is the API key to update.\n\nThe key's id is used to identify the key to update."
         },
