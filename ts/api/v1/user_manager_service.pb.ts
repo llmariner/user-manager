@@ -113,7 +113,7 @@ export type DeleteAPIKeyResponse = {
 }
 
 export type UpdateAPIKeyRequest = {
-  key?: APIKey
+  apiKey?: APIKey
   updateMask?: GoogleProtobufField_mask.FieldMask
 }
 
