@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
 func TestAPIKey(t *testing.T) {
@@ -104,6 +105,48 @@ func TestAPIKey(t *testing.T) {
 			assert.Empty(t, lresp.Data)
 		})
 	}
+}
+
+func TestAPIKey_Update(t *testing.T) {
+	st, tearDown := store.NewTest(t)
+	defer tearDown()
+
+	srv := New(st, nil, testr.New(t))
+
+	ctx := fakeAuthInto(context.Background())
+	org, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
+		Title: "Test organization",
+	})
+	assert.NoError(t, err)
+
+	proj, err := srv.CreateProject(ctx, &v1.CreateProjectRequest{
+		Title:               "Test project",
+		OrganizationId:      org.Id,
+		KubernetesNamespace: "test",
+	})
+	assert.NoError(t, err)
+
+	key, err := srv.CreateAPIKey(ctx, &v1.CreateAPIKeyRequest{
+		Name:           "dummy",
+		OrganizationId: org.Id,
+		ProjectId:      proj.Id,
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, "dummy", key.Name)
+
+	key.Name = "dummy2"
+	_, err = srv.UpdateAPIKey(ctx, &v1.UpdateAPIKeyRequest{
+		ApiKey: key,
+		UpdateMask: &fieldmaskpb.FieldMask{
+			Paths: []string{"name"},
+		},
+	})
+	assert.NoError(t, err)
+
+	resp, err := srv.ListAPIKeys(ctx, &v1.ListAPIKeysRequest{})
+	assert.NoError(t, err)
+	assert.Len(t, resp.Data, 1)
+	assert.Equal(t, "dummy2", resp.Data[0].Name)
 }
 
 func TestProjectAPIKey(t *testing.T) {
