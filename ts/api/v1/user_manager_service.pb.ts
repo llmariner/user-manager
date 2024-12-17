@@ -263,7 +263,7 @@ export class UsersService {
     return fm.fetchReq<DeleteAPIKeyRequest, DeleteAPIKeyResponse>(`/v1/api_keys/${req["id"]}`, {...initReq, method: "DELETE"})
   }
   static UpdateAPIKey(req: UpdateAPIKeyRequest, initReq?: fm.InitReq): Promise<APIKey> {
-    return fm.fetchReq<UpdateAPIKeyRequest, APIKey>(`/v1/api_keys`, {...initReq, method: "PATCH", body: JSON.stringify(req)})
+    return fm.fetchReq<UpdateAPIKeyRequest, APIKey>(`/v1/api_keys/${req["apiKeyId"]}`, {...initReq, method: "PATCH", body: JSON.stringify(req["api_key"])})
   }
   static CreateProjectAPIKey(req: CreateAPIKeyRequest, initReq?: fm.InitReq): Promise<APIKey> {
     return fm.fetchReq<CreateAPIKeyRequest, APIKey>(`/v1/organizations/${req["organizationId"]}/projects/${req["projectId"]}/api_keys`, {...initReq, method: "POST", body: JSON.stringify(req)})

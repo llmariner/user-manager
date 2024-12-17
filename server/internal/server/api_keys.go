@@ -107,6 +107,66 @@ func (s *S) ListAPIKeys(
 	}, nil
 }
 
+// UpdateAPIKey updates an API key.
+func (s *S) UpdateAPIKey(
+	ctx context.Context,
+	req *v1.UpdateAPIKeyRequest,
+) (*v1.APIKey, error) {
+	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("failed to extract user info from context")
+	}
+
+	if req.ApiKey == nil {
+		return nil, status.Error(codes.InvalidArgument, "api key is required")
+	}
+
+	if req.ApiKey.Id == "" {
+		return nil, status.Error(codes.InvalidArgument, "id is required")
+	}
+
+	if req.ApiKey.Name == "" {
+		return nil, status.Error(codes.InvalidArgument, "name is required")
+	}
+
+	// Currently only support the update of the name field.
+	if req.UpdateMask == nil {
+		return nil, status.Error(codes.InvalidArgument, "update mask is required")
+	}
+	if len(req.UpdateMask.Paths) != 1 || req.UpdateMask.Paths[0] != "name" {
+		return nil, status.Error(codes.InvalidArgument, "only name field is supported for update")
+	}
+
+	key, err := s.store.GetAPIKeyByID(req.ApiKey.Id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, status.Errorf(codes.NotFound, "api key %q not found", req.ApiKey.Id)
+		}
+		return nil, status.Errorf(codes.Internal, "get api key: %s", err)
+	}
+
+	isOwner := s.validateProjectOwner(key.ProjectID, key.OrganizationID, userInfo.UserID) == nil
+	if !isOwner && userInfo.UserID != key.UserID {
+		return nil, status.Errorf(codes.NotFound, "api key %q not found", req.ApiKey.Id)
+	}
+
+	key.Name = req.ApiKey.Name
+	if err := s.store.UpdateAPIKey(key); err != nil {
+		return nil, status.Errorf(codes.Internal, "update api key: %s", err)
+	}
+
+	orgsByID, projectsByID, err := getOrgAndProject(s.store, userInfo.TenantID, key.OrganizationID, key.ProjectID)
+	if err != nil {
+		return nil, err
+	}
+
+	kProto, err := toAPIKeyProto(ctx, s.store, s.dataKey, key, "", false, orgsByID, projectsByID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "to api key proto: %s", err)
+	}
+	return kProto, nil
+}
+
 // CreateProjectAPIKey creates an API key.
 func (s *S) CreateProjectAPIKey(
 	ctx context.Context,

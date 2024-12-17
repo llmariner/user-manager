@@ -69,7 +69,9 @@
         "tags": [
           "UsersService"
         ]
-      },
+      }
+    },
+    "/v1/api_keys/{apiKey.id}": {
       "patch": {
         "operationId": "UsersService_UpdateAPIKey",
         "responses": {
@@ -88,12 +90,26 @@
         },
         "parameters": [
           {
+            "name": "apiKey.id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
             "name": "body",
+            "description": "api_key is the API key to update.\n\nThe key's id is used to identify the key to update.",
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/v1UpdateAPIKeyRequest"
+              "$ref": "#/definitions/v1APIKey"
             }
+          },
+          {
+            "name": "updateMask",
+            "description": "The list of fields to update.",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -1077,19 +1093,6 @@
         },
         "role": {
           "$ref": "#/definitions/v1ProjectRole"
-        }
-      }
-    },
-    "v1UpdateAPIKeyRequest": {
-      "type": "object",
-      "properties": {
-        "apiKey": {
-          "$ref": "#/definitions/v1APIKey",
-          "description": "key is the API key to update.\n\nThe key's id is used to identify the key to update."
-        },
-        "updateMask": {
-          "type": "string",
-          "description": "The list of fields to update."
         }
       }
     },

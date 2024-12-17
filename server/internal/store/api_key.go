@@ -124,3 +124,11 @@ func (s *S) DeleteAPIKey(apiKeyID, projectID string) error {
 	}
 	return nil
 }
+
+// UpdateAPIKey updates an API key.
+func (s *S) UpdateAPIKey(key *APIKey) error {
+	if err := s.db.Save(key).Error; err != nil {
+		return err
+	}
+	return nil
+}

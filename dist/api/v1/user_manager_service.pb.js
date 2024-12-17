@@ -27,7 +27,7 @@ export class UsersService {
         return fm.fetchReq(`/v1/api_keys/${req["id"]}`, Object.assign(Object.assign({}, initReq), { method: "DELETE" }));
     }
     static UpdateAPIKey(req, initReq) {
-        return fm.fetchReq(`/v1/api_keys`, Object.assign(Object.assign({}, initReq), { method: "PATCH", body: JSON.stringify(req) }));
+        return fm.fetchReq(`/v1/api_keys/${req["apiKeyId"]}`, Object.assign(Object.assign({}, initReq), { method: "PATCH", body: JSON.stringify(req["api_key"]) }));
     }
     static CreateProjectAPIKey(req, initReq) {
         return fm.fetchReq(`/v1/organizations/${req["organizationId"]}/projects/${req["projectId"]}/api_keys`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
