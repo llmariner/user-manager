@@ -1,5 +1,6 @@
 import * as fm from "../../fetch.pb";
 import * as GoogleProtobufEmpty from "../../google/protobuf/empty.pb";
+import * as GoogleProtobufField_mask from "../../google/protobuf/field_mask.pb";
 export declare enum OrganizationRole {
     ORGANIZATION_ROLE_UNSPECIFIED = "ORGANIZATION_ROLE_UNSPECIFIED",
     ORGANIZATION_ROLE_OWNER = "ORGANIZATION_ROLE_OWNER",
@@ -85,6 +86,10 @@ export type DeleteAPIKeyResponse = {
     id?: string;
     object?: string;
     deleted?: boolean;
+};
+export type UpdateAPIKeyRequest = {
+    key?: APIKey;
+    updateMask?: GoogleProtobufField_mask.FieldMask;
 };
 export type CreateOrganizationRequest = {
     title?: string;
@@ -194,6 +199,7 @@ export declare class UsersService {
     static CreateAPIKey(req: CreateAPIKeyRequest, initReq?: fm.InitReq): Promise<APIKey>;
     static ListAPIKeys(req: ListAPIKeysRequest, initReq?: fm.InitReq): Promise<ListAPIKeysResponse>;
     static DeleteAPIKey(req: DeleteAPIKeyRequest, initReq?: fm.InitReq): Promise<DeleteAPIKeyResponse>;
+    static UpdateAPIKey(req: UpdateAPIKeyRequest, initReq?: fm.InitReq): Promise<APIKey>;
     static CreateProjectAPIKey(req: CreateAPIKeyRequest, initReq?: fm.InitReq): Promise<APIKey>;
     static ListProjectAPIKeys(req: ListProjectAPIKeysRequest, initReq?: fm.InitReq): Promise<ListAPIKeysResponse>;
     static DeleteProjectAPIKey(req: DeleteProjectAPIKeyRequest, initReq?: fm.InitReq): Promise<DeleteAPIKeyResponse>;

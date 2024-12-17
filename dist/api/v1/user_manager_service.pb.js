@@ -26,6 +26,9 @@ export class UsersService {
     static DeleteAPIKey(req, initReq) {
         return fm.fetchReq(`/v1/api_keys/${req["id"]}`, Object.assign(Object.assign({}, initReq), { method: "DELETE" }));
     }
+    static UpdateAPIKey(req, initReq) {
+        return fm.fetchReq(`/v1/api_keys`, Object.assign(Object.assign({}, initReq), { method: "PATCH", body: JSON.stringify(req) }));
+    }
     static CreateProjectAPIKey(req, initReq) {
         return fm.fetchReq(`/v1/organizations/${req["organizationId"]}/projects/${req["projectId"]}/api_keys`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
     }

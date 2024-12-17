@@ -69,6 +69,36 @@
         "tags": [
           "UsersService"
         ]
+      },
+      "patch": {
+        "operationId": "UsersService_UpdateAPIKey",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1APIKey"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1UpdateAPIKeyRequest"
+            }
+          }
+        ],
+        "tags": [
+          "UsersService"
+        ]
       }
     },
     "/v1/api_keys/{id}": {
@@ -1047,6 +1077,19 @@
         },
         "role": {
           "$ref": "#/definitions/v1ProjectRole"
+        }
+      }
+    },
+    "v1UpdateAPIKeyRequest": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "$ref": "#/definitions/v1APIKey",
+          "description": "key is the API key to update.\n\nThe key's id is used to identify the key to update."
+        },
+        "updateMask": {
+          "type": "string",
+          "description": "The list of fields to update."
         }
       }
     },

@@ -4,6 +4,7 @@ package llmariner.users.server.v1;
 
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
 
 option go_package = "github.com/llmariner/user-manager/api/v1";
 
@@ -126,6 +127,16 @@ message DeleteAPIKeyResponse {
   string id = 1;
   string object = 2;
   bool deleted = 3;
+}
+
+message UpdateAPIKeyRequest {
+  // key is the API key to update.
+  //
+  // The key's id is used to identify the key to update.
+  APIKey key = 1;
+
+  // The list of fields to update.
+  google.protobuf.FieldMask update_mask = 2;
 }
 
 message CreateOrganizationRequest {
@@ -252,6 +263,13 @@ service UsersService {
   rpc DeleteAPIKey(DeleteAPIKeyRequest) returns (DeleteAPIKeyResponse) {
     option (google.api.http) = {
       delete: "/v1/api_keys/{id}"
+    };
+  }
+
+  rpc UpdateAPIKey(UpdateAPIKeyRequest) returns (APIKey) {
+    option (google.api.http) = {
+      patch: "/v1/api_keys"
+      body: "*"
     };
   }
 

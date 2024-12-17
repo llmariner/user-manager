@@ -22,6 +22,7 @@ type UsersServiceClient interface {
 	CreateAPIKey(ctx context.Context, in *CreateAPIKeyRequest, opts ...grpc.CallOption) (*APIKey, error)
 	ListAPIKeys(ctx context.Context, in *ListAPIKeysRequest, opts ...grpc.CallOption) (*ListAPIKeysResponse, error)
 	DeleteAPIKey(ctx context.Context, in *DeleteAPIKeyRequest, opts ...grpc.CallOption) (*DeleteAPIKeyResponse, error)
+	UpdateAPIKey(ctx context.Context, in *UpdateAPIKeyRequest, opts ...grpc.CallOption) (*APIKey, error)
 	// TODO(kenji): Remove the follwoing three RPC endpoints in favor of "/v1/api_keys".
 	CreateProjectAPIKey(ctx context.Context, in *CreateAPIKeyRequest, opts ...grpc.CallOption) (*APIKey, error)
 	ListProjectAPIKeys(ctx context.Context, in *ListProjectAPIKeysRequest, opts ...grpc.CallOption) (*ListAPIKeysResponse, error)
@@ -70,6 +71,15 @@ func (c *usersServiceClient) ListAPIKeys(ctx context.Context, in *ListAPIKeysReq
 func (c *usersServiceClient) DeleteAPIKey(ctx context.Context, in *DeleteAPIKeyRequest, opts ...grpc.CallOption) (*DeleteAPIKeyResponse, error) {
 	out := new(DeleteAPIKeyResponse)
 	err := c.cc.Invoke(ctx, "/llmariner.users.server.v1.UsersService/DeleteAPIKey", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *usersServiceClient) UpdateAPIKey(ctx context.Context, in *UpdateAPIKeyRequest, opts ...grpc.CallOption) (*APIKey, error) {
+	out := new(APIKey)
+	err := c.cc.Invoke(ctx, "/llmariner.users.server.v1.UsersService/UpdateAPIKey", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -227,6 +237,7 @@ type UsersServiceServer interface {
 	CreateAPIKey(context.Context, *CreateAPIKeyRequest) (*APIKey, error)
 	ListAPIKeys(context.Context, *ListAPIKeysRequest) (*ListAPIKeysResponse, error)
 	DeleteAPIKey(context.Context, *DeleteAPIKeyRequest) (*DeleteAPIKeyResponse, error)
+	UpdateAPIKey(context.Context, *UpdateAPIKeyRequest) (*APIKey, error)
 	// TODO(kenji): Remove the follwoing three RPC endpoints in favor of "/v1/api_keys".
 	CreateProjectAPIKey(context.Context, *CreateAPIKeyRequest) (*APIKey, error)
 	ListProjectAPIKeys(context.Context, *ListProjectAPIKeysRequest) (*ListAPIKeysResponse, error)
@@ -259,6 +270,9 @@ func (UnimplementedUsersServiceServer) ListAPIKeys(context.Context, *ListAPIKeys
 }
 func (UnimplementedUsersServiceServer) DeleteAPIKey(context.Context, *DeleteAPIKeyRequest) (*DeleteAPIKeyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteAPIKey not implemented")
+}
+func (UnimplementedUsersServiceServer) UpdateAPIKey(context.Context, *UpdateAPIKeyRequest) (*APIKey, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateAPIKey not implemented")
 }
 func (UnimplementedUsersServiceServer) CreateProjectAPIKey(context.Context, *CreateAPIKeyRequest) (*APIKey, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateProjectAPIKey not implemented")
@@ -371,6 +385,24 @@ func _UsersService_DeleteAPIKey_Handler(srv interface{}, ctx context.Context, de
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UsersServiceServer).DeleteAPIKey(ctx, req.(*DeleteAPIKeyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UsersService_UpdateAPIKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateAPIKeyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServiceServer).UpdateAPIKey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/llmariner.users.server.v1.UsersService/UpdateAPIKey",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServiceServer).UpdateAPIKey(ctx, req.(*UpdateAPIKeyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -681,6 +713,10 @@ var UsersService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteAPIKey",
 			Handler:    _UsersService_DeleteAPIKey_Handler,
+		},
+		{
+			MethodName: "UpdateAPIKey",
+			Handler:    _UsersService_UpdateAPIKey_Handler,
 		},
 		{
 			MethodName: "CreateProjectAPIKey",
