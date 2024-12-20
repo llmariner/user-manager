@@ -2,6 +2,7 @@ package store
 
 import (
 	v1 "github.com/llmariner/user-manager/api/v1"
+	"google.golang.org/protobuf/proto"
 	"gorm.io/gorm"
 )
 
@@ -21,27 +22,62 @@ type Project struct {
 	// TODO(kenji): Currently we don't set the unique constraint so that multiple orgs can use the same namespace,
 	// but revisit the design.
 	KubernetesNamespace string
+
+	// Assignments is the assignments of the project. It is a marshaled v1.ProjectAssignments.
+	Assignments []byte
 }
 
 // ToProto converts the organization to proto.
-func (p *Project) ToProto() *v1.Project {
+func (p *Project) ToProto() (*v1.Project, error) {
+	// Populate the KubernetesNamespace and Assignments from each other
+	// for backward compatibility .
+	// TODO(kenji): Remove this once all clients are updated.
+	var (
+		kn = p.KubernetesNamespace
+		as []*v1.ProjectAssignment
+	)
+
+	if kn != "" {
+		// Populate the Assignments from KubernetesNamespace.
+		as = []*v1.ProjectAssignment{
+			{
+				Namespace: kn,
+			},
+		}
+	} else {
+		// Populate the KubernetesNamespace from Assignments.
+		var asproto v1.ProjectAssignments
+		if err := proto.Unmarshal(p.Assignments, &asproto); err != nil {
+			return nil, err
+		}
+		as = asproto.Assignments
+
+		for _, a := range asproto.Assignments {
+			if a.Cluster == "" {
+				kn = a.Namespace
+				break
+			}
+		}
+	}
+
 	return &v1.Project{
 		Id:                  p.ProjectID,
 		OrganizationId:      p.OrganizationID,
 		Title:               p.Title,
-		KubernetesNamespace: p.KubernetesNamespace,
+		KubernetesNamespace: kn,
+		Assignments:         as,
 		CreatedAt:           p.CreatedAt.UTC().Unix(),
-	}
+	}, nil
 }
 
 // CreateProjectParams is the parameters for CreateProject.xo
 type CreateProjectParams struct {
-	ProjectID           string
-	OrganizationID      string
-	TenantID            string
-	Title               string
-	KubernetesNamespace string
-	IsDefault           bool
+	ProjectID      string
+	OrganizationID string
+	TenantID       string
+	Title          string
+	Assignments    []*v1.ProjectAssignment
+	IsDefault      bool
 }
 
 // CreateProject creates a new project.
@@ -51,13 +87,18 @@ func (s *S) CreateProject(p CreateProjectParams) (*Project, error) {
 
 // CreateProjectInTransaction creates a new project in a transaction.
 func CreateProjectInTransaction(tx *gorm.DB, p CreateProjectParams) (*Project, error) {
+	asb, err := proto.Marshal(&v1.ProjectAssignments{Assignments: p.Assignments})
+	if err != nil {
+		return nil, err
+	}
+
 	project := &Project{
-		ProjectID:           p.ProjectID,
-		OrganizationID:      p.OrganizationID,
-		TenantID:            p.TenantID,
-		Title:               p.Title,
-		KubernetesNamespace: p.KubernetesNamespace,
-		IsDefault:           p.IsDefault,
+		ProjectID:      p.ProjectID,
+		OrganizationID: p.OrganizationID,
+		TenantID:       p.TenantID,
+		Title:          p.Title,
+		Assignments:    asb,
+		IsDefault:      p.IsDefault,
 	}
 	if err := tx.Create(project).Error; err != nil {
 		return nil, err
