@@ -68,10 +68,10 @@ func TestCreateUserInternal(t *testing.T) {
 
 			ctx := fakeAuthInto(context.Background())
 			_, err := isrv.CreateUserInternal(ctx, &v1.CreateUserInternalRequest{
-				TenantId:           "tenant-1",
-				Title:              "Title-1",
-				UserId:             "user-1",
-				KubernetesNamespac: "ns-1",
+				TenantId:            "tenant-1",
+				Title:               "Title-1",
+				UserId:              "user-1",
+				KubernetesNamespace: "ns-1",
 			})
 			assert.NoError(t, err)
 

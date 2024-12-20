@@ -193,7 +193,7 @@ export type CreateUserInternalRequest = {
     tenantId?: string;
     title?: string;
     userId?: string;
-    kubernetesNamespac?: string;
+    kubernetesNamespace?: string;
 };
 export declare class UsersService {
     static CreateAPIKey(req: CreateAPIKeyRequest, initReq?: fm.InitReq): Promise<APIKey>;

@@ -249,7 +249,7 @@ export type CreateUserInternalRequest = {
   tenantId?: string
   title?: string
   userId?: string
-  kubernetesNamespac?: string
+  kubernetesNamespace?: string
 }
 
 export class UsersService {
