@@ -39,7 +39,7 @@ func (s *IS) CreateUserInternal(ctx context.Context, req *v1.CreateUserInternalR
 		return nil, status.Error(codes.InvalidArgument, "user id is required")
 	}
 	userID := userid.Normalize(req.UserId)
-	if req.KubernetesNamespac == "" {
+	if req.KubernetesNamespace == "" {
 		return nil, status.Error(codes.InvalidArgument, "kubernets namespace is required")
 	}
 
@@ -80,7 +80,7 @@ func (s *IS) CreateUserInternal(ctx context.Context, req *v1.CreateUserInternalR
 					return status.Errorf(codes.Internal, "list projects: %s", err)
 				}
 				for _, p := range ps {
-					if p.OrganizationID == org.OrganizationID && p.KubernetesNamespace == req.KubernetesNamespac {
+					if p.OrganizationID == org.OrganizationID && p.KubernetesNamespace == req.KubernetesNamespace {
 						if _, err := store.CreateProjectUserInTransaction(tx, store.CreateProjectUserParams{
 							ProjectID:      p.ProjectID,
 							OrganizationID: p.OrganizationID,
@@ -92,7 +92,7 @@ func (s *IS) CreateUserInternal(ctx context.Context, req *v1.CreateUserInternalR
 						return nil
 					}
 				}
-				return status.Errorf(codes.NotFound, "project not found: %s", req.KubernetesNamespac)
+				return status.Errorf(codes.NotFound, "project not found: %s", req.KubernetesNamespace)
 			}); err != nil {
 				return nil, err
 			}
@@ -111,7 +111,7 @@ func (s *IS) CreateUserInternal(ctx context.Context, req *v1.CreateUserInternalR
 			return status.Error(codes.Internal, err.Error())
 		}
 
-		if _, err = createProject(s.store, req.Title, org.OrganizationID, req.KubernetesNamespac, false, org.TenantID); err != nil {
+		if _, err = createProject(s.store, req.Title, org.OrganizationID, req.KubernetesNamespace, false, org.TenantID); err != nil {
 			return err
 		}
 		return nil

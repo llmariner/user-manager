@@ -398,7 +398,7 @@ message CreateUserInternalRequest {
   // title is used for both orgnization and project.
   string title = 2;
   string user_id = 3;
-  string kubernetes_namespac= 4;
+  string kubernetes_namespace = 4;
 }
 
 service UsersInternalService {
