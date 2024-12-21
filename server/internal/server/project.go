@@ -32,19 +32,25 @@ func (s *S) CreateProject(ctx context.Context, req *v1.CreateProjectRequest) (*v
 	if req.OrganizationId == "" {
 		return nil, status.Error(codes.InvalidArgument, "organization id is required")
 	}
-	if req.KubernetesNamespace == "" {
-		return nil, status.Error(codes.InvalidArgument, "kubernetes namespace is required")
-	}
 
 	if err := s.validateOrganizationOwner(req.OrganizationId, userInfo.UserID); err != nil {
 		return nil, err
+	}
+
+	kn := req.KubernetesNamespace
+	as := req.Assignments
+	if kn != "" && len(as) > 0 {
+		return nil, status.Errorf(codes.InvalidArgument, "kubernetes namespace and assignments cannot be set at the same time")
+	}
+	if kn != "" {
+		as = []*v1.ProjectAssignment{{Namespace: kn}}
 	}
 
 	return createProject(
 		s.store,
 		req.Title,
 		req.OrganizationId,
-		req.KubernetesNamespace,
+		as,
 		false,
 		userInfo.TenantID,
 	)
@@ -54,7 +60,7 @@ func createProject(
 	st *store.S,
 	title string,
 	organizationID string,
-	kubernetesNamespace string,
+	assignmetns []*v1.ProjectAssignment,
 	isDefault bool,
 	tenantID string,
 ) (*v1.Project, error) {
@@ -62,8 +68,16 @@ func createProject(
 		return nil, err
 	}
 
-	if errs := validation.ValidateNamespaceName(kubernetesNamespace, false); len(errs) != 0 {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid kubernetes namespace: %s", errs)
+	for _, a := range assignmetns {
+		if a.Namespace == "" {
+			return nil, status.Error(codes.InvalidArgument, "namespace is required")
+		}
+
+		if errs := validation.ValidateNamespaceName(a.Namespace, false); len(errs) != 0 {
+			return nil, status.Errorf(codes.InvalidArgument, "invalid kubernetes namespace: %s", errs)
+		}
+
+		// TODO(kenji): If the cluster is not empty, check if the cluster exists.
 	}
 
 	projectID, err := id.GenerateID("proj_", 24)
@@ -79,12 +93,12 @@ func createProject(
 	var p *store.Project
 	if err := st.Transaction(func(tx *gorm.DB) error {
 		p, err = store.CreateProjectInTransaction(tx, store.CreateProjectParams{
-			TenantID:            tenantID,
-			ProjectID:           projectID,
-			OrganizationID:      organizationID,
-			Title:               title,
-			KubernetesNamespace: kubernetesNamespace,
-			IsDefault:           isDefault,
+			TenantID:       tenantID,
+			ProjectID:      projectID,
+			OrganizationID: organizationID,
+			Title:          title,
+			Assignments:    assignmetns,
+			IsDefault:      isDefault,
 		})
 		if err != nil {
 			return err
@@ -114,7 +128,11 @@ func createProject(
 		return nil, status.Errorf(codes.Internal, "create project: %s", err)
 	}
 
-	return p.ToProto(), nil
+	pp, err := p.ToProto()
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "convert project to proto: %s", err)
+	}
+	return pp, nil
 }
 
 // ListProjects lists all projects.
@@ -146,7 +164,10 @@ func (s *S) ListProjects(ctx context.Context, req *v1.ListProjectsRequest) (*v1.
 
 	var pProtos []*v1.Project
 	for _, p := range filtered {
-		pProto := p.ToProto()
+		pProto, err := p.ToProto()
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "convert project to proto: %s", err)
+		}
 
 		if req.IncludeSummary {
 			numUsers, err := s.store.CountProjectUsersByProjectID(p.ProjectID)
@@ -377,7 +398,11 @@ func (s *S) CreateDefaultProject(ctx context.Context, c *config.DefaultProjectCo
 		s.store,
 		c.Title,
 		orgID,
-		c.KubernetesNamespace,
+		[]*v1.ProjectAssignment{
+			{
+				Namespace: c.KubernetesNamespace,
+			},
+		},
 		true,
 		tenantID,
 	); err != nil {
@@ -389,17 +414,21 @@ func (s *S) CreateDefaultProject(ctx context.Context, c *config.DefaultProjectCo
 
 // ListProjects lists all projects.
 func (s *IS) ListProjects(ctx context.Context, req *v1.ListProjectsRequest) (*v1.ListProjectsResponse, error) {
-	orgs, err := s.store.ListAllProjects()
+	projects, err := s.store.ListAllProjects()
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "list projects: %s", err)
 	}
 
-	var orgProtos []*v1.Project
-	for _, org := range orgs {
-		orgProtos = append(orgProtos, org.ToProto())
+	var pProtos []*v1.Project
+	for _, p := range projects {
+		pp, err := p.ToProto()
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "convert project to proto: %s", err)
+		}
+		pProtos = append(pProtos, pp)
 	}
 	return &v1.ListProjectsResponse{
-		Projects: orgProtos,
+		Projects: pProtos,
 	}, nil
 }
 

@@ -14,6 +14,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
 )
 
 func TestProject(t *testing.T) {
@@ -21,6 +22,7 @@ func TestProject(t *testing.T) {
 	defer tearDown()
 
 	srv := New(st, nil, testr.New(t))
+
 	isrv := NewInternal(st, nil, testr.New(t))
 	ctx := fakeAuthInto(context.Background())
 
@@ -44,6 +46,9 @@ func TestProject(t *testing.T) {
 		assert.Equal(t, title, proj.Title)
 		assert.Equal(t, org.Id, proj.OrganizationId)
 		assert.Equal(t, "test", proj.KubernetesNamespace)
+		assert.Len(t, proj.Assignments, 1)
+		assert.Equal(t, "", proj.Assignments[0].Cluster)
+		assert.Equal(t, "test", proj.Assignments[0].Namespace)
 
 		projs = append(projs, proj)
 	}
@@ -257,7 +262,12 @@ func TestCreateDefaultProject(t *testing.T) {
 
 	p, err := st.GetDefaultProject(defaultTenantID)
 	assert.NoError(t, err)
-	assert.Equal(t, c.KubernetesNamespace, p.KubernetesNamespace)
+	var asp v1.ProjectAssignments
+	err = proto.Unmarshal(p.Assignments, &asp)
+	assert.NoError(t, err)
+	as := asp.Assignments
+	assert.Len(t, as, 1)
+	assert.Equal(t, c.KubernetesNamespace, as[0].Namespace)
 	assert.True(t, p.IsDefault)
 
 	pus, err := st.ListProjectUsersByProjectID(p.ProjectID)
@@ -303,6 +313,101 @@ func TestCreateProject_EnableAuth(t *testing.T) {
 
 	_, err = srv.CreateProject(u0Ctx, req)
 	assert.NoError(t, err)
+}
+
+func TestCreateProject_Assignments(t *testing.T) {
+	tcs := []struct {
+		name                   string
+		reqKubernetesNamespace string
+		reqAssignments         []*v1.ProjectAssignment
+
+		wantKubernetesNamespace string
+		wantAssignments         []*v1.ProjectAssignment
+		wantErr                 bool
+	}{
+		{
+			name:                    "only kubernetes namespace",
+			reqKubernetesNamespace:  "ns",
+			reqAssignments:          nil,
+			wantKubernetesNamespace: "ns",
+			wantAssignments: []*v1.ProjectAssignment{
+				{
+					Cluster:   "",
+					Namespace: "ns",
+				},
+			},
+		},
+		{
+			name:                   "only assignments",
+			reqKubernetesNamespace: "",
+			reqAssignments: []*v1.ProjectAssignment{
+				{
+					Cluster:   "",
+					Namespace: "ns0",
+				},
+				{
+					Cluster:   "c1",
+					Namespace: "ns1",
+				},
+			},
+			wantKubernetesNamespace: "ns0",
+			wantAssignments: []*v1.ProjectAssignment{
+				{
+					Cluster:   "",
+					Namespace: "ns0",
+				},
+				{
+					Cluster:   "c1",
+					Namespace: "ns1",
+				},
+			},
+		},
+		{
+			name:                   "both",
+			reqKubernetesNamespace: "ns0",
+			reqAssignments: []*v1.ProjectAssignment{
+				{
+					Cluster:   "",
+					Namespace: "ns1",
+				},
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			st, tearDown := store.NewTest(t)
+			defer tearDown()
+
+			srv := New(st, nil, testr.New(t))
+
+			ctx := fakeAuthInto(context.Background())
+			org, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
+				Title: "org",
+			})
+			assert.NoError(t, err)
+
+			proj, err := srv.CreateProject(ctx, &v1.CreateProjectRequest{
+				Title:               "project",
+				OrganizationId:      org.Id,
+				KubernetesNamespace: tc.reqKubernetesNamespace,
+				Assignments:         tc.reqAssignments,
+			})
+			if tc.wantErr {
+				assert.Error(t, err)
+				return
+			}
+
+			assert.NoError(t, err)
+			assert.Equal(t, tc.wantKubernetesNamespace, proj.KubernetesNamespace)
+			assert.Len(t, proj.Assignments, len(tc.wantAssignments))
+			for i, want := range tc.wantAssignments {
+				got := proj.Assignments[i]
+				assert.Truef(t, proto.Equal(want, got), "wanted %+v, but got %+v", want, got)
+			}
+		})
+	}
 }
 
 func TestListProjects_EnableAuth(t *testing.T) {

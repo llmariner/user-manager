@@ -76,11 +76,31 @@ message ProjectUser {
   ProjectRole role = 4;
 }
 
+message ProjectAssignment {
+    // cluster is set of a namespace for a specific cluster is assigned to this project. It it empty
+    // when the namespace of any registered clusters is assigned to this project.
+    string cluster = 1;
+    string namespace = 2;
+}
+
+// ProjectAssignemnt is a list of assigned clusters and namespaces for the project.
+// This is used to marshal a repeated field in the proto message so that
+// it can be persisted in a database.
+message ProjectAssignments {
+  repeated ProjectAssignment assignments = 1;
+}
+
 message Project {
   string id = 1;
   string title = 2;
+
+  // assignments is the list of assigned clusters and namespaces for the project.
+  repeated ProjectAssignment assignments = 7;
+
   // kubernetes_namespace is the namespace where the fine-tuning jobs for the project run.
+  // TODO(
   string kubernetes_namespace = 3;
+
   string organization_id = 4;
   int64 created_at = 5;
 
@@ -92,6 +112,8 @@ message Project {
   // Summary holds summary information about the project.
   // This field is filled only when `include_summary` is set to true.
   Summary summary = 6;
+
+  // Next ID: 8
 }
 
 message CreateAPIKeyRequest {
@@ -191,6 +213,8 @@ message CreateProjectRequest {
   string title = 1;
   string organization_id = 2;
   string kubernetes_namespace = 3;
+
+  repeated ProjectAssignment assignments = 4;
 }
 
 message ListProjectsRequest {

@@ -50,11 +50,15 @@ func TestCreateUserInternal(t *testing.T) {
 				org, err := st.CreateOrganization("tenant-1", "org-1", "Title-1", false)
 				assert.NoError(t, err)
 				_, err = st.CreateProject(store.CreateProjectParams{
-					TenantID:            "tenant-1",
-					OrganizationID:      org.OrganizationID,
-					ProjectID:           "proj-1",
-					Title:               "Title-1",
-					KubernetesNamespace: "ns-1",
+					TenantID:       "tenant-1",
+					OrganizationID: org.OrganizationID,
+					ProjectID:      "proj-1",
+					Title:          "Title-1",
+					Assignments: []*v1.ProjectAssignment{
+						{
+							Namespace: "ns-1",
+						},
+					},
 				})
 				assert.NoError(t, err)
 			}

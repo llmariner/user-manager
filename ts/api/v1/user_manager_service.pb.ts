@@ -64,6 +64,15 @@ export type ProjectUser = {
   role?: ProjectRole
 }
 
+export type ProjectAssignment = {
+  cluster?: string
+  namespace?: string
+}
+
+export type ProjectAssignments = {
+  assignments?: ProjectAssignment[]
+}
+
 export type ProjectSummary = {
   userCount?: number
 }
@@ -71,6 +80,7 @@ export type ProjectSummary = {
 export type Project = {
   id?: string
   title?: string
+  assignments?: ProjectAssignment[]
   kubernetesNamespace?: string
   organizationId?: string
   createdAt?: string
@@ -168,6 +178,7 @@ export type CreateProjectRequest = {
   title?: string
   organizationId?: string
   kubernetesNamespace?: string
+  assignments?: ProjectAssignment[]
 }
 
 export type ListProjectsRequest = {

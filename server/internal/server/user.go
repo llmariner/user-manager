@@ -11,6 +11,7 @@ import (
 	"github.com/llmariner/user-manager/server/internal/store"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"gorm.io/gorm"
 )
@@ -79,20 +80,51 @@ func (s *IS) CreateUserInternal(ctx context.Context, req *v1.CreateUserInternalR
 				if err != nil {
 					return status.Errorf(codes.Internal, "list projects: %s", err)
 				}
+
+				var found *store.Project
 				for _, p := range ps {
-					if p.OrganizationID == org.OrganizationID && p.KubernetesNamespace == req.KubernetesNamespace {
-						if _, err := store.CreateProjectUserInTransaction(tx, store.CreateProjectUserParams{
-							ProjectID:      p.ProjectID,
-							OrganizationID: p.OrganizationID,
-							UserID:         userID,
-							Role:           v1.ProjectRole_PROJECT_ROLE_OWNER,
-						}); err != nil {
-							return err
-						}
-						return nil
+					if p.OrganizationID != org.OrganizationID {
+						continue
 					}
+
+					kn := p.KubernetesNamespace
+					if kn == "" {
+						var asp v1.ProjectAssignments
+						if err := proto.Unmarshal(p.Assignments, &asp); err != nil {
+							return status.Errorf(codes.Internal, "unmarshal project assignments: %s", err)
+						}
+						for _, a := range asp.Assignments {
+							if a.Cluster == "" {
+								kn = a.Namespace
+								break
+							}
+						}
+						if kn == "" {
+							return status.Errorf(codes.Internal, "kubernetes namespace not found")
+						}
+					}
+
+					if kn != req.KubernetesNamespace {
+						continue
+					}
+
+					found = p
+					break
 				}
-				return status.Errorf(codes.NotFound, "project not found: %s", req.KubernetesNamespace)
+
+				if found == nil {
+					return status.Errorf(codes.NotFound, "project not found: %s", req.KubernetesNamespace)
+				}
+
+				if _, err := store.CreateProjectUserInTransaction(tx, store.CreateProjectUserParams{
+					ProjectID:      found.ProjectID,
+					OrganizationID: found.OrganizationID,
+					UserID:         userID,
+					Role:           v1.ProjectRole_PROJECT_ROLE_OWNER,
+				}); err != nil {
+					return err
+				}
+				return nil
 			}); err != nil {
 				return nil, err
 			}
@@ -111,7 +143,12 @@ func (s *IS) CreateUserInternal(ctx context.Context, req *v1.CreateUserInternalR
 			return status.Error(codes.Internal, err.Error())
 		}
 
-		if _, err = createProject(s.store, req.Title, org.OrganizationID, req.KubernetesNamespace, false, org.TenantID); err != nil {
+		as := []*v1.ProjectAssignment{
+			{
+				Namespace: req.KubernetesNamespace,
+			},
+		}
+		if _, err = createProject(s.store, req.Title, org.OrganizationID, as, false, org.TenantID); err != nil {
 			return err
 		}
 		return nil

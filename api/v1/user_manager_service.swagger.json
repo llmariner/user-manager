@@ -307,6 +307,12 @@
                 },
                 "kubernetesNamespace": {
                   "type": "string"
+                },
+                "assignments": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/v1ProjectAssignment"
+                  }
                 }
               }
             }
@@ -1043,9 +1049,16 @@
         "title": {
           "type": "string"
         },
+        "assignments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1ProjectAssignment"
+          },
+          "description": "assignments is the list of assigned clusters and namespaces for the project."
+        },
         "kubernetesNamespace": {
           "type": "string",
-          "description": "kubernetes_namespace is the namespace where the fine-tuning jobs for the project run."
+          "title": "kubernetes_namespace is the namespace where the fine-tuning jobs for the project run.\nTODO("
         },
         "organizationId": {
           "type": "string"
@@ -1057,6 +1070,18 @@
         "summary": {
           "$ref": "#/definitions/v1ProjectSummary",
           "description": "Summary holds summary information about the project.\nThis field is filled only when `include_summary` is set to true."
+        }
+      }
+    },
+    "v1ProjectAssignment": {
+      "type": "object",
+      "properties": {
+        "cluster": {
+          "type": "string",
+          "description": "cluster is set of a namespace for a specific cluster is assigned to this project. It it empty\nwhen the namespace of any registered clusters is assigned to this project."
+        },
+        "namespace": {
+          "type": "string"
         }
       }
     },
