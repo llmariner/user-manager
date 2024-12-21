@@ -65,7 +65,7 @@ export type ProjectUser = {
 }
 
 export type ProjectAssignment = {
-  cluster?: string
+  clusterId?: string
   namespace?: string
 }
 

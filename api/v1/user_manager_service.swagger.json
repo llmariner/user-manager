@@ -1076,9 +1076,9 @@
     "v1ProjectAssignment": {
       "type": "object",
       "properties": {
-        "cluster": {
+        "clusterId": {
           "type": "string",
-          "description": "cluster is set of a namespace for a specific cluster is assigned to this project. It it empty\nwhen the namespace of any registered clusters is assigned to this project."
+          "description": "cluster_id is set of a namespace for a specific cluster is assigned to this project. It it empty\nwhen the namespace of any registered clusters is assigned to this project."
         },
         "namespace": {
           "type": "string"

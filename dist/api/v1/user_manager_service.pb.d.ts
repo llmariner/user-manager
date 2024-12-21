@@ -50,7 +50,7 @@ export type ProjectUser = {
     role?: ProjectRole;
 };
 export type ProjectAssignment = {
-    cluster?: string;
+    clusterId?: string;
     namespace?: string;
 };
 export type ProjectAssignments = {

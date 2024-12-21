@@ -88,7 +88,7 @@ func TestToProto(t *testing.T) {
 			},
 			{
 				Namespace: "ns1",
-				Cluster:   "cluster1",
+				ClusterId: "cluster1",
 			},
 		},
 	}
@@ -148,7 +148,7 @@ func TestToProto(t *testing.T) {
 					},
 					{
 						Namespace: "ns1",
-						Cluster:   "cluster1",
+						ClusterId: "cluster1",
 					},
 				},
 				CreatedAt: now.UTC().Unix(),

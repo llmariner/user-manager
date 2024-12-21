@@ -77,9 +77,9 @@ message ProjectUser {
 }
 
 message ProjectAssignment {
-    // cluster is set of a namespace for a specific cluster is assigned to this project. It it empty
+    // cluster_id is set of a namespace for a specific cluster is assigned to this project. It it empty
     // when the namespace of any registered clusters is assigned to this project.
-    string cluster = 1;
+    string cluster_id = 1;
     string namespace = 2;
 }
 

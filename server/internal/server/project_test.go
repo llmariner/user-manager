@@ -47,7 +47,7 @@ func TestProject(t *testing.T) {
 		assert.Equal(t, org.Id, proj.OrganizationId)
 		assert.Equal(t, "test", proj.KubernetesNamespace)
 		assert.Len(t, proj.Assignments, 1)
-		assert.Equal(t, "", proj.Assignments[0].Cluster)
+		assert.Equal(t, "", proj.Assignments[0].ClusterId)
 		assert.Equal(t, "test", proj.Assignments[0].Namespace)
 
 		projs = append(projs, proj)
@@ -332,7 +332,7 @@ func TestCreateProject_Assignments(t *testing.T) {
 			wantKubernetesNamespace: "ns",
 			wantAssignments: []*v1.ProjectAssignment{
 				{
-					Cluster:   "",
+					ClusterId: "",
 					Namespace: "ns",
 				},
 			},
@@ -342,22 +342,22 @@ func TestCreateProject_Assignments(t *testing.T) {
 			reqKubernetesNamespace: "",
 			reqAssignments: []*v1.ProjectAssignment{
 				{
-					Cluster:   "",
+					ClusterId: "",
 					Namespace: "ns0",
 				},
 				{
-					Cluster:   "c1",
+					ClusterId: "c1",
 					Namespace: "ns1",
 				},
 			},
 			wantKubernetesNamespace: "ns0",
 			wantAssignments: []*v1.ProjectAssignment{
 				{
-					Cluster:   "",
+					ClusterId: "",
 					Namespace: "ns0",
 				},
 				{
-					Cluster:   "c1",
+					ClusterId: "c1",
 					Namespace: "ns1",
 				},
 			},
@@ -367,7 +367,7 @@ func TestCreateProject_Assignments(t *testing.T) {
 			reqKubernetesNamespace: "ns0",
 			reqAssignments: []*v1.ProjectAssignment{
 				{
-					Cluster:   "",
+					ClusterId: "",
 					Namespace: "ns1",
 				},
 			},
