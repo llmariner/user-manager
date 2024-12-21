@@ -94,7 +94,7 @@ func (s *IS) CreateUserInternal(ctx context.Context, req *v1.CreateUserInternalR
 							return status.Errorf(codes.Internal, "unmarshal project assignments: %s", err)
 						}
 						for _, a := range asp.Assignments {
-							if a.Cluster == "" {
+							if a.ClusterId == "" {
 								kn = a.Namespace
 								break
 							}

@@ -53,7 +53,7 @@ func (p *Project) ToProto() (*v1.Project, error) {
 		as = asproto.Assignments
 
 		for _, a := range asproto.Assignments {
-			if a.Cluster == "" {
+			if a.ClusterId == "" {
 				kn = a.Namespace
 				break
 			}
