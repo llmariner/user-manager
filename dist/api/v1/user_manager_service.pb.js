@@ -9,6 +9,7 @@ export var OrganizationRole;
     OrganizationRole["ORGANIZATION_ROLE_UNSPECIFIED"] = "ORGANIZATION_ROLE_UNSPECIFIED";
     OrganizationRole["ORGANIZATION_ROLE_OWNER"] = "ORGANIZATION_ROLE_OWNER";
     OrganizationRole["ORGANIZATION_ROLE_READER"] = "ORGANIZATION_ROLE_READER";
+    OrganizationRole["ORGANIZATION_ROLE_TENANT_SYSTEM"] = "ORGANIZATION_ROLE_TENANT_SYSTEM";
 })(OrganizationRole || (OrganizationRole = {}));
 export var ProjectRole;
 (function (ProjectRole) {

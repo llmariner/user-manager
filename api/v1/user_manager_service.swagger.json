@@ -433,6 +433,13 @@
               "properties": {
                 "name": {
                   "type": "string"
+                },
+                "isServiceAccount": {
+                  "type": "boolean"
+                },
+                "role": {
+                  "$ref": "#/definitions/v1OrganizationRole",
+                  "description": "role is used only for service account keys."
                 }
               }
             }
@@ -824,6 +831,13 @@
         },
         "organizationId": {
           "type": "string"
+        },
+        "isServiceAccount": {
+          "type": "boolean"
+        },
+        "role": {
+          "$ref": "#/definitions/v1OrganizationRole",
+          "description": "role is used only for service account keys."
         }
       }
     },
@@ -1003,7 +1017,8 @@
       "enum": [
         "ORGANIZATION_ROLE_UNSPECIFIED",
         "ORGANIZATION_ROLE_OWNER",
-        "ORGANIZATION_ROLE_READER"
+        "ORGANIZATION_ROLE_READER",
+        "ORGANIZATION_ROLE_TENANT_SYSTEM"
       ],
       "default": "ORGANIZATION_ROLE_UNSPECIFIED"
     },
@@ -1130,6 +1145,9 @@
         "internalId": {
           "type": "string",
           "description": "internal_id is populated only for internal gRPC service."
+        },
+        "isServiceAccount": {
+          "type": "boolean"
         }
       }
     }

@@ -12,6 +12,7 @@ export enum OrganizationRole {
   ORGANIZATION_ROLE_UNSPECIFIED = "ORGANIZATION_ROLE_UNSPECIFIED",
   ORGANIZATION_ROLE_OWNER = "ORGANIZATION_ROLE_OWNER",
   ORGANIZATION_ROLE_READER = "ORGANIZATION_ROLE_READER",
+  ORGANIZATION_ROLE_TENANT_SYSTEM = "ORGANIZATION_ROLE_TENANT_SYSTEM",
 }
 
 export enum ProjectRole {
@@ -36,6 +37,7 @@ export type APIKey = {
 export type User = {
   id?: string
   internalId?: string
+  isServiceAccount?: boolean
 }
 
 export type OrganizationUser = {
@@ -91,6 +93,8 @@ export type CreateAPIKeyRequest = {
   name?: string
   projectId?: string
   organizationId?: string
+  isServiceAccount?: boolean
+  role?: OrganizationRole
 }
 
 export type ListProjectAPIKeysRequest = {
