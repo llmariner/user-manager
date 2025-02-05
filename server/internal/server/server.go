@@ -184,7 +184,8 @@ func (s *S) validateOrganizationOwner(orgID, userID string) error {
 		return status.Errorf(codes.FailedPrecondition, "organization %q not found", orgID)
 	case v1.OrganizationRole_ORGANIZATION_ROLE_OWNER:
 		return nil
-	case v1.OrganizationRole_ORGANIZATION_ROLE_READER:
+	case v1.OrganizationRole_ORGANIZATION_ROLE_READER,
+		v1.OrganizationRole_ORGANIZATION_ROLE_TENANT_SYSTEM:
 		return status.Errorf(codes.PermissionDenied, "user %q is not the owner of organization %q", userID, orgID)
 	default:
 		return status.Errorf(codes.Internal, "unknown role %q", r.String())

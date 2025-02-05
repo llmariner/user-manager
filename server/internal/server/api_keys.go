@@ -186,6 +186,14 @@ func (s *S) CreateProjectAPIKey(
 	if req.OrganizationId == "" {
 		return nil, status.Error(codes.InvalidArgument, "organization id is required")
 	}
+	if req.IsServiceAccount {
+		if req.Role == v1.OrganizationRole_ORGANIZATION_ROLE_UNSPECIFIED {
+			return nil, status.Error(codes.InvalidArgument, "role is required for service account")
+		}
+		if !s.isOrganizationOwner(req.OrganizationId, userInfo.UserID) {
+			return nil, status.Error(codes.PermissionDenied, "only organization owner can create service account")
+		}
+	}
 
 	if _, err := validateProjectID(s.store, req.ProjectId, req.OrganizationId, userInfo.TenantID); err != nil {
 		return nil, err
@@ -201,16 +209,64 @@ func (s *S) CreateProjectAPIKey(
 		return nil, status.Errorf(codes.Internal, "generate api key id: %s", err)
 	}
 
-	k, err := createAPIKey(ctx, s.store, s.dataKey, req.Name, secKey, userInfo.UserID, req.OrganizationId, req.ProjectId, userInfo.TenantID)
+	var key *store.APIKey
+	var createErr error
+	if req.IsServiceAccount {
+		createErr = s.store.Transaction(func(tx *gorm.DB) error {
+			userID := fmt.Sprintf("system:serviceaccount:%s", req.Name)
+			if _, err := findOrCreateUserInTransaction(tx, userID); err != nil {
+				return err
+			}
+			if _, err := store.CreateOrganizationUserInTransaction(
+				tx,
+				req.OrganizationId,
+				userID,
+				v1.OrganizationRole_ORGANIZATION_ROLE_OWNER.String(),
+			); err != nil {
+				return err
+			}
+			if _, err := store.CreateProjectUserInTransaction(tx, store.CreateProjectUserParams{
+				ProjectID:      req.ProjectId,
+				OrganizationID: req.OrganizationId,
+				UserID:         userID,
+				Role:           v1.ProjectRole_PROJECT_ROLE_OWNER,
+			}); err != nil {
+				return err
+			}
+			spec, err := createAPIKeySpec(ctx, s.dataKey, req.Name, secKey, userID, req.OrganizationId, req.ProjectId, userInfo.TenantID, true)
+			if err != nil {
+				return err
+			}
+			key, err = store.CreateAPIKeyInTransaction(tx, spec)
+			return err
+		})
+	} else {
+		spec, err := createAPIKeySpec(ctx, s.dataKey, req.Name, secKey, userInfo.UserID, req.OrganizationId, req.ProjectId, userInfo.TenantID, false)
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		key, createErr = s.store.CreateAPIKey(spec)
+	}
+	if createErr != nil {
+		if gerrors.IsUniqueConstraintViolation(createErr) {
+			return nil, status.Errorf(codes.AlreadyExists, "api key %q already exists", req.Name)
+		}
+		return nil, status.Errorf(codes.Internal, "create api key: %s", createErr)
+	}
+	orgsByID, projectsByID, err := getOrgAndProject(s.store, userInfo.TenantID, req.OrganizationId, req.ProjectId)
 	if err != nil {
 		return nil, err
 	}
-	return k, nil
+	// Do not populate the internal User ID for non-internal gRPC.
+	kProto, err := toAPIKeyProto(ctx, s.store, s.dataKey, key, "", true, orgsByID, projectsByID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "to api key proto: %s", err)
+	}
+	return kProto, nil
 }
 
-func createAPIKey(
+func createAPIKeySpec(
 	ctx context.Context,
-	st *store.S,
 	dataKey []byte,
 	name string,
 	secKey string,
@@ -218,49 +274,31 @@ func createAPIKey(
 	organizationID string,
 	projectID string,
 	tenantID string,
-) (*v1.APIKey, error) {
+	isServiceAccount bool,
+) (store.APIKeySpec, error) {
 	trackID, err := id.GenerateID("key_", 16)
 	if err != nil {
-		return nil, fmt.Errorf("generate api key id: %s", err)
+		return store.APIKeySpec{}, fmt.Errorf("generate api key id: %s", err)
 	}
-
 	spec := store.APIKeySpec{
-		APIKeyID:       trackID,
-		TenantID:       tenantID,
-		OrganizationID: organizationID,
-		ProjectID:      projectID,
-		UserID:         userID,
-		Name:           name,
+		APIKeyID:         trackID,
+		TenantID:         tenantID,
+		OrganizationID:   organizationID,
+		ProjectID:        projectID,
+		UserID:           userID,
+		Name:             name,
+		IsServiceAccount: isServiceAccount,
 	}
 	if len(dataKey) > 0 {
 		encryptedAPIKey, err := aws.Encrypt(ctx, secKey, trackID, dataKey)
 		if err != nil {
-			return nil, err
+			return store.APIKeySpec{}, err
 		}
 		spec.EncryptedSecret = encryptedAPIKey
 	} else {
 		spec.Secret = secKey
 	}
-
-	k, err := st.CreateAPIKey(spec)
-	if err != nil {
-		if gerrors.IsUniqueConstraintViolation(err) {
-			return nil, status.Errorf(codes.AlreadyExists, "api key %q already exists", name)
-		}
-		return nil, status.Errorf(codes.Internal, "create api key: %s", err)
-	}
-
-	orgsByID, projectsByID, err := getOrgAndProject(st, tenantID, organizationID, projectID)
-	if err != nil {
-		return nil, err
-	}
-
-	// Do not populate the internal User ID for non-internal gRPC.
-	kProto, err := toAPIKeyProto(ctx, st, dataKey, k, "", true, orgsByID, projectsByID)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "to api key proto: %s", err)
-	}
-	return kProto, nil
+	return spec, nil
 }
 
 // ListProjectAPIKeys lists API keys.
@@ -365,9 +403,33 @@ func (s *S) DeleteProjectAPIKey(
 		return nil, status.Errorf(codes.NotFound, "api key %q not found", req.Id)
 	}
 
-	if err := s.store.DeleteAPIKey(req.Id, req.ProjectId); err != nil {
-		return nil, status.Errorf(codes.Internal, "delete api key: %s", err)
+	if key.IsServiceAccount {
+		if err := s.store.Transaction(func(tx *gorm.DB) error {
+			if err := store.DeleteProjectUserInTransaction(tx, key.ProjectID, key.UserID); err != nil {
+				if !errors.Is(err, gorm.ErrRecordNotFound) {
+					return fmt.Errorf("delete project user %s: %s", key.UserID, err)
+				}
+			}
+			if err := store.DeleteOrganizationUserInTransaction(tx, req.OrganizationId, key.UserID); err != nil {
+				if !errors.Is(err, gorm.ErrRecordNotFound) {
+					return fmt.Errorf("delete project user %s: %s", key.UserID, err)
+				}
+			}
+			if err := store.DeleteUserInTransaction(tx, key.UserID); err != nil {
+				if !errors.Is(err, gorm.ErrRecordNotFound) {
+					return fmt.Errorf("delete user %s: %s", key.UserID, err)
+				}
+			}
+			return store.DeleteAPIKeyInTransaction(tx, req.Id, req.ProjectId)
+		}); err != nil {
+			return nil, status.Errorf(codes.Internal, "delete api key: %s", err)
+		}
+	} else {
+		if err := s.store.DeleteAPIKey(req.Id, req.ProjectId); err != nil {
+			return nil, status.Errorf(codes.Internal, "delete api key: %s", err)
+		}
 	}
+
 	return &v1.DeleteAPIKeyResponse{
 		Id:      req.Id,
 		Object:  "users.api_key",
@@ -381,11 +443,11 @@ func (s *S) CreateDefaultAPIKey(ctx context.Context, c *config.DefaultAPIKeyConf
 		// Do nothing.
 		return nil
 	}
-
-	if _, err := createAPIKey(ctx, s.store, s.dataKey, c.Name, c.Secret, c.UserID, orgID, projectID, tenantID); err != nil {
-		return fmt.Errorf("create api key: %s", err)
+	spec, err := createAPIKeySpec(ctx, s.dataKey, c.Name, c.Secret, c.UserID, orgID, projectID, tenantID, false)
+	if err != nil {
+		return err
 	}
-
+	_, err = s.store.CreateAPIKey(spec)
 	return nil
 }
 
@@ -524,8 +586,9 @@ func toAPIKeyProto(
 		Name:      k.Name,
 		Object:    "user.api_key",
 		User: &v1.User{
-			Id:         k.UserID,
-			InternalId: internalUserID,
+			Id:               k.UserID,
+			InternalId:       internalUserID,
+			IsServiceAccount: k.IsServiceAccount,
 		},
 		Organization: &v1.Organization{
 			Id:    k.OrganizationID,

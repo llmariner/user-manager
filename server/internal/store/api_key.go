@@ -18,6 +18,8 @@ type APIKey struct {
 	ProjectID      string
 	UserID         string `gorm:"uniqueIndex:idx_api_key_name_user_id"`
 
+	IsServiceAccount bool
+
 	// Secret is set when kms encryption is disabled.
 	Secret string
 	// EncryptedSecret is encrypted by data key, and it is set when kms encryption is enabled.
@@ -34,6 +36,8 @@ type APIKeySpec struct {
 	ProjectID      string
 	UserID         string
 
+	IsServiceAccount bool
+
 	Name   string
 	Secret string
 	// EncryptedSecret is encrypted by data key.
@@ -42,18 +46,24 @@ type APIKeySpec struct {
 
 // CreateAPIKey creates a new API key.
 func (s *S) CreateAPIKey(spec APIKeySpec) (*APIKey, error) {
+	return CreateAPIKeyInTransaction(s.db, spec)
+}
+
+// CreateAPIKeyInTransaction creates a new API key in a transaction.
+func CreateAPIKeyInTransaction(db *gorm.DB, spec APIKeySpec) (*APIKey, error) {
 	k := &APIKey{
-		APIKeyID:       spec.APIKeyID,
-		TenantID:       spec.TenantID,
-		OrganizationID: spec.OrganizationID,
-		ProjectID:      spec.ProjectID,
-		UserID:         spec.UserID,
+		APIKeyID:         spec.APIKeyID,
+		TenantID:         spec.TenantID,
+		OrganizationID:   spec.OrganizationID,
+		ProjectID:        spec.ProjectID,
+		UserID:           spec.UserID,
+		IsServiceAccount: spec.IsServiceAccount,
 
 		Name:            spec.Name,
 		Secret:          spec.Secret,
 		EncryptedSecret: spec.EncryptedSecret,
 	}
-	if err := s.db.Create(k).Error; err != nil {
+	if err := db.Create(k).Error; err != nil {
 		return nil, err
 	}
 	return k, nil
@@ -115,7 +125,12 @@ func (s *S) ListAllAPIKeys() ([]*APIKey, error) {
 
 // DeleteAPIKey deletes an APIKey by APIKey ID and tenant ID.
 func (s *S) DeleteAPIKey(apiKeyID, projectID string) error {
-	res := s.db.Unscoped().Where("api_key_id = ? AND project_id = ?", apiKeyID, projectID).Delete(&APIKey{})
+	return DeleteAPIKeyInTransaction(s.db, apiKeyID, projectID)
+}
+
+// DeleteAPIKeyInTransaction deletes an APIKey in a transaction.
+func DeleteAPIKeyInTransaction(tx *gorm.DB, apiKeyID, projectID string) error {
+	res := tx.Unscoped().Where("api_key_id = ? AND project_id = ?", apiKeyID, projectID).Delete(&APIKey{})
 	if err := res.Error; err != nil {
 		return err
 	}
