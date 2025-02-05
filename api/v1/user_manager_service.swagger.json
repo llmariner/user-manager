@@ -1020,7 +1020,8 @@
         "ORGANIZATION_ROLE_READER",
         "ORGANIZATION_ROLE_TENANT_SYSTEM"
       ],
-      "default": "ORGANIZATION_ROLE_UNSPECIFIED"
+      "default": "ORGANIZATION_ROLE_UNSPECIFIED",
+      "description": " - ORGANIZATION_ROLE_TENANT_SYSTEM: TENANT_SYSTEM role does not follow the OpenAI APIs.\nThis is used for the tenant system component."
     },
     "v1OrganizationSummary": {
       "type": "object",

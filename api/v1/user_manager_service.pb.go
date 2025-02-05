@@ -26,9 +26,11 @@ const (
 type OrganizationRole int32
 
 const (
-	OrganizationRole_ORGANIZATION_ROLE_UNSPECIFIED   OrganizationRole = 0
-	OrganizationRole_ORGANIZATION_ROLE_OWNER         OrganizationRole = 1
-	OrganizationRole_ORGANIZATION_ROLE_READER        OrganizationRole = 2
+	OrganizationRole_ORGANIZATION_ROLE_UNSPECIFIED OrganizationRole = 0
+	OrganizationRole_ORGANIZATION_ROLE_OWNER       OrganizationRole = 1
+	OrganizationRole_ORGANIZATION_ROLE_READER      OrganizationRole = 2
+	// TENANT_SYSTEM role does not follow the OpenAI APIs.
+	// This is used for the tenant system component.
 	OrganizationRole_ORGANIZATION_ROLE_TENANT_SYSTEM OrganizationRole = 3
 )
 
