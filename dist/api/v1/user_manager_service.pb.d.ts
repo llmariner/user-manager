@@ -4,7 +4,8 @@ import * as GoogleProtobufField_mask from "../../google/protobuf/field_mask.pb";
 export declare enum OrganizationRole {
     ORGANIZATION_ROLE_UNSPECIFIED = "ORGANIZATION_ROLE_UNSPECIFIED",
     ORGANIZATION_ROLE_OWNER = "ORGANIZATION_ROLE_OWNER",
-    ORGANIZATION_ROLE_READER = "ORGANIZATION_ROLE_READER"
+    ORGANIZATION_ROLE_READER = "ORGANIZATION_ROLE_READER",
+    ORGANIZATION_ROLE_TENANT_SYSTEM = "ORGANIZATION_ROLE_TENANT_SYSTEM"
 }
 export declare enum ProjectRole {
     PROJECT_ROLE_UNSPECIFIED = "PROJECT_ROLE_UNSPECIFIED",
@@ -26,6 +27,7 @@ export type APIKey = {
 export type User = {
     id?: string;
     internalId?: string;
+    isServiceAccount?: boolean;
 };
 export type OrganizationUser = {
     userId?: string;
@@ -72,6 +74,8 @@ export type CreateAPIKeyRequest = {
     name?: string;
     projectId?: string;
     organizationId?: string;
+    isServiceAccount?: boolean;
+    role?: OrganizationRole;
 };
 export type ListProjectAPIKeysRequest = {
     projectId?: string;
