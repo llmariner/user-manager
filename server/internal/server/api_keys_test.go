@@ -13,6 +13,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
+	"gorm.io/gorm"
 )
 
 func TestAPIKey(t *testing.T) {
@@ -327,6 +328,25 @@ func TestAPIKey_EnableAuth(t *testing.T) {
 	key2, err := srv.CreateProjectAPIKey(u2Ctx, req)
 	assert.NoError(t, err)
 
+	saKeyReq := &v1.CreateAPIKeyRequest{
+		Name:             "sa",
+		OrganizationId:   org.OrganizationID,
+		ProjectId:        proj.Id,
+		IsServiceAccount: true,
+		Role:             v1.OrganizationRole_ORGANIZATION_ROLE_TENANT_SYSTEM,
+	}
+	key3, err := srv.CreateProjectAPIKey(u0Ctx, saKeyReq)
+	assert.NoError(t, err)
+	_, err = srv.CreateProjectAPIKey(u0Ctx, saKeyReq)
+	assert.Error(t, err)
+	assert.Equal(t, codes.AlreadyExists, status.Code(err))
+	_, err = st.GetUserByUserID(key3.User.Id)
+	assert.NoError(t, err, "user")
+	_, err = st.GetOrganizationUser(key3.Organization.Id, key3.User.Id)
+	assert.NoError(t, err, "org user")
+	_, err = st.GetProjectUser(key3.Project.Id, key3.User.Id)
+	assert.NoError(t, err, "project user")
+
 	// List API keys.
 
 	resp, err := srv.ListProjectAPIKeys(u0Ctx, &v1.ListProjectAPIKeysRequest{
@@ -334,7 +354,7 @@ func TestAPIKey_EnableAuth(t *testing.T) {
 		ProjectId:      proj.Id,
 	})
 	assert.NoError(t, err)
-	assert.Len(t, resp.Data, 2)
+	assert.Len(t, resp.Data, 3)
 
 	_, err = srv.ListProjectAPIKeys(u1Ctx, &v1.ListProjectAPIKeysRequest{
 		OrganizationId: org.OrganizationID,
@@ -378,6 +398,20 @@ func TestAPIKey_EnableAuth(t *testing.T) {
 		Id:             key2.Id,
 	})
 	assert.NoError(t, err)
+
+	// delete service account key
+	_, err = srv.DeleteProjectAPIKey(u0Ctx, &v1.DeleteProjectAPIKeyRequest{
+		OrganizationId: org.OrganizationID,
+		ProjectId:      proj.Id,
+		Id:             key3.Id,
+	})
+	assert.NoError(t, err)
+	_, err = st.GetUserByUserID(key3.User.Id)
+	assert.ErrorIs(t, err, gorm.ErrRecordNotFound)
+	_, err = st.GetOrganizationUser(key3.Organization.Id, key3.User.Id)
+	assert.ErrorIs(t, err, gorm.ErrRecordNotFound)
+	_, err = st.GetProjectUser(key3.Project.Id, key3.User.Id)
+	assert.ErrorIs(t, err, gorm.ErrRecordNotFound)
 }
 
 func TestObfuscateSecret(t *testing.T) {

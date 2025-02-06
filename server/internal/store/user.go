@@ -41,6 +41,18 @@ func FindOrCreateUserInTransaction(tx *gorm.DB, userID, internalUserID string) (
 	return u, nil
 }
 
+// DeleteUserInTransaction deletes a user.
+func DeleteUserInTransaction(tx *gorm.DB, userID string) error {
+	res := tx.Unscoped().Where("user_id = ?", userID).Delete(&User{})
+	if err := res.Error; err != nil {
+		return err
+	}
+	if res.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
+}
+
 // GetUserByUserID returns the user with the given ID.
 func (s *S) GetUserByUserID(userID string) (*User, error) {
 	var u User

@@ -40,3 +40,18 @@ func TestGetAndList(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, users, 2)
 }
+
+func TestDeleteUserInTransaction(t *testing.T) {
+	st, tearDown := NewTest(t)
+	defer tearDown()
+
+	u1, err := FindOrCreateUserInTransaction(st.db, "user1", "iuser1")
+	assert.NoError(t, err)
+
+	err = DeleteUserInTransaction(st.db, u1.UserID)
+	assert.NoError(t, err)
+
+	u1Again, err := FindOrCreateUserInTransaction(st.db, "user1", "iuser1")
+	assert.NoError(t, err)
+	assert.NotEqual(t, u1.ID, u1Again.ID)
+}
