@@ -221,7 +221,7 @@ func (s *S) CreateProjectAPIKey(
 				tx,
 				req.OrganizationId,
 				userID,
-				v1.OrganizationRole_ORGANIZATION_ROLE_OWNER.String(),
+				req.Role.String(),
 			); err != nil {
 				return err
 			}
@@ -448,7 +448,7 @@ func (s *S) CreateDefaultAPIKey(ctx context.Context, c *config.DefaultAPIKeyConf
 		return err
 	}
 	_, err = s.store.CreateAPIKey(spec)
-	return nil
+	return err
 }
 
 // ListInternalAPIKeys lists all API keys.

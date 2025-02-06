@@ -341,11 +341,11 @@ func TestAPIKey_EnableAuth(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, codes.AlreadyExists, status.Code(err))
 	_, err = st.GetUserByUserID(key3.User.Id)
-	assert.NoError(t, err)
+	assert.NoError(t, err, "user")
 	_, err = st.GetOrganizationUser(key3.Organization.Id, key3.User.Id)
 	assert.NoError(t, err, "org user")
 	_, err = st.GetProjectUser(key3.Project.Id, key3.User.Id)
-	assert.NoError(t, err)
+	assert.NoError(t, err, "project user")
 
 	// List API keys.
 
