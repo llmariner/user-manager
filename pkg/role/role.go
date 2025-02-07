@@ -9,6 +9,8 @@ const (
 	Owner = "owner"
 	// Reader is the reader role.
 	Reader = "reader"
+	// TenantSystem is the tenant-system role.
+	TenantSystem = "tenant-system"
 	// Member is the member role.
 	Member = "member"
 )
@@ -20,6 +22,8 @@ func OrganizationRoleToString(role uv1.OrganizationRole) (string, bool) {
 		return Owner, true
 	case uv1.OrganizationRole_ORGANIZATION_ROLE_READER:
 		return Reader, true
+	case uv1.OrganizationRole_ORGANIZATION_ROLE_TENANT_SYSTEM:
+		return TenantSystem, true
 	}
 	return "", false
 }
@@ -31,6 +35,8 @@ func OrganizationRoleToProtoEnum(role string) (uv1.OrganizationRole, bool) {
 		return uv1.OrganizationRole_ORGANIZATION_ROLE_OWNER, true
 	case Reader:
 		return uv1.OrganizationRole_ORGANIZATION_ROLE_READER, true
+	case TenantSystem:
+		return uv1.OrganizationRole_ORGANIZATION_ROLE_TENANT_SYSTEM, true
 	}
 	return uv1.OrganizationRole_ORGANIZATION_ROLE_UNSPECIFIED, false
 }
