@@ -209,49 +209,22 @@ func (s *S) CreateProjectAPIKey(
 		return nil, status.Errorf(codes.Internal, "generate api key id: %s", err)
 	}
 
-	var key *store.APIKey
-	var createErr error
-	if req.IsServiceAccount {
-		createErr = s.store.Transaction(func(tx *gorm.DB) error {
-			userID := fmt.Sprintf("system:serviceaccount:%s", req.Name)
-			if _, err := findOrCreateUserInTransaction(tx, userID); err != nil {
-				return err
-			}
-			if _, err := store.CreateOrganizationUserInTransaction(
-				tx,
-				req.OrganizationId,
-				userID,
-				req.Role.String(),
-			); err != nil {
-				return err
-			}
-			if _, err := store.CreateProjectUserInTransaction(tx, store.CreateProjectUserParams{
-				ProjectID:      req.ProjectId,
-				OrganizationID: req.OrganizationId,
-				UserID:         userID,
-				Role:           v1.ProjectRole_PROJECT_ROLE_OWNER,
-			}); err != nil {
-				return err
-			}
-			spec, err := createAPIKeySpec(ctx, s.dataKey, req.Name, secKey, userID, req.OrganizationId, req.ProjectId, userInfo.TenantID, true)
-			if err != nil {
-				return err
-			}
-			key, err = store.CreateAPIKeyInTransaction(tx, spec)
-			return err
-		})
-	} else {
-		spec, err := createAPIKeySpec(ctx, s.dataKey, req.Name, secKey, userInfo.UserID, req.OrganizationId, req.ProjectId, userInfo.TenantID, false)
-		if err != nil {
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-		key, createErr = s.store.CreateAPIKey(spec)
-	}
-	if createErr != nil {
-		if gerrors.IsUniqueConstraintViolation(createErr) {
+	key, err := s.createProjectAPIKey(
+		ctx,
+		req.Name,
+		secKey,
+		userInfo.UserID,
+		req.OrganizationId,
+		req.ProjectId,
+		userInfo.TenantID,
+		req.IsServiceAccount,
+		req.Role,
+	)
+	if err != nil {
+		if gerrors.IsUniqueConstraintViolation(err) {
 			return nil, status.Errorf(codes.AlreadyExists, "api key %q already exists", req.Name)
 		}
-		return nil, status.Errorf(codes.Internal, "create api key: %s", createErr)
+		return nil, status.Errorf(codes.Internal, "create api key: %s", err)
 	}
 	orgsByID, projectsByID, err := getOrgAndProject(s.store, userInfo.TenantID, req.OrganizationId, req.ProjectId)
 	if err != nil {
@@ -263,6 +236,63 @@ func (s *S) CreateProjectAPIKey(
 		return nil, status.Errorf(codes.Internal, "to api key proto: %s", err)
 	}
 	return kProto, nil
+}
+
+func (s *S) createProjectAPIKey(
+	ctx context.Context,
+	name string,
+	secKey string,
+	userID string,
+	organizationID string,
+	projectID string,
+	tenantID string,
+	isServiceAccount bool,
+	role v1.OrganizationRole,
+) (*store.APIKey, error) {
+	if isServiceAccount {
+		var key *store.APIKey
+		err := s.store.Transaction(func(tx *gorm.DB) error {
+			userID := fmt.Sprintf("system:serviceaccount:%s", name)
+			if _, err := findOrCreateUserInTransaction(tx, userID); err != nil {
+				return err
+			}
+			if _, err := store.CreateOrganizationUserInTransaction(
+				tx,
+				organizationID,
+				userID,
+				role.String(),
+			); err != nil {
+				return err
+			}
+			if _, err := store.CreateProjectUserInTransaction(tx, store.CreateProjectUserParams{
+				ProjectID:      projectID,
+				OrganizationID: organizationID,
+				UserID:         userID,
+				Role:           v1.ProjectRole_PROJECT_ROLE_OWNER,
+			}); err != nil {
+				return err
+			}
+			spec, err := createAPIKeySpec(ctx, s.dataKey, name, secKey, userID, organizationID, projectID, tenantID, true)
+			if err != nil {
+				return err
+			}
+			key, err = store.CreateAPIKeyInTransaction(tx, spec)
+			if err != nil {
+				return err
+			}
+			return nil
+		})
+		if err != nil {
+			return nil, err
+		}
+		return key, nil
+	}
+
+	spec, err := createAPIKeySpec(ctx, s.dataKey, name, secKey, userID, organizationID, projectID, tenantID, false)
+	if err != nil {
+		return nil, err
+	}
+	return s.store.CreateAPIKey(spec)
 }
 
 func createAPIKeySpec(
@@ -443,11 +473,18 @@ func (s *S) CreateDefaultAPIKey(ctx context.Context, c *config.DefaultAPIKeyConf
 		// Do nothing.
 		return nil
 	}
-	spec, err := createAPIKeySpec(ctx, s.dataKey, c.Name, c.Secret, c.UserID, orgID, projectID, tenantID, false)
-	if err != nil {
-		return err
-	}
-	_, err = s.store.CreateAPIKey(spec)
+
+	_, err := s.createProjectAPIKey(
+		ctx,
+		c.Name,
+		c.Secret,
+		c.UserID,
+		orgID,
+		projectID,
+		tenantID,
+		c.IsServiceAccount,
+		v1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
+	)
 	return err
 }
 

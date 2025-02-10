@@ -157,8 +157,8 @@ func run(ctx context.Context, c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	if k := c.DefaultAPIKey; k != nil {
-		if err := s.CreateDefaultAPIKey(ctx, k, org.OrganizationID, project.ProjectID, c.DefaultOrganization.TenantID); err != nil {
+	for _, k := range c.DefaultAPIKeys {
+		if err := s.CreateDefaultAPIKey(ctx, &k, org.OrganizationID, project.ProjectID, c.DefaultOrganization.TenantID); err != nil {
 			return err
 		}
 	}
