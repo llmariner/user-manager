@@ -123,16 +123,14 @@ defaultProject:
 # secrets directly in the production environment.
 #
 # For example:
-# defaultApiKey:
-#   name: my-api-key
+# defaultApiKeys:
+# - name: my-api-key
 #   secret: my-password
 #   userId: my-email@example.com
+#   isServiceAccount: false
 #
-# +docs:property
-# defaultApiKey:
-#   name: ""
-#   secret: ""
-#   userId: ""
+# userId must be set if isServiceAccount is false. It should be empty otherwise.
+defaultApiKeys: []
 
 # The AWS KMS configuration to encrypt API keys.
 kms:

@@ -46,9 +46,10 @@ func (c *DefaultProjectConfig) validate() error {
 
 // DefaultAPIKeyConfig is the default API key configuration.
 type DefaultAPIKeyConfig struct {
-	Name   string `yaml:"name"`
-	Secret string `yaml:"secret"`
-	UserID string `yaml:"userId"`
+	Name             string `yaml:"name"`
+	Secret           string `yaml:"secret"`
+	UserID           string `yaml:"userId"`
+	IsServiceAccount bool   `yaml:"isServiceAccount"`
 }
 
 // validate validates the configuration.
@@ -59,8 +60,14 @@ func (c *DefaultAPIKeyConfig) validate() error {
 	if c.Secret == "" {
 		return fmt.Errorf("secret must be set")
 	}
-	if c.UserID == "" {
-		return fmt.Errorf("userId must be set")
+	if c.IsServiceAccount {
+		if c.UserID != "" {
+			return fmt.Errorf("userId must not be set")
+		}
+	} else {
+		if c.UserID == "" {
+			return fmt.Errorf("userId must be set")
+		}
 	}
 	return nil
 }
@@ -140,7 +147,7 @@ type Config struct {
 
 	DefaultOrganization DefaultOrganizationConfig `yaml:"defaultOrganization"`
 	DefaultProject      DefaultProjectConfig      `yaml:"defaultProject"`
-	DefaultAPIKey       *DefaultAPIKeyConfig      `yaml:"defaultApiKey"`
+	DefaultAPIKeys      []DefaultAPIKeyConfig     `yaml:"defaultApiKeys"`
 
 	KMSConfig KMSConfig `yaml:"kms"`
 
@@ -175,7 +182,7 @@ func (c *Config) Validate() error {
 	if err := c.DefaultProject.validate(); err != nil {
 		return err
 	}
-	if k := c.DefaultAPIKey; k != nil {
+	for _, k := range c.DefaultAPIKeys {
 		if err := k.validate(); err != nil {
 			return fmt.Errorf("defaultApiKey: %s", err)
 		}
