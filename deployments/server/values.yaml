@@ -127,6 +127,9 @@ defaultProject:
 # - name: my-api-key
 #   secret: my-password
 #   userId: my-email@example.com
+#   isServiceAccount: false
+#
+# userId must be set if isServiceAccount is false. It should be empty otherwise.
 defaultApiKeys: []
 
 # The AWS KMS configuration to encrypt API keys.
