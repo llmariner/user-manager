@@ -483,7 +483,7 @@ func (s *S) CreateDefaultAPIKey(ctx context.Context, c *config.DefaultAPIKeyConf
 		projectID,
 		tenantID,
 		c.IsServiceAccount,
-		v1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
+		v1.OrganizationRole_ORGANIZATION_ROLE_TENANT_SYSTEM,
 	)
 	return err
 }
