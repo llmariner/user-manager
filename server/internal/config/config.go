@@ -145,9 +145,9 @@ type Config struct {
 	AuthConfig  AuthConfig    `yaml:"auth"`
 	UsageSender sender.Config `yaml:"usageSender"`
 
-	DefaultOrganization DefaultOrganizationConfig `yaml:"defaultOrganization"`
-	DefaultProject      DefaultProjectConfig      `yaml:"defaultProject"`
-	DefaultAPIKeys      []DefaultAPIKeyConfig     `yaml:"defaultApiKeys"`
+	DefaultOrganization *DefaultOrganizationConfig `yaml:"defaultOrganization"`
+	DefaultProject      *DefaultProjectConfig      `yaml:"defaultProject"`
+	DefaultAPIKeys      []DefaultAPIKeyConfig      `yaml:"defaultApiKeys"`
 
 	KMSConfig KMSConfig `yaml:"kms"`
 
@@ -176,15 +176,31 @@ func (c *Config) Validate() error {
 		}
 	}
 
-	if err := c.DefaultOrganization.validate(); err != nil {
-		return err
+	if oc := c.DefaultOrganization; oc != nil {
+		if err := oc.validate(); err != nil {
+			return err
+		}
 	}
-	if err := c.DefaultProject.validate(); err != nil {
-		return err
+	if dp := c.DefaultProject; dp != nil {
+		if c.DefaultOrganization == nil {
+			return fmt.Errorf("defaultOrganization must be set when defaultProject is set")
+		}
+		if err := c.DefaultProject.validate(); err != nil {
+			return err
+		}
 	}
-	for _, k := range c.DefaultAPIKeys {
-		if err := k.validate(); err != nil {
-			return fmt.Errorf("defaultApiKey: %s", err)
+	if len(c.DefaultAPIKeys) > 0 {
+		if c.DefaultOrganization == nil {
+			return fmt.Errorf("defaultOrganization must be set when defaultApiKeys is set")
+		}
+		if c.DefaultProject == nil {
+			return fmt.Errorf("defaultProject must be set when defaultApiKeys is set")
+		}
+
+		for _, k := range c.DefaultAPIKeys {
+			if err := k.validate(); err != nil {
+				return fmt.Errorf("defaultApiKey: %s", err)
+			}
 		}
 	}
 
