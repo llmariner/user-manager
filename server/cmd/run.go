@@ -149,23 +149,39 @@ func run(ctx context.Context, c *config.Config) error {
 		errCh <- s.Run(ctx, c.GRPCPort, c.AuthConfig, usageSetter)
 	}()
 
-	org, err := s.CreateDefaultOrganization(ctx, &c.DefaultOrganization)
-	if err != nil {
+	if err := createDefaultResources(ctx, s, c); err != nil {
 		return err
 	}
-	project, err := s.CreateDefaultProject(ctx, &c.DefaultProject, org.OrganizationID, c.DefaultOrganization.TenantID)
-	if err != nil {
-		return err
-	}
-	for _, k := range c.DefaultAPIKeys {
-		if err := s.CreateDefaultAPIKey(ctx, &k, org.OrganizationID, project.ProjectID, c.DefaultOrganization.TenantID); err != nil {
-			return err
-		}
-	}
+
 	go func() {
 		s := server.NewInternal(st, dataKey, logger)
 		errCh <- s.Run(c.InternalGRPCPort)
 	}()
 
 	return <-errCh
+}
+
+func createDefaultResources(ctx context.Context, s *server.S, c *config.Config) error {
+	if c.DefaultOrganization == nil {
+		return nil
+	}
+	org, err := s.CreateDefaultOrganization(ctx, c.DefaultOrganization)
+	if err != nil {
+		return err
+	}
+
+	if c.DefaultProject == nil {
+		return nil
+	}
+	project, err := s.CreateDefaultProject(ctx, c.DefaultProject, org.OrganizationID, c.DefaultOrganization.TenantID)
+	if err != nil {
+		return err
+	}
+
+	for _, k := range c.DefaultAPIKeys {
+		if err := s.CreateDefaultAPIKey(ctx, &k, org.OrganizationID, project.ProjectID, c.DefaultOrganization.TenantID); err != nil {
+			return err
+		}
+	}
+	return nil
 }

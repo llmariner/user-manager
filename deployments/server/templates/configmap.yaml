@@ -9,16 +9,24 @@ data:
     httpPort: {{ .Values.httpPort }}
     grpcPort: {{ .Values.grpcPort }}
     internalGrpcPort: {{ .Values.internalGrpcPort }}
+    {{- with .Values.defaultOrganization }}
+    {{- if .title }}
     defaultOrganization:
-      title: {{ .Values.defaultOrganization.title }}
+      title: {{ .title }}
       userIds:
-      {{- toYaml .Values.defaultOrganization.userIds | nindent 6 }}
-      tenantId: {{ .Values.defaultOrganization.tenantId }}
+      {{- toYaml .userIds | nindent 6 }}
+      tenantId: {{ .tenantId }}
+    {{- end }}
+    {{- end }}
+    {{- with .Values.defaultProject }}
+    {{- if .title }}
     defaultProject:
-      title: {{ .Values.defaultProject.title }}
-      kubernetesNamespace: {{ .Values.defaultProject.kubernetesNamespace }}
+      title: {{ .title }}
+      kubernetesNamespace: {{ .kubernetesNamespace }}
       userIds:
-      {{- toYaml .Values.defaultProject.userIds | nindent 6 }}
+      {{- toYaml .userIds | nindent 6 }}
+    {{- end }}
+    {{- end }}
     {{- with .Values.defaultApiKeys }}
     defaultApiKeys:
     {{- toYaml . | nindent 4 }}
