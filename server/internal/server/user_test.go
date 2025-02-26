@@ -9,6 +9,8 @@ import (
 	v1 "github.com/llmariner/user-manager/api/v1"
 	"github.com/llmariner/user-manager/server/internal/store"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/protobuf/proto"
+	"gorm.io/gorm"
 )
 
 func TestGetUserSelf(t *testing.T) {
@@ -21,6 +23,26 @@ func TestGetUserSelf(t *testing.T) {
 	user, err := srv.GetUserSelf(ctx, &v1.GetUserSelfRequest{})
 	assert.NoError(t, err)
 	assert.Equal(t, "defaultuser", user.Id)
+}
+
+func TestListUsers(t *testing.T) {
+	st, tearDown := store.NewTest(t)
+	defer tearDown()
+
+	err := st.Transaction(func(tx *gorm.DB) error {
+		_, err := store.FindOrCreateUserInTransaction(tx, "uid", "iuid")
+		return err
+	})
+	assert.NoError(t, err)
+	isrv := NewInternal(st, []byte{}, testr.New(t))
+	resp, err := isrv.ListUsers(context.Background(), &v1.ListUsersRequest{})
+	assert.NoError(t, err)
+	assert.Len(t, resp.Users, 1)
+	want := &v1.User{
+		Id:         "uid",
+		InternalId: "iuid",
+	}
+	assert.True(t, proto.Equal(want, resp.Users[0]))
 }
 
 func TestCreateUserInternal(t *testing.T) {

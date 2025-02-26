@@ -993,6 +993,17 @@
         }
       }
     },
+    "v1ListUsersResponse": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1User"
+          }
+        }
+      }
+    },
     "v1Organization": {
       "type": "object",
       "properties": {

@@ -28,6 +28,24 @@ func (s *S) GetUserSelf(ctx context.Context, req *v1.GetUserSelfRequest) (*v1.Us
 	}, nil
 }
 
+// ListUsers lists all users.
+func (s *IS) ListUsers(ctx context.Context, req *v1.ListUsersRequest) (*v1.ListUsersResponse, error) {
+	users, err := s.store.ListAllUsers()
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "list users: %s", err)
+	}
+
+	var res v1.ListUsersResponse
+	for _, u := range users {
+		res.Users = append(res.Users, &v1.User{
+			Id:               u.UserID,
+			InternalId:       u.InternalUserID,
+			IsServiceAccount: false,
+		})
+	}
+	return &res, nil
+}
+
 // CreateUserInternal creates a new user and related organization and project.
 func (s *IS) CreateUserInternal(ctx context.Context, req *v1.CreateUserInternalRequest) (*emptypb.Empty, error) {
 	if req.TenantId == "" {

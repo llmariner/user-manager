@@ -424,6 +424,13 @@ message ListInternalOrganizationsResponse {
   repeated InternalOrganization organizations = 1;
 }
 
+message ListUsersRequest {
+}
+
+message ListUsersResponse {
+  repeated User users = 1;
+}
+
 message CreateUserInternalRequest {
   string tenant_id = 1;
   // title is used for both orgnization and project.
@@ -442,6 +449,8 @@ service UsersInternalService {
   rpc ListProjects(ListProjectsRequest) returns (ListProjectsResponse) {
   }
   rpc ListProjectUsers(ListProjectUsersRequest) returns (ListProjectUsersResponse) {
+  }
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse) {
   }
   rpc CreateUserInternal(CreateUserInternalRequest) returns (google.protobuf.Empty) {
   }
