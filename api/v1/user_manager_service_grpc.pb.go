@@ -796,6 +796,7 @@ type UsersInternalServiceClient interface {
 	ListOrganizationUsers(ctx context.Context, in *ListOrganizationUsersRequest, opts ...grpc.CallOption) (*ListOrganizationUsersResponse, error)
 	ListProjects(ctx context.Context, in *ListProjectsRequest, opts ...grpc.CallOption) (*ListProjectsResponse, error)
 	ListProjectUsers(ctx context.Context, in *ListProjectUsersRequest, opts ...grpc.CallOption) (*ListProjectUsersResponse, error)
+	ListUsers(ctx context.Context, in *ListUsersRequest, opts ...grpc.CallOption) (*ListUsersResponse, error)
 	CreateUserInternal(ctx context.Context, in *CreateUserInternalRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
@@ -852,6 +853,15 @@ func (c *usersInternalServiceClient) ListProjectUsers(ctx context.Context, in *L
 	return out, nil
 }
 
+func (c *usersInternalServiceClient) ListUsers(ctx context.Context, in *ListUsersRequest, opts ...grpc.CallOption) (*ListUsersResponse, error) {
+	out := new(ListUsersResponse)
+	err := c.cc.Invoke(ctx, "/llmariner.users.server.v1.UsersInternalService/ListUsers", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *usersInternalServiceClient) CreateUserInternal(ctx context.Context, in *CreateUserInternalRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/llmariner.users.server.v1.UsersInternalService/CreateUserInternal", in, out, opts...)
@@ -870,6 +880,7 @@ type UsersInternalServiceServer interface {
 	ListOrganizationUsers(context.Context, *ListOrganizationUsersRequest) (*ListOrganizationUsersResponse, error)
 	ListProjects(context.Context, *ListProjectsRequest) (*ListProjectsResponse, error)
 	ListProjectUsers(context.Context, *ListProjectUsersRequest) (*ListProjectUsersResponse, error)
+	ListUsers(context.Context, *ListUsersRequest) (*ListUsersResponse, error)
 	CreateUserInternal(context.Context, *CreateUserInternalRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedUsersInternalServiceServer()
 }
@@ -892,6 +903,9 @@ func (UnimplementedUsersInternalServiceServer) ListProjects(context.Context, *Li
 }
 func (UnimplementedUsersInternalServiceServer) ListProjectUsers(context.Context, *ListProjectUsersRequest) (*ListProjectUsersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListProjectUsers not implemented")
+}
+func (UnimplementedUsersInternalServiceServer) ListUsers(context.Context, *ListUsersRequest) (*ListUsersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListUsers not implemented")
 }
 func (UnimplementedUsersInternalServiceServer) CreateUserInternal(context.Context, *CreateUserInternalRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateUserInternal not implemented")
@@ -999,6 +1013,24 @@ func _UsersInternalService_ListProjectUsers_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UsersInternalService_ListUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListUsersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersInternalServiceServer).ListUsers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/llmariner.users.server.v1.UsersInternalService/ListUsers",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersInternalServiceServer).ListUsers(ctx, req.(*ListUsersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _UsersInternalService_CreateUserInternal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateUserInternalRequest)
 	if err := dec(in); err != nil {
@@ -1043,6 +1075,10 @@ var UsersInternalService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListProjectUsers",
 			Handler:    _UsersInternalService_ListProjectUsers_Handler,
+		},
+		{
+			MethodName: "ListUsers",
+			Handler:    _UsersInternalService_ListUsers_Handler,
 		},
 		{
 			MethodName: "CreateUserInternal",

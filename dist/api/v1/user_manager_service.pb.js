@@ -95,6 +95,9 @@ export class UsersInternalService {
     static ListProjectUsers(req, initReq) {
         return fm.fetchReq(`/llmariner.users.server.v1.UsersInternalService/ListProjectUsers`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
     }
+    static ListUsers(req, initReq) {
+        return fm.fetchReq(`/llmariner.users.server.v1.UsersInternalService/ListUsers`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
+    }
     static CreateUserInternal(req, initReq) {
         return fm.fetchReq(`/llmariner.users.server.v1.UsersInternalService/CreateUserInternal`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
     }

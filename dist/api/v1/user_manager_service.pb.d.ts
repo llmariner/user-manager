@@ -202,6 +202,10 @@ export type ListInternalOrganizationsRequest = {};
 export type ListInternalOrganizationsResponse = {
     organizations?: InternalOrganization[];
 };
+export type ListUsersRequest = {};
+export type ListUsersResponse = {
+    users?: User[];
+};
 export type CreateUserInternalRequest = {
     tenantId?: string;
     title?: string;
@@ -236,5 +240,6 @@ export declare class UsersInternalService {
     static ListOrganizationUsers(req: ListOrganizationUsersRequest, initReq?: fm.InitReq): Promise<ListOrganizationUsersResponse>;
     static ListProjects(req: ListProjectsRequest, initReq?: fm.InitReq): Promise<ListProjectsResponse>;
     static ListProjectUsers(req: ListProjectUsersRequest, initReq?: fm.InitReq): Promise<ListProjectUsersResponse>;
+    static ListUsers(req: ListUsersRequest, initReq?: fm.InitReq): Promise<ListUsersResponse>;
     static CreateUserInternal(req: CreateUserInternalRequest, initReq?: fm.InitReq): Promise<GoogleProtobufEmpty.Empty>;
 }

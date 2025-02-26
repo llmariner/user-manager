@@ -2629,6 +2629,91 @@ func (x *ListInternalOrganizationsResponse) GetOrganizations() []*InternalOrgani
 	return nil
 }
 
+type ListUsersRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *ListUsersRequest) Reset() {
+	*x = ListUsersRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_v1_user_manager_service_proto_msgTypes[43]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ListUsersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListUsersRequest) ProtoMessage() {}
+
+func (x *ListUsersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_v1_user_manager_service_proto_msgTypes[43]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListUsersRequest.ProtoReflect.Descriptor instead.
+func (*ListUsersRequest) Descriptor() ([]byte, []int) {
+	return file_api_v1_user_manager_service_proto_rawDescGZIP(), []int{43}
+}
+
+type ListUsersResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Users []*User `protobuf:"bytes,1,rep,name=users,proto3" json:"users,omitempty"`
+}
+
+func (x *ListUsersResponse) Reset() {
+	*x = ListUsersResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_v1_user_manager_service_proto_msgTypes[44]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ListUsersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListUsersResponse) ProtoMessage() {}
+
+func (x *ListUsersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_v1_user_manager_service_proto_msgTypes[44]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListUsersResponse.ProtoReflect.Descriptor instead.
+func (*ListUsersResponse) Descriptor() ([]byte, []int) {
+	return file_api_v1_user_manager_service_proto_rawDescGZIP(), []int{44}
+}
+
+func (x *ListUsersResponse) GetUsers() []*User {
+	if x != nil {
+		return x.Users
+	}
+	return nil
+}
+
 type CreateUserInternalRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -2644,7 +2729,7 @@ type CreateUserInternalRequest struct {
 func (x *CreateUserInternalRequest) Reset() {
 	*x = CreateUserInternalRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_v1_user_manager_service_proto_msgTypes[43]
+		mi := &file_api_v1_user_manager_service_proto_msgTypes[45]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2657,7 +2742,7 @@ func (x *CreateUserInternalRequest) String() string {
 func (*CreateUserInternalRequest) ProtoMessage() {}
 
 func (x *CreateUserInternalRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_v1_user_manager_service_proto_msgTypes[43]
+	mi := &file_api_v1_user_manager_service_proto_msgTypes[45]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2670,7 +2755,7 @@ func (x *CreateUserInternalRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateUserInternalRequest.ProtoReflect.Descriptor instead.
 func (*CreateUserInternalRequest) Descriptor() ([]byte, []int) {
-	return file_api_v1_user_manager_service_proto_rawDescGZIP(), []int{43}
+	return file_api_v1_user_manager_service_proto_rawDescGZIP(), []int{45}
 }
 
 func (x *CreateUserInternalRequest) GetTenantId() string {
@@ -2715,7 +2800,7 @@ type Organization_Summary struct {
 func (x *Organization_Summary) Reset() {
 	*x = Organization_Summary{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_v1_user_manager_service_proto_msgTypes[44]
+		mi := &file_api_v1_user_manager_service_proto_msgTypes[46]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2728,7 +2813,7 @@ func (x *Organization_Summary) String() string {
 func (*Organization_Summary) ProtoMessage() {}
 
 func (x *Organization_Summary) ProtoReflect() protoreflect.Message {
-	mi := &file_api_v1_user_manager_service_proto_msgTypes[44]
+	mi := &file_api_v1_user_manager_service_proto_msgTypes[46]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2770,7 +2855,7 @@ type Project_Summary struct {
 func (x *Project_Summary) Reset() {
 	*x = Project_Summary{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_v1_user_manager_service_proto_msgTypes[45]
+		mi := &file_api_v1_user_manager_service_proto_msgTypes[47]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2783,7 +2868,7 @@ func (x *Project_Summary) String() string {
 func (*Project_Summary) ProtoMessage() {}
 
 func (x *Project_Summary) ProtoReflect() protoreflect.Message {
-	mi := &file_api_v1_user_manager_service_proto_msgTypes[45]
+	mi := &file_api_v1_user_manager_service_proto_msgTypes[47]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3145,6 +3230,12 @@ var file_api_v1_user_manager_service_proto_rawDesc = []byte{
 	0x65, 0x72, 0x73, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x49, 0x6e,
 	0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69,
 	0x6f, 0x6e, 0x52, 0x0d, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e,
+	0x73, 0x22, 0x12, 0x0a, 0x10, 0x4c, 0x69, 0x73, 0x74, 0x55, 0x73, 0x65, 0x72, 0x73, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x4a, 0x0a, 0x11, 0x4c, 0x69, 0x73, 0x74, 0x55, 0x73, 0x65,
+	0x72, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x35, 0x0a, 0x05, 0x75, 0x73,
+	0x65, 0x72, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x1f, 0x2e, 0x6c, 0x6c, 0x6d, 0x61,
+	0x72, 0x69, 0x6e, 0x65, 0x72, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x73, 0x2e, 0x73, 0x65, 0x72, 0x76,
+	0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x52, 0x05, 0x75, 0x73, 0x65, 0x72,
 	0x73, 0x22, 0x9a, 0x01, 0x0a, 0x19, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x55, 0x73, 0x65, 0x72,
 	0x49, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
 	0x1b, 0x0a, 0x09, 0x74, 0x65, 0x6e, 0x61, 0x6e, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01,
@@ -3380,7 +3471,7 @@ var file_api_v1_user_manager_service_proto_rawDesc = []byte{
 	0x1f, 0x2e, 0x6c, 0x6c, 0x6d, 0x61, 0x72, 0x69, 0x6e, 0x65, 0x72, 0x2e, 0x75, 0x73, 0x65, 0x72,
 	0x73, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x55, 0x73, 0x65, 0x72,
 	0x22, 0x19, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x13, 0x12, 0x11, 0x2f, 0x76, 0x31, 0x2f, 0x75, 0x73,
-	0x65, 0x72, 0x73, 0x3a, 0x67, 0x65, 0x74, 0x53, 0x65, 0x6c, 0x66, 0x32, 0xa1, 0x06, 0x0a, 0x14,
+	0x65, 0x72, 0x73, 0x3a, 0x67, 0x65, 0x74, 0x53, 0x65, 0x6c, 0x66, 0x32, 0x8b, 0x07, 0x0a, 0x14,
 	0x55, 0x73, 0x65, 0x72, 0x73, 0x49, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x53, 0x65, 0x72,
 	0x76, 0x69, 0x63, 0x65, 0x12, 0x86, 0x01, 0x0a, 0x13, 0x4c, 0x69, 0x73, 0x74, 0x49, 0x6e, 0x74,
 	0x65, 0x72, 0x6e, 0x61, 0x6c, 0x41, 0x50, 0x49, 0x4b, 0x65, 0x79, 0x73, 0x12, 0x35, 0x2e, 0x6c,
@@ -3424,17 +3515,23 @@ var file_api_v1_user_manager_service_proto_rawDesc = []byte{
 	0x73, 0x74, 0x1a, 0x33, 0x2e, 0x6c, 0x6c, 0x6d, 0x61, 0x72, 0x69, 0x6e, 0x65, 0x72, 0x2e, 0x75,
 	0x73, 0x65, 0x72, 0x73, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x4c,
 	0x69, 0x73, 0x74, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x55, 0x73, 0x65, 0x72, 0x73, 0x52,
-	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x64, 0x0a, 0x12, 0x43, 0x72, 0x65,
-	0x61, 0x74, 0x65, 0x55, 0x73, 0x65, 0x72, 0x49, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x12,
-	0x34, 0x2e, 0x6c, 0x6c, 0x6d, 0x61, 0x72, 0x69, 0x6e, 0x65, 0x72, 0x2e, 0x75, 0x73, 0x65, 0x72,
-	0x73, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x72, 0x65, 0x61,
-	0x74, 0x65, 0x55, 0x73, 0x65, 0x72, 0x49, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x52, 0x65,
-	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x22, 0x00, 0x42,
-	0x2a, 0x5a, 0x28, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x6c, 0x6c,
-	0x6d, 0x61, 0x72, 0x69, 0x6e, 0x65, 0x72, 0x2f, 0x75, 0x73, 0x65, 0x72, 0x2d, 0x6d, 0x61, 0x6e,
-	0x61, 0x67, 0x65, 0x72, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x33,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x68, 0x0a, 0x09, 0x4c, 0x69, 0x73,
+	0x74, 0x55, 0x73, 0x65, 0x72, 0x73, 0x12, 0x2b, 0x2e, 0x6c, 0x6c, 0x6d, 0x61, 0x72, 0x69, 0x6e,
+	0x65, 0x72, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x73, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e,
+	0x76, 0x31, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x55, 0x73, 0x65, 0x72, 0x73, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x1a, 0x2c, 0x2e, 0x6c, 0x6c, 0x6d, 0x61, 0x72, 0x69, 0x6e, 0x65, 0x72, 0x2e,
+	0x75, 0x73, 0x65, 0x72, 0x73, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e,
+	0x4c, 0x69, 0x73, 0x74, 0x55, 0x73, 0x65, 0x72, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x22, 0x00, 0x12, 0x64, 0x0a, 0x12, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x55, 0x73, 0x65,
+	0x72, 0x49, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x12, 0x34, 0x2e, 0x6c, 0x6c, 0x6d, 0x61,
+	0x72, 0x69, 0x6e, 0x65, 0x72, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x73, 0x2e, 0x73, 0x65, 0x72, 0x76,
+	0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x55, 0x73, 0x65, 0x72,
+	0x49, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
+	0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75,
+	0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x22, 0x00, 0x42, 0x2a, 0x5a, 0x28, 0x67, 0x69, 0x74,
+	0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x6c, 0x6c, 0x6d, 0x61, 0x72, 0x69, 0x6e, 0x65,
+	0x72, 0x2f, 0x75, 0x73, 0x65, 0x72, 0x2d, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2f, 0x61,
+	0x70, 0x69, 0x2f, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -3450,7 +3547,7 @@ func file_api_v1_user_manager_service_proto_rawDescGZIP() []byte {
 }
 
 var file_api_v1_user_manager_service_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_api_v1_user_manager_service_proto_msgTypes = make([]protoimpl.MessageInfo, 46)
+var file_api_v1_user_manager_service_proto_msgTypes = make([]protoimpl.MessageInfo, 48)
 var file_api_v1_user_manager_service_proto_goTypes = []interface{}{
 	(OrganizationRole)(0),                     // 0: llmariner.users.server.v1.OrganizationRole
 	(ProjectRole)(0),                          // 1: llmariner.users.server.v1.ProjectRole
@@ -3497,11 +3594,13 @@ var file_api_v1_user_manager_service_proto_goTypes = []interface{}{
 	(*InternalOrganization)(nil),              // 42: llmariner.users.server.v1.InternalOrganization
 	(*ListInternalOrganizationsRequest)(nil),  // 43: llmariner.users.server.v1.ListInternalOrganizationsRequest
 	(*ListInternalOrganizationsResponse)(nil), // 44: llmariner.users.server.v1.ListInternalOrganizationsResponse
-	(*CreateUserInternalRequest)(nil),         // 45: llmariner.users.server.v1.CreateUserInternalRequest
-	(*Organization_Summary)(nil),              // 46: llmariner.users.server.v1.Organization.Summary
-	(*Project_Summary)(nil),                   // 47: llmariner.users.server.v1.Project.Summary
-	(*fieldmaskpb.FieldMask)(nil),             // 48: google.protobuf.FieldMask
-	(*emptypb.Empty)(nil),                     // 49: google.protobuf.Empty
+	(*ListUsersRequest)(nil),                  // 45: llmariner.users.server.v1.ListUsersRequest
+	(*ListUsersResponse)(nil),                 // 46: llmariner.users.server.v1.ListUsersResponse
+	(*CreateUserInternalRequest)(nil),         // 47: llmariner.users.server.v1.CreateUserInternalRequest
+	(*Organization_Summary)(nil),              // 48: llmariner.users.server.v1.Organization.Summary
+	(*Project_Summary)(nil),                   // 49: llmariner.users.server.v1.Project.Summary
+	(*fieldmaskpb.FieldMask)(nil),             // 50: google.protobuf.FieldMask
+	(*emptypb.Empty)(nil),                     // 51: google.protobuf.Empty
 }
 var file_api_v1_user_manager_service_proto_depIdxs = []int32{
 	3,  // 0: llmariner.users.server.v1.APIKey.user:type_name -> llmariner.users.server.v1.User
@@ -3510,15 +3609,15 @@ var file_api_v1_user_manager_service_proto_depIdxs = []int32{
 	0,  // 3: llmariner.users.server.v1.APIKey.organization_role:type_name -> llmariner.users.server.v1.OrganizationRole
 	1,  // 4: llmariner.users.server.v1.APIKey.project_role:type_name -> llmariner.users.server.v1.ProjectRole
 	0,  // 5: llmariner.users.server.v1.OrganizationUser.role:type_name -> llmariner.users.server.v1.OrganizationRole
-	46, // 6: llmariner.users.server.v1.Organization.summary:type_name -> llmariner.users.server.v1.Organization.Summary
+	48, // 6: llmariner.users.server.v1.Organization.summary:type_name -> llmariner.users.server.v1.Organization.Summary
 	1,  // 7: llmariner.users.server.v1.ProjectUser.role:type_name -> llmariner.users.server.v1.ProjectRole
 	7,  // 8: llmariner.users.server.v1.ProjectAssignments.assignments:type_name -> llmariner.users.server.v1.ProjectAssignment
 	7,  // 9: llmariner.users.server.v1.Project.assignments:type_name -> llmariner.users.server.v1.ProjectAssignment
-	47, // 10: llmariner.users.server.v1.Project.summary:type_name -> llmariner.users.server.v1.Project.Summary
+	49, // 10: llmariner.users.server.v1.Project.summary:type_name -> llmariner.users.server.v1.Project.Summary
 	0,  // 11: llmariner.users.server.v1.CreateAPIKeyRequest.role:type_name -> llmariner.users.server.v1.OrganizationRole
 	2,  // 12: llmariner.users.server.v1.ListAPIKeysResponse.data:type_name -> llmariner.users.server.v1.APIKey
 	2,  // 13: llmariner.users.server.v1.UpdateAPIKeyRequest.api_key:type_name -> llmariner.users.server.v1.APIKey
-	48, // 14: llmariner.users.server.v1.UpdateAPIKeyRequest.update_mask:type_name -> google.protobuf.FieldMask
+	50, // 14: llmariner.users.server.v1.UpdateAPIKeyRequest.update_mask:type_name -> google.protobuf.FieldMask
 	5,  // 15: llmariner.users.server.v1.ListOrganizationsResponse.organizations:type_name -> llmariner.users.server.v1.Organization
 	0,  // 16: llmariner.users.server.v1.CreateOrganizationUserRequest.role:type_name -> llmariner.users.server.v1.OrganizationRole
 	4,  // 17: llmariner.users.server.v1.ListOrganizationUsersResponse.users:type_name -> llmariner.users.server.v1.OrganizationUser
@@ -3530,63 +3629,66 @@ var file_api_v1_user_manager_service_proto_depIdxs = []int32{
 	39, // 23: llmariner.users.server.v1.ListInternalAPIKeysResponse.api_keys:type_name -> llmariner.users.server.v1.InternalAPIKey
 	5,  // 24: llmariner.users.server.v1.InternalOrganization.organization:type_name -> llmariner.users.server.v1.Organization
 	42, // 25: llmariner.users.server.v1.ListInternalOrganizationsResponse.organizations:type_name -> llmariner.users.server.v1.InternalOrganization
-	10, // 26: llmariner.users.server.v1.UsersService.CreateAPIKey:input_type -> llmariner.users.server.v1.CreateAPIKeyRequest
-	12, // 27: llmariner.users.server.v1.UsersService.ListAPIKeys:input_type -> llmariner.users.server.v1.ListAPIKeysRequest
-	14, // 28: llmariner.users.server.v1.UsersService.DeleteAPIKey:input_type -> llmariner.users.server.v1.DeleteAPIKeyRequest
-	17, // 29: llmariner.users.server.v1.UsersService.UpdateAPIKey:input_type -> llmariner.users.server.v1.UpdateAPIKeyRequest
-	10, // 30: llmariner.users.server.v1.UsersService.CreateProjectAPIKey:input_type -> llmariner.users.server.v1.CreateAPIKeyRequest
-	11, // 31: llmariner.users.server.v1.UsersService.ListProjectAPIKeys:input_type -> llmariner.users.server.v1.ListProjectAPIKeysRequest
-	15, // 32: llmariner.users.server.v1.UsersService.DeleteProjectAPIKey:input_type -> llmariner.users.server.v1.DeleteProjectAPIKeyRequest
-	18, // 33: llmariner.users.server.v1.UsersService.CreateOrganization:input_type -> llmariner.users.server.v1.CreateOrganizationRequest
-	19, // 34: llmariner.users.server.v1.UsersService.ListOrganizations:input_type -> llmariner.users.server.v1.ListOrganizationsRequest
-	21, // 35: llmariner.users.server.v1.UsersService.DeleteOrganization:input_type -> llmariner.users.server.v1.DeleteOrganizationRequest
-	23, // 36: llmariner.users.server.v1.UsersService.CreateOrganizationUser:input_type -> llmariner.users.server.v1.CreateOrganizationUserRequest
-	24, // 37: llmariner.users.server.v1.UsersService.ListOrganizationUsers:input_type -> llmariner.users.server.v1.ListOrganizationUsersRequest
-	26, // 38: llmariner.users.server.v1.UsersService.DeleteOrganizationUser:input_type -> llmariner.users.server.v1.DeleteOrganizationUserRequest
-	28, // 39: llmariner.users.server.v1.UsersService.CreateProject:input_type -> llmariner.users.server.v1.CreateProjectRequest
-	29, // 40: llmariner.users.server.v1.UsersService.ListProjects:input_type -> llmariner.users.server.v1.ListProjectsRequest
-	31, // 41: llmariner.users.server.v1.UsersService.DeleteProject:input_type -> llmariner.users.server.v1.DeleteProjectRequest
-	33, // 42: llmariner.users.server.v1.UsersService.CreateProjectUser:input_type -> llmariner.users.server.v1.CreateProjectUserRequest
-	34, // 43: llmariner.users.server.v1.UsersService.ListProjectUsers:input_type -> llmariner.users.server.v1.ListProjectUsersRequest
-	36, // 44: llmariner.users.server.v1.UsersService.DeleteProjectUser:input_type -> llmariner.users.server.v1.DeleteProjectUserRequest
-	38, // 45: llmariner.users.server.v1.UsersService.GetUserSelf:input_type -> llmariner.users.server.v1.GetUserSelfRequest
-	40, // 46: llmariner.users.server.v1.UsersInternalService.ListInternalAPIKeys:input_type -> llmariner.users.server.v1.ListInternalAPIKeysRequest
-	43, // 47: llmariner.users.server.v1.UsersInternalService.ListInternalOrganizations:input_type -> llmariner.users.server.v1.ListInternalOrganizationsRequest
-	24, // 48: llmariner.users.server.v1.UsersInternalService.ListOrganizationUsers:input_type -> llmariner.users.server.v1.ListOrganizationUsersRequest
-	29, // 49: llmariner.users.server.v1.UsersInternalService.ListProjects:input_type -> llmariner.users.server.v1.ListProjectsRequest
-	34, // 50: llmariner.users.server.v1.UsersInternalService.ListProjectUsers:input_type -> llmariner.users.server.v1.ListProjectUsersRequest
-	45, // 51: llmariner.users.server.v1.UsersInternalService.CreateUserInternal:input_type -> llmariner.users.server.v1.CreateUserInternalRequest
-	2,  // 52: llmariner.users.server.v1.UsersService.CreateAPIKey:output_type -> llmariner.users.server.v1.APIKey
-	13, // 53: llmariner.users.server.v1.UsersService.ListAPIKeys:output_type -> llmariner.users.server.v1.ListAPIKeysResponse
-	16, // 54: llmariner.users.server.v1.UsersService.DeleteAPIKey:output_type -> llmariner.users.server.v1.DeleteAPIKeyResponse
-	2,  // 55: llmariner.users.server.v1.UsersService.UpdateAPIKey:output_type -> llmariner.users.server.v1.APIKey
-	2,  // 56: llmariner.users.server.v1.UsersService.CreateProjectAPIKey:output_type -> llmariner.users.server.v1.APIKey
-	13, // 57: llmariner.users.server.v1.UsersService.ListProjectAPIKeys:output_type -> llmariner.users.server.v1.ListAPIKeysResponse
-	16, // 58: llmariner.users.server.v1.UsersService.DeleteProjectAPIKey:output_type -> llmariner.users.server.v1.DeleteAPIKeyResponse
-	5,  // 59: llmariner.users.server.v1.UsersService.CreateOrganization:output_type -> llmariner.users.server.v1.Organization
-	20, // 60: llmariner.users.server.v1.UsersService.ListOrganizations:output_type -> llmariner.users.server.v1.ListOrganizationsResponse
-	22, // 61: llmariner.users.server.v1.UsersService.DeleteOrganization:output_type -> llmariner.users.server.v1.DeleteOrganizationResponse
-	4,  // 62: llmariner.users.server.v1.UsersService.CreateOrganizationUser:output_type -> llmariner.users.server.v1.OrganizationUser
-	25, // 63: llmariner.users.server.v1.UsersService.ListOrganizationUsers:output_type -> llmariner.users.server.v1.ListOrganizationUsersResponse
-	49, // 64: llmariner.users.server.v1.UsersService.DeleteOrganizationUser:output_type -> google.protobuf.Empty
-	9,  // 65: llmariner.users.server.v1.UsersService.CreateProject:output_type -> llmariner.users.server.v1.Project
-	30, // 66: llmariner.users.server.v1.UsersService.ListProjects:output_type -> llmariner.users.server.v1.ListProjectsResponse
-	32, // 67: llmariner.users.server.v1.UsersService.DeleteProject:output_type -> llmariner.users.server.v1.DeleteProjectResponse
-	6,  // 68: llmariner.users.server.v1.UsersService.CreateProjectUser:output_type -> llmariner.users.server.v1.ProjectUser
-	35, // 69: llmariner.users.server.v1.UsersService.ListProjectUsers:output_type -> llmariner.users.server.v1.ListProjectUsersResponse
-	49, // 70: llmariner.users.server.v1.UsersService.DeleteProjectUser:output_type -> google.protobuf.Empty
-	3,  // 71: llmariner.users.server.v1.UsersService.GetUserSelf:output_type -> llmariner.users.server.v1.User
-	41, // 72: llmariner.users.server.v1.UsersInternalService.ListInternalAPIKeys:output_type -> llmariner.users.server.v1.ListInternalAPIKeysResponse
-	44, // 73: llmariner.users.server.v1.UsersInternalService.ListInternalOrganizations:output_type -> llmariner.users.server.v1.ListInternalOrganizationsResponse
-	25, // 74: llmariner.users.server.v1.UsersInternalService.ListOrganizationUsers:output_type -> llmariner.users.server.v1.ListOrganizationUsersResponse
-	30, // 75: llmariner.users.server.v1.UsersInternalService.ListProjects:output_type -> llmariner.users.server.v1.ListProjectsResponse
-	35, // 76: llmariner.users.server.v1.UsersInternalService.ListProjectUsers:output_type -> llmariner.users.server.v1.ListProjectUsersResponse
-	49, // 77: llmariner.users.server.v1.UsersInternalService.CreateUserInternal:output_type -> google.protobuf.Empty
-	52, // [52:78] is the sub-list for method output_type
-	26, // [26:52] is the sub-list for method input_type
-	26, // [26:26] is the sub-list for extension type_name
-	26, // [26:26] is the sub-list for extension extendee
-	0,  // [0:26] is the sub-list for field type_name
+	3,  // 26: llmariner.users.server.v1.ListUsersResponse.users:type_name -> llmariner.users.server.v1.User
+	10, // 27: llmariner.users.server.v1.UsersService.CreateAPIKey:input_type -> llmariner.users.server.v1.CreateAPIKeyRequest
+	12, // 28: llmariner.users.server.v1.UsersService.ListAPIKeys:input_type -> llmariner.users.server.v1.ListAPIKeysRequest
+	14, // 29: llmariner.users.server.v1.UsersService.DeleteAPIKey:input_type -> llmariner.users.server.v1.DeleteAPIKeyRequest
+	17, // 30: llmariner.users.server.v1.UsersService.UpdateAPIKey:input_type -> llmariner.users.server.v1.UpdateAPIKeyRequest
+	10, // 31: llmariner.users.server.v1.UsersService.CreateProjectAPIKey:input_type -> llmariner.users.server.v1.CreateAPIKeyRequest
+	11, // 32: llmariner.users.server.v1.UsersService.ListProjectAPIKeys:input_type -> llmariner.users.server.v1.ListProjectAPIKeysRequest
+	15, // 33: llmariner.users.server.v1.UsersService.DeleteProjectAPIKey:input_type -> llmariner.users.server.v1.DeleteProjectAPIKeyRequest
+	18, // 34: llmariner.users.server.v1.UsersService.CreateOrganization:input_type -> llmariner.users.server.v1.CreateOrganizationRequest
+	19, // 35: llmariner.users.server.v1.UsersService.ListOrganizations:input_type -> llmariner.users.server.v1.ListOrganizationsRequest
+	21, // 36: llmariner.users.server.v1.UsersService.DeleteOrganization:input_type -> llmariner.users.server.v1.DeleteOrganizationRequest
+	23, // 37: llmariner.users.server.v1.UsersService.CreateOrganizationUser:input_type -> llmariner.users.server.v1.CreateOrganizationUserRequest
+	24, // 38: llmariner.users.server.v1.UsersService.ListOrganizationUsers:input_type -> llmariner.users.server.v1.ListOrganizationUsersRequest
+	26, // 39: llmariner.users.server.v1.UsersService.DeleteOrganizationUser:input_type -> llmariner.users.server.v1.DeleteOrganizationUserRequest
+	28, // 40: llmariner.users.server.v1.UsersService.CreateProject:input_type -> llmariner.users.server.v1.CreateProjectRequest
+	29, // 41: llmariner.users.server.v1.UsersService.ListProjects:input_type -> llmariner.users.server.v1.ListProjectsRequest
+	31, // 42: llmariner.users.server.v1.UsersService.DeleteProject:input_type -> llmariner.users.server.v1.DeleteProjectRequest
+	33, // 43: llmariner.users.server.v1.UsersService.CreateProjectUser:input_type -> llmariner.users.server.v1.CreateProjectUserRequest
+	34, // 44: llmariner.users.server.v1.UsersService.ListProjectUsers:input_type -> llmariner.users.server.v1.ListProjectUsersRequest
+	36, // 45: llmariner.users.server.v1.UsersService.DeleteProjectUser:input_type -> llmariner.users.server.v1.DeleteProjectUserRequest
+	38, // 46: llmariner.users.server.v1.UsersService.GetUserSelf:input_type -> llmariner.users.server.v1.GetUserSelfRequest
+	40, // 47: llmariner.users.server.v1.UsersInternalService.ListInternalAPIKeys:input_type -> llmariner.users.server.v1.ListInternalAPIKeysRequest
+	43, // 48: llmariner.users.server.v1.UsersInternalService.ListInternalOrganizations:input_type -> llmariner.users.server.v1.ListInternalOrganizationsRequest
+	24, // 49: llmariner.users.server.v1.UsersInternalService.ListOrganizationUsers:input_type -> llmariner.users.server.v1.ListOrganizationUsersRequest
+	29, // 50: llmariner.users.server.v1.UsersInternalService.ListProjects:input_type -> llmariner.users.server.v1.ListProjectsRequest
+	34, // 51: llmariner.users.server.v1.UsersInternalService.ListProjectUsers:input_type -> llmariner.users.server.v1.ListProjectUsersRequest
+	45, // 52: llmariner.users.server.v1.UsersInternalService.ListUsers:input_type -> llmariner.users.server.v1.ListUsersRequest
+	47, // 53: llmariner.users.server.v1.UsersInternalService.CreateUserInternal:input_type -> llmariner.users.server.v1.CreateUserInternalRequest
+	2,  // 54: llmariner.users.server.v1.UsersService.CreateAPIKey:output_type -> llmariner.users.server.v1.APIKey
+	13, // 55: llmariner.users.server.v1.UsersService.ListAPIKeys:output_type -> llmariner.users.server.v1.ListAPIKeysResponse
+	16, // 56: llmariner.users.server.v1.UsersService.DeleteAPIKey:output_type -> llmariner.users.server.v1.DeleteAPIKeyResponse
+	2,  // 57: llmariner.users.server.v1.UsersService.UpdateAPIKey:output_type -> llmariner.users.server.v1.APIKey
+	2,  // 58: llmariner.users.server.v1.UsersService.CreateProjectAPIKey:output_type -> llmariner.users.server.v1.APIKey
+	13, // 59: llmariner.users.server.v1.UsersService.ListProjectAPIKeys:output_type -> llmariner.users.server.v1.ListAPIKeysResponse
+	16, // 60: llmariner.users.server.v1.UsersService.DeleteProjectAPIKey:output_type -> llmariner.users.server.v1.DeleteAPIKeyResponse
+	5,  // 61: llmariner.users.server.v1.UsersService.CreateOrganization:output_type -> llmariner.users.server.v1.Organization
+	20, // 62: llmariner.users.server.v1.UsersService.ListOrganizations:output_type -> llmariner.users.server.v1.ListOrganizationsResponse
+	22, // 63: llmariner.users.server.v1.UsersService.DeleteOrganization:output_type -> llmariner.users.server.v1.DeleteOrganizationResponse
+	4,  // 64: llmariner.users.server.v1.UsersService.CreateOrganizationUser:output_type -> llmariner.users.server.v1.OrganizationUser
+	25, // 65: llmariner.users.server.v1.UsersService.ListOrganizationUsers:output_type -> llmariner.users.server.v1.ListOrganizationUsersResponse
+	51, // 66: llmariner.users.server.v1.UsersService.DeleteOrganizationUser:output_type -> google.protobuf.Empty
+	9,  // 67: llmariner.users.server.v1.UsersService.CreateProject:output_type -> llmariner.users.server.v1.Project
+	30, // 68: llmariner.users.server.v1.UsersService.ListProjects:output_type -> llmariner.users.server.v1.ListProjectsResponse
+	32, // 69: llmariner.users.server.v1.UsersService.DeleteProject:output_type -> llmariner.users.server.v1.DeleteProjectResponse
+	6,  // 70: llmariner.users.server.v1.UsersService.CreateProjectUser:output_type -> llmariner.users.server.v1.ProjectUser
+	35, // 71: llmariner.users.server.v1.UsersService.ListProjectUsers:output_type -> llmariner.users.server.v1.ListProjectUsersResponse
+	51, // 72: llmariner.users.server.v1.UsersService.DeleteProjectUser:output_type -> google.protobuf.Empty
+	3,  // 73: llmariner.users.server.v1.UsersService.GetUserSelf:output_type -> llmariner.users.server.v1.User
+	41, // 74: llmariner.users.server.v1.UsersInternalService.ListInternalAPIKeys:output_type -> llmariner.users.server.v1.ListInternalAPIKeysResponse
+	44, // 75: llmariner.users.server.v1.UsersInternalService.ListInternalOrganizations:output_type -> llmariner.users.server.v1.ListInternalOrganizationsResponse
+	25, // 76: llmariner.users.server.v1.UsersInternalService.ListOrganizationUsers:output_type -> llmariner.users.server.v1.ListOrganizationUsersResponse
+	30, // 77: llmariner.users.server.v1.UsersInternalService.ListProjects:output_type -> llmariner.users.server.v1.ListProjectsResponse
+	35, // 78: llmariner.users.server.v1.UsersInternalService.ListProjectUsers:output_type -> llmariner.users.server.v1.ListProjectUsersResponse
+	46, // 79: llmariner.users.server.v1.UsersInternalService.ListUsers:output_type -> llmariner.users.server.v1.ListUsersResponse
+	51, // 80: llmariner.users.server.v1.UsersInternalService.CreateUserInternal:output_type -> google.protobuf.Empty
+	54, // [54:81] is the sub-list for method output_type
+	27, // [27:54] is the sub-list for method input_type
+	27, // [27:27] is the sub-list for extension type_name
+	27, // [27:27] is the sub-list for extension extendee
+	0,  // [0:27] is the sub-list for field type_name
 }
 
 func init() { file_api_v1_user_manager_service_proto_init() }
@@ -4112,7 +4214,7 @@ func file_api_v1_user_manager_service_proto_init() {
 			}
 		}
 		file_api_v1_user_manager_service_proto_msgTypes[43].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CreateUserInternalRequest); i {
+			switch v := v.(*ListUsersRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4124,7 +4226,7 @@ func file_api_v1_user_manager_service_proto_init() {
 			}
 		}
 		file_api_v1_user_manager_service_proto_msgTypes[44].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Organization_Summary); i {
+			switch v := v.(*ListUsersResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -4136,6 +4238,30 @@ func file_api_v1_user_manager_service_proto_init() {
 			}
 		}
 		file_api_v1_user_manager_service_proto_msgTypes[45].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CreateUserInternalRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_v1_user_manager_service_proto_msgTypes[46].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Organization_Summary); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_v1_user_manager_service_proto_msgTypes[47].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Project_Summary); i {
 			case 0:
 				return &v.state
@@ -4154,7 +4280,7 @@ func file_api_v1_user_manager_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_api_v1_user_manager_service_proto_rawDesc,
 			NumEnums:      2,
-			NumMessages:   46,
+			NumMessages:   48,
 			NumExtensions: 0,
 			NumServices:   2,
 		},

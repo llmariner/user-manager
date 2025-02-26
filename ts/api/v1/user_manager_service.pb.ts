@@ -260,6 +260,13 @@ export type ListInternalOrganizationsResponse = {
   organizations?: InternalOrganization[]
 }
 
+export type ListUsersRequest = {
+}
+
+export type ListUsersResponse = {
+  users?: User[]
+}
+
 export type CreateUserInternalRequest = {
   tenantId?: string
   title?: string
@@ -344,6 +351,9 @@ export class UsersInternalService {
   }
   static ListProjectUsers(req: ListProjectUsersRequest, initReq?: fm.InitReq): Promise<ListProjectUsersResponse> {
     return fm.fetchReq<ListProjectUsersRequest, ListProjectUsersResponse>(`/llmariner.users.server.v1.UsersInternalService/ListProjectUsers`, {...initReq, method: "POST", body: JSON.stringify(req)})
+  }
+  static ListUsers(req: ListUsersRequest, initReq?: fm.InitReq): Promise<ListUsersResponse> {
+    return fm.fetchReq<ListUsersRequest, ListUsersResponse>(`/llmariner.users.server.v1.UsersInternalService/ListUsers`, {...initReq, method: "POST", body: JSON.stringify(req)})
   }
   static CreateUserInternal(req: CreateUserInternalRequest, initReq?: fm.InitReq): Promise<GoogleProtobufEmpty.Empty> {
     return fm.fetchReq<CreateUserInternalRequest, GoogleProtobufEmpty.Empty>(`/llmariner.users.server.v1.UsersInternalService/CreateUserInternal`, {...initReq, method: "POST", body: JSON.stringify(req)})
