@@ -667,10 +667,14 @@ func findProjectRole(s *store.S, projectID, userID string) (v1.ProjectRole, erro
 
 // obfuscateSecret obfuscates the secret.
 // The function returns the first 5 characters and the last 2 characters of the secret
-// The rest of the characters are replaced with '*'.
+// The rest of the characters are replaced with '*' (at most 5 characters are shown).
 func obfuscateSecret(secret string) string {
 	prefix := secret[0:5]
 	suffix := secret[len(secret)-2:]
-	obfuscated := strings.Repeat("*", len(secret)-7)
+	starLen := len(secret) - 7
+	if starLen > 5 {
+		starLen = 5
+	}
+	obfuscated := strings.Repeat("*", starLen)
 	return prefix + obfuscated + suffix
 }
