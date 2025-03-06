@@ -421,7 +421,7 @@ func TestObfuscateSecret(t *testing.T) {
 	}{
 		{
 			secret: "sk-1234567890abcdef",
-			want:   "sk-12************ef",
+			want:   "sk-12*****ef",
 		},
 	}
 	for _, tc := range tcs {
