@@ -28,16 +28,16 @@ export class UsersService {
         return fm.fetchReq(`/v1/api_keys/${req["id"]}`, Object.assign(Object.assign({}, initReq), { method: "DELETE" }));
     }
     static UpdateAPIKey(req, initReq) {
-        return fm.fetchReq(`/v1/api_keys/${req["apiKeyId"]}`, Object.assign(Object.assign({}, initReq), { method: "PATCH", body: JSON.stringify(req["api_key"]) }));
+        return fm.fetchReq(`/v1/api_keys/${req["api_key.id"]}`, Object.assign(Object.assign({}, initReq), { method: "PATCH", body: JSON.stringify(req["api_key"]) }));
     }
     static CreateProjectAPIKey(req, initReq) {
-        return fm.fetchReq(`/v1/organizations/${req["organizationId"]}/projects/${req["projectId"]}/api_keys`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
+        return fm.fetchReq(`/v1/organizations/${req["organization_id"]}/projects/${req["project_id"]}/api_keys`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
     }
     static ListProjectAPIKeys(req, initReq) {
-        return fm.fetchReq(`/v1/organizations/${req["organizationId"]}/projects/${req["projectId"]}/api_keys?${fm.renderURLSearchParams(req, ["organizationId", "projectId"])}`, Object.assign(Object.assign({}, initReq), { method: "GET" }));
+        return fm.fetchReq(`/v1/organizations/${req["organization_id"]}/projects/${req["project_id"]}/api_keys?${fm.renderURLSearchParams(req, ["organization_id", "project_id"])}`, Object.assign(Object.assign({}, initReq), { method: "GET" }));
     }
     static DeleteProjectAPIKey(req, initReq) {
-        return fm.fetchReq(`/v1/organizations/${req["organizationId"]}/projects/${req["projectId"]}/api_keys/${req["id"]}`, Object.assign(Object.assign({}, initReq), { method: "DELETE" }));
+        return fm.fetchReq(`/v1/organizations/${req["organization_id"]}/projects/${req["project_id"]}/api_keys/${req["id"]}`, Object.assign(Object.assign({}, initReq), { method: "DELETE" }));
     }
     static CreateOrganization(req, initReq) {
         return fm.fetchReq(`/v1/organizations`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
@@ -49,31 +49,31 @@ export class UsersService {
         return fm.fetchReq(`/v1/organizations/${req["id"]}`, Object.assign(Object.assign({}, initReq), { method: "DELETE" }));
     }
     static CreateOrganizationUser(req, initReq) {
-        return fm.fetchReq(`/v1/organizations/${req["organizationId"]}/users`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
+        return fm.fetchReq(`/v1/organizations/${req["organization_id"]}/users`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
     }
     static ListOrganizationUsers(req, initReq) {
-        return fm.fetchReq(`/v1/organizations/${req["organizationId"]}/users?${fm.renderURLSearchParams(req, ["organizationId"])}`, Object.assign(Object.assign({}, initReq), { method: "GET" }));
+        return fm.fetchReq(`/v1/organizations/${req["organization_id"]}/users?${fm.renderURLSearchParams(req, ["organization_id"])}`, Object.assign(Object.assign({}, initReq), { method: "GET" }));
     }
     static DeleteOrganizationUser(req, initReq) {
-        return fm.fetchReq(`/v1/organizations/${req["organizationId"]}/users/${req["userId"]}`, Object.assign(Object.assign({}, initReq), { method: "DELETE" }));
+        return fm.fetchReq(`/v1/organizations/${req["organization_id"]}/users/${req["user_id"]}`, Object.assign(Object.assign({}, initReq), { method: "DELETE" }));
     }
     static CreateProject(req, initReq) {
-        return fm.fetchReq(`/v1/organizations/${req["organizationId"]}/projects`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
+        return fm.fetchReq(`/v1/organizations/${req["organization_id"]}/projects`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
     }
     static ListProjects(req, initReq) {
-        return fm.fetchReq(`/v1/organizations/${req["organizationId"]}/projects?${fm.renderURLSearchParams(req, ["organizationId"])}`, Object.assign(Object.assign({}, initReq), { method: "GET" }));
+        return fm.fetchReq(`/v1/organizations/${req["organization_id"]}/projects?${fm.renderURLSearchParams(req, ["organization_id"])}`, Object.assign(Object.assign({}, initReq), { method: "GET" }));
     }
     static DeleteProject(req, initReq) {
-        return fm.fetchReq(`/v1/organizations/${req["organizationId"]}/projects/${req["id"]}`, Object.assign(Object.assign({}, initReq), { method: "DELETE" }));
+        return fm.fetchReq(`/v1/organizations/${req["organization_id"]}/projects/${req["id"]}`, Object.assign(Object.assign({}, initReq), { method: "DELETE" }));
     }
     static CreateProjectUser(req, initReq) {
-        return fm.fetchReq(`/v1/organizations/${req["organizationId"]}/projects/${req["projectId"]}/users`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
+        return fm.fetchReq(`/v1/organizations/${req["organization_id"]}/projects/${req["project_id"]}/users`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
     }
     static ListProjectUsers(req, initReq) {
-        return fm.fetchReq(`/v1/organizations/${req["organizationId"]}/projects/${req["projectId"]}/users?${fm.renderURLSearchParams(req, ["organizationId", "projectId"])}`, Object.assign(Object.assign({}, initReq), { method: "GET" }));
+        return fm.fetchReq(`/v1/organizations/${req["organization_id"]}/projects/${req["project_id"]}/users?${fm.renderURLSearchParams(req, ["organization_id", "project_id"])}`, Object.assign(Object.assign({}, initReq), { method: "GET" }));
     }
     static DeleteProjectUser(req, initReq) {
-        return fm.fetchReq(`/v1/organizations/${req["organizationId"]}/projects/${req["projectId"]}/users/${req["userId"]}`, Object.assign(Object.assign({}, initReq), { method: "DELETE" }));
+        return fm.fetchReq(`/v1/organizations/${req["organization_id"]}/projects/${req["project_id"]}/users/${req["user_id"]}`, Object.assign(Object.assign({}, initReq), { method: "DELETE" }));
     }
     static GetUserSelf(req, initReq) {
         return fm.fetchReq(`/v1/users:getSelf?${fm.renderURLSearchParams(req, [])}`, Object.assign(Object.assign({}, initReq), { method: "GET" }));

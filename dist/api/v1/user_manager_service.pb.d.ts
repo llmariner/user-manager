@@ -17,69 +17,69 @@ export type APIKey = {
     object?: string;
     name?: string;
     secret?: string;
-    createdAt?: string;
+    created_at?: string;
     user?: User;
     organization?: Organization;
     project?: Project;
-    organizationRole?: OrganizationRole;
-    projectRole?: ProjectRole;
+    organization_role?: OrganizationRole;
+    project_role?: ProjectRole;
 };
 export type User = {
     id?: string;
-    internalId?: string;
-    isServiceAccount?: boolean;
+    internal_id?: string;
+    is_service_account?: boolean;
 };
 export type OrganizationUser = {
-    userId?: string;
-    internalUserId?: string;
-    organizationId?: string;
+    user_id?: string;
+    internal_user_id?: string;
+    organization_id?: string;
     role?: OrganizationRole;
 };
 export type OrganizationSummary = {
-    projectCount?: number;
-    userCount?: number;
+    project_count?: number;
+    user_count?: number;
 };
 export type Organization = {
     id?: string;
     title?: string;
-    createdAt?: string;
+    created_at?: string;
     summary?: OrganizationSummary;
 };
 export type ProjectUser = {
-    userId?: string;
-    projectId?: string;
-    organizationId?: string;
+    user_id?: string;
+    project_id?: string;
+    organization_id?: string;
     role?: ProjectRole;
 };
 export type ProjectAssignment = {
-    clusterId?: string;
+    cluster_id?: string;
     namespace?: string;
 };
 export type ProjectAssignments = {
     assignments?: ProjectAssignment[];
 };
 export type ProjectSummary = {
-    userCount?: number;
+    user_count?: number;
 };
 export type Project = {
     id?: string;
     title?: string;
     assignments?: ProjectAssignment[];
-    kubernetesNamespace?: string;
-    organizationId?: string;
-    createdAt?: string;
+    kubernetes_namespace?: string;
+    organization_id?: string;
+    created_at?: string;
     summary?: ProjectSummary;
 };
 export type CreateAPIKeyRequest = {
     name?: string;
-    projectId?: string;
-    organizationId?: string;
-    isServiceAccount?: boolean;
+    project_id?: string;
+    organization_id?: string;
+    is_service_account?: boolean;
     role?: OrganizationRole;
 };
 export type ListProjectAPIKeysRequest = {
-    projectId?: string;
-    organizationId?: string;
+    project_id?: string;
+    organization_id?: string;
 };
 export type ListAPIKeysRequest = {};
 export type ListAPIKeysResponse = {
@@ -91,8 +91,8 @@ export type DeleteAPIKeyRequest = {
 };
 export type DeleteProjectAPIKeyRequest = {
     id?: string;
-    projectId?: string;
-    organizationId?: string;
+    project_id?: string;
+    organization_id?: string;
 };
 export type DeleteAPIKeyResponse = {
     id?: string;
@@ -100,14 +100,14 @@ export type DeleteAPIKeyResponse = {
     deleted?: boolean;
 };
 export type UpdateAPIKeyRequest = {
-    apiKey?: APIKey;
-    updateMask?: GoogleProtobufField_mask.FieldMask;
+    api_key?: APIKey;
+    update_mask?: GoogleProtobufField_mask.FieldMask;
 };
 export type CreateOrganizationRequest = {
     title?: string;
 };
 export type ListOrganizationsRequest = {
-    includeSummary?: boolean;
+    include_summary?: boolean;
 };
 export type ListOrganizationsResponse = {
     organizations?: Organization[];
@@ -121,19 +121,19 @@ export type DeleteOrganizationResponse = {
     deleted?: boolean;
 };
 export type CreateOrganizationUserRequest = {
-    organizationId?: string;
-    userId?: string;
+    organization_id?: string;
+    user_id?: string;
     role?: OrganizationRole;
 };
 export type ListOrganizationUsersRequest = {
-    organizationId?: string;
+    organization_id?: string;
 };
 export type ListOrganizationUsersResponse = {
     users?: OrganizationUser[];
 };
 export type DeleteOrganizationUserRequest = {
-    organizationId?: string;
-    userId?: string;
+    organization_id?: string;
+    user_id?: string;
 };
 export type DeleteOrganizationUserResponse = {
     id?: string;
@@ -142,19 +142,19 @@ export type DeleteOrganizationUserResponse = {
 };
 export type CreateProjectRequest = {
     title?: string;
-    organizationId?: string;
-    kubernetesNamespace?: string;
+    organization_id?: string;
+    kubernetes_namespace?: string;
     assignments?: ProjectAssignment[];
 };
 export type ListProjectsRequest = {
-    organizationId?: string;
-    includeSummary?: boolean;
+    organization_id?: string;
+    include_summary?: boolean;
 };
 export type ListProjectsResponse = {
     projects?: Project[];
 };
 export type DeleteProjectRequest = {
-    organizationId?: string;
+    organization_id?: string;
     id?: string;
 };
 export type DeleteProjectResponse = {
@@ -163,22 +163,22 @@ export type DeleteProjectResponse = {
     deleted?: boolean;
 };
 export type CreateProjectUserRequest = {
-    organizationId?: string;
-    projectId?: string;
-    userId?: string;
+    organization_id?: string;
+    project_id?: string;
+    user_id?: string;
     role?: ProjectRole;
 };
 export type ListProjectUsersRequest = {
-    organizationId?: string;
-    projectId?: string;
+    organization_id?: string;
+    project_id?: string;
 };
 export type ListProjectUsersResponse = {
     users?: ProjectUser[];
 };
 export type DeleteProjectUserRequest = {
-    organizationId?: string;
-    projectId?: string;
-    userId?: string;
+    organization_id?: string;
+    project_id?: string;
+    user_id?: string;
 };
 export type DeleteProjectUserResponse = {
     id?: string;
@@ -187,16 +187,16 @@ export type DeleteProjectUserResponse = {
 };
 export type GetUserSelfRequest = {};
 export type InternalAPIKey = {
-    apiKey?: APIKey;
-    tenantId?: string;
+    api_key?: APIKey;
+    tenant_id?: string;
 };
 export type ListInternalAPIKeysRequest = {};
 export type ListInternalAPIKeysResponse = {
-    apiKeys?: InternalAPIKey[];
+    api_keys?: InternalAPIKey[];
 };
 export type InternalOrganization = {
     organization?: Organization;
-    tenantId?: string;
+    tenant_id?: string;
 };
 export type ListInternalOrganizationsRequest = {};
 export type ListInternalOrganizationsResponse = {
@@ -207,10 +207,10 @@ export type ListUsersResponse = {
     users?: User[];
 };
 export type CreateUserInternalRequest = {
-    tenantId?: string;
+    tenant_id?: string;
     title?: string;
-    userId?: string;
-    kubernetesNamespace?: string;
+    user_id?: string;
+    kubernetes_namespace?: string;
 };
 export declare class UsersService {
     static CreateAPIKey(req: CreateAPIKeyRequest, initReq?: fm.InitReq): Promise<APIKey>;

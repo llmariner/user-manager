@@ -26,48 +26,48 @@ export type APIKey = {
   object?: string
   name?: string
   secret?: string
-  createdAt?: string
+  created_at?: string
   user?: User
   organization?: Organization
   project?: Project
-  organizationRole?: OrganizationRole
-  projectRole?: ProjectRole
+  organization_role?: OrganizationRole
+  project_role?: ProjectRole
 }
 
 export type User = {
   id?: string
-  internalId?: string
-  isServiceAccount?: boolean
+  internal_id?: string
+  is_service_account?: boolean
 }
 
 export type OrganizationUser = {
-  userId?: string
-  internalUserId?: string
-  organizationId?: string
+  user_id?: string
+  internal_user_id?: string
+  organization_id?: string
   role?: OrganizationRole
 }
 
 export type OrganizationSummary = {
-  projectCount?: number
-  userCount?: number
+  project_count?: number
+  user_count?: number
 }
 
 export type Organization = {
   id?: string
   title?: string
-  createdAt?: string
+  created_at?: string
   summary?: OrganizationSummary
 }
 
 export type ProjectUser = {
-  userId?: string
-  projectId?: string
-  organizationId?: string
+  user_id?: string
+  project_id?: string
+  organization_id?: string
   role?: ProjectRole
 }
 
 export type ProjectAssignment = {
-  clusterId?: string
+  cluster_id?: string
   namespace?: string
 }
 
@@ -76,30 +76,30 @@ export type ProjectAssignments = {
 }
 
 export type ProjectSummary = {
-  userCount?: number
+  user_count?: number
 }
 
 export type Project = {
   id?: string
   title?: string
   assignments?: ProjectAssignment[]
-  kubernetesNamespace?: string
-  organizationId?: string
-  createdAt?: string
+  kubernetes_namespace?: string
+  organization_id?: string
+  created_at?: string
   summary?: ProjectSummary
 }
 
 export type CreateAPIKeyRequest = {
   name?: string
-  projectId?: string
-  organizationId?: string
-  isServiceAccount?: boolean
+  project_id?: string
+  organization_id?: string
+  is_service_account?: boolean
   role?: OrganizationRole
 }
 
 export type ListProjectAPIKeysRequest = {
-  projectId?: string
-  organizationId?: string
+  project_id?: string
+  organization_id?: string
 }
 
 export type ListAPIKeysRequest = {
@@ -116,8 +116,8 @@ export type DeleteAPIKeyRequest = {
 
 export type DeleteProjectAPIKeyRequest = {
   id?: string
-  projectId?: string
-  organizationId?: string
+  project_id?: string
+  organization_id?: string
 }
 
 export type DeleteAPIKeyResponse = {
@@ -127,8 +127,8 @@ export type DeleteAPIKeyResponse = {
 }
 
 export type UpdateAPIKeyRequest = {
-  apiKey?: APIKey
-  updateMask?: GoogleProtobufField_mask.FieldMask
+  api_key?: APIKey
+  update_mask?: GoogleProtobufField_mask.FieldMask
 }
 
 export type CreateOrganizationRequest = {
@@ -136,7 +136,7 @@ export type CreateOrganizationRequest = {
 }
 
 export type ListOrganizationsRequest = {
-  includeSummary?: boolean
+  include_summary?: boolean
 }
 
 export type ListOrganizationsResponse = {
@@ -154,13 +154,13 @@ export type DeleteOrganizationResponse = {
 }
 
 export type CreateOrganizationUserRequest = {
-  organizationId?: string
-  userId?: string
+  organization_id?: string
+  user_id?: string
   role?: OrganizationRole
 }
 
 export type ListOrganizationUsersRequest = {
-  organizationId?: string
+  organization_id?: string
 }
 
 export type ListOrganizationUsersResponse = {
@@ -168,8 +168,8 @@ export type ListOrganizationUsersResponse = {
 }
 
 export type DeleteOrganizationUserRequest = {
-  organizationId?: string
-  userId?: string
+  organization_id?: string
+  user_id?: string
 }
 
 export type DeleteOrganizationUserResponse = {
@@ -180,14 +180,14 @@ export type DeleteOrganizationUserResponse = {
 
 export type CreateProjectRequest = {
   title?: string
-  organizationId?: string
-  kubernetesNamespace?: string
+  organization_id?: string
+  kubernetes_namespace?: string
   assignments?: ProjectAssignment[]
 }
 
 export type ListProjectsRequest = {
-  organizationId?: string
-  includeSummary?: boolean
+  organization_id?: string
+  include_summary?: boolean
 }
 
 export type ListProjectsResponse = {
@@ -195,7 +195,7 @@ export type ListProjectsResponse = {
 }
 
 export type DeleteProjectRequest = {
-  organizationId?: string
+  organization_id?: string
   id?: string
 }
 
@@ -206,15 +206,15 @@ export type DeleteProjectResponse = {
 }
 
 export type CreateProjectUserRequest = {
-  organizationId?: string
-  projectId?: string
-  userId?: string
+  organization_id?: string
+  project_id?: string
+  user_id?: string
   role?: ProjectRole
 }
 
 export type ListProjectUsersRequest = {
-  organizationId?: string
-  projectId?: string
+  organization_id?: string
+  project_id?: string
 }
 
 export type ListProjectUsersResponse = {
@@ -222,9 +222,9 @@ export type ListProjectUsersResponse = {
 }
 
 export type DeleteProjectUserRequest = {
-  organizationId?: string
-  projectId?: string
-  userId?: string
+  organization_id?: string
+  project_id?: string
+  user_id?: string
 }
 
 export type DeleteProjectUserResponse = {
@@ -237,20 +237,20 @@ export type GetUserSelfRequest = {
 }
 
 export type InternalAPIKey = {
-  apiKey?: APIKey
-  tenantId?: string
+  api_key?: APIKey
+  tenant_id?: string
 }
 
 export type ListInternalAPIKeysRequest = {
 }
 
 export type ListInternalAPIKeysResponse = {
-  apiKeys?: InternalAPIKey[]
+  api_keys?: InternalAPIKey[]
 }
 
 export type InternalOrganization = {
   organization?: Organization
-  tenantId?: string
+  tenant_id?: string
 }
 
 export type ListInternalOrganizationsRequest = {
@@ -268,10 +268,10 @@ export type ListUsersResponse = {
 }
 
 export type CreateUserInternalRequest = {
-  tenantId?: string
+  tenant_id?: string
   title?: string
-  userId?: string
-  kubernetesNamespace?: string
+  user_id?: string
+  kubernetes_namespace?: string
 }
 
 export class UsersService {
@@ -285,16 +285,16 @@ export class UsersService {
     return fm.fetchReq<DeleteAPIKeyRequest, DeleteAPIKeyResponse>(`/v1/api_keys/${req["id"]}`, {...initReq, method: "DELETE"})
   }
   static UpdateAPIKey(req: UpdateAPIKeyRequest, initReq?: fm.InitReq): Promise<APIKey> {
-    return fm.fetchReq<UpdateAPIKeyRequest, APIKey>(`/v1/api_keys/${req["apiKeyId"]}`, {...initReq, method: "PATCH", body: JSON.stringify(req["api_key"])})
+    return fm.fetchReq<UpdateAPIKeyRequest, APIKey>(`/v1/api_keys/${req["api_key.id"]}`, {...initReq, method: "PATCH", body: JSON.stringify(req["api_key"])})
   }
   static CreateProjectAPIKey(req: CreateAPIKeyRequest, initReq?: fm.InitReq): Promise<APIKey> {
-    return fm.fetchReq<CreateAPIKeyRequest, APIKey>(`/v1/organizations/${req["organizationId"]}/projects/${req["projectId"]}/api_keys`, {...initReq, method: "POST", body: JSON.stringify(req)})
+    return fm.fetchReq<CreateAPIKeyRequest, APIKey>(`/v1/organizations/${req["organization_id"]}/projects/${req["project_id"]}/api_keys`, {...initReq, method: "POST", body: JSON.stringify(req)})
   }
   static ListProjectAPIKeys(req: ListProjectAPIKeysRequest, initReq?: fm.InitReq): Promise<ListAPIKeysResponse> {
-    return fm.fetchReq<ListProjectAPIKeysRequest, ListAPIKeysResponse>(`/v1/organizations/${req["organizationId"]}/projects/${req["projectId"]}/api_keys?${fm.renderURLSearchParams(req, ["organizationId", "projectId"])}`, {...initReq, method: "GET"})
+    return fm.fetchReq<ListProjectAPIKeysRequest, ListAPIKeysResponse>(`/v1/organizations/${req["organization_id"]}/projects/${req["project_id"]}/api_keys?${fm.renderURLSearchParams(req, ["organization_id", "project_id"])}`, {...initReq, method: "GET"})
   }
   static DeleteProjectAPIKey(req: DeleteProjectAPIKeyRequest, initReq?: fm.InitReq): Promise<DeleteAPIKeyResponse> {
-    return fm.fetchReq<DeleteProjectAPIKeyRequest, DeleteAPIKeyResponse>(`/v1/organizations/${req["organizationId"]}/projects/${req["projectId"]}/api_keys/${req["id"]}`, {...initReq, method: "DELETE"})
+    return fm.fetchReq<DeleteProjectAPIKeyRequest, DeleteAPIKeyResponse>(`/v1/organizations/${req["organization_id"]}/projects/${req["project_id"]}/api_keys/${req["id"]}`, {...initReq, method: "DELETE"})
   }
   static CreateOrganization(req: CreateOrganizationRequest, initReq?: fm.InitReq): Promise<Organization> {
     return fm.fetchReq<CreateOrganizationRequest, Organization>(`/v1/organizations`, {...initReq, method: "POST", body: JSON.stringify(req)})
@@ -306,31 +306,31 @@ export class UsersService {
     return fm.fetchReq<DeleteOrganizationRequest, DeleteOrganizationResponse>(`/v1/organizations/${req["id"]}`, {...initReq, method: "DELETE"})
   }
   static CreateOrganizationUser(req: CreateOrganizationUserRequest, initReq?: fm.InitReq): Promise<OrganizationUser> {
-    return fm.fetchReq<CreateOrganizationUserRequest, OrganizationUser>(`/v1/organizations/${req["organizationId"]}/users`, {...initReq, method: "POST", body: JSON.stringify(req)})
+    return fm.fetchReq<CreateOrganizationUserRequest, OrganizationUser>(`/v1/organizations/${req["organization_id"]}/users`, {...initReq, method: "POST", body: JSON.stringify(req)})
   }
   static ListOrganizationUsers(req: ListOrganizationUsersRequest, initReq?: fm.InitReq): Promise<ListOrganizationUsersResponse> {
-    return fm.fetchReq<ListOrganizationUsersRequest, ListOrganizationUsersResponse>(`/v1/organizations/${req["organizationId"]}/users?${fm.renderURLSearchParams(req, ["organizationId"])}`, {...initReq, method: "GET"})
+    return fm.fetchReq<ListOrganizationUsersRequest, ListOrganizationUsersResponse>(`/v1/organizations/${req["organization_id"]}/users?${fm.renderURLSearchParams(req, ["organization_id"])}`, {...initReq, method: "GET"})
   }
   static DeleteOrganizationUser(req: DeleteOrganizationUserRequest, initReq?: fm.InitReq): Promise<GoogleProtobufEmpty.Empty> {
-    return fm.fetchReq<DeleteOrganizationUserRequest, GoogleProtobufEmpty.Empty>(`/v1/organizations/${req["organizationId"]}/users/${req["userId"]}`, {...initReq, method: "DELETE"})
+    return fm.fetchReq<DeleteOrganizationUserRequest, GoogleProtobufEmpty.Empty>(`/v1/organizations/${req["organization_id"]}/users/${req["user_id"]}`, {...initReq, method: "DELETE"})
   }
   static CreateProject(req: CreateProjectRequest, initReq?: fm.InitReq): Promise<Project> {
-    return fm.fetchReq<CreateProjectRequest, Project>(`/v1/organizations/${req["organizationId"]}/projects`, {...initReq, method: "POST", body: JSON.stringify(req)})
+    return fm.fetchReq<CreateProjectRequest, Project>(`/v1/organizations/${req["organization_id"]}/projects`, {...initReq, method: "POST", body: JSON.stringify(req)})
   }
   static ListProjects(req: ListProjectsRequest, initReq?: fm.InitReq): Promise<ListProjectsResponse> {
-    return fm.fetchReq<ListProjectsRequest, ListProjectsResponse>(`/v1/organizations/${req["organizationId"]}/projects?${fm.renderURLSearchParams(req, ["organizationId"])}`, {...initReq, method: "GET"})
+    return fm.fetchReq<ListProjectsRequest, ListProjectsResponse>(`/v1/organizations/${req["organization_id"]}/projects?${fm.renderURLSearchParams(req, ["organization_id"])}`, {...initReq, method: "GET"})
   }
   static DeleteProject(req: DeleteProjectRequest, initReq?: fm.InitReq): Promise<DeleteProjectResponse> {
-    return fm.fetchReq<DeleteProjectRequest, DeleteProjectResponse>(`/v1/organizations/${req["organizationId"]}/projects/${req["id"]}`, {...initReq, method: "DELETE"})
+    return fm.fetchReq<DeleteProjectRequest, DeleteProjectResponse>(`/v1/organizations/${req["organization_id"]}/projects/${req["id"]}`, {...initReq, method: "DELETE"})
   }
   static CreateProjectUser(req: CreateProjectUserRequest, initReq?: fm.InitReq): Promise<ProjectUser> {
-    return fm.fetchReq<CreateProjectUserRequest, ProjectUser>(`/v1/organizations/${req["organizationId"]}/projects/${req["projectId"]}/users`, {...initReq, method: "POST", body: JSON.stringify(req)})
+    return fm.fetchReq<CreateProjectUserRequest, ProjectUser>(`/v1/organizations/${req["organization_id"]}/projects/${req["project_id"]}/users`, {...initReq, method: "POST", body: JSON.stringify(req)})
   }
   static ListProjectUsers(req: ListProjectUsersRequest, initReq?: fm.InitReq): Promise<ListProjectUsersResponse> {
-    return fm.fetchReq<ListProjectUsersRequest, ListProjectUsersResponse>(`/v1/organizations/${req["organizationId"]}/projects/${req["projectId"]}/users?${fm.renderURLSearchParams(req, ["organizationId", "projectId"])}`, {...initReq, method: "GET"})
+    return fm.fetchReq<ListProjectUsersRequest, ListProjectUsersResponse>(`/v1/organizations/${req["organization_id"]}/projects/${req["project_id"]}/users?${fm.renderURLSearchParams(req, ["organization_id", "project_id"])}`, {...initReq, method: "GET"})
   }
   static DeleteProjectUser(req: DeleteProjectUserRequest, initReq?: fm.InitReq): Promise<GoogleProtobufEmpty.Empty> {
-    return fm.fetchReq<DeleteProjectUserRequest, GoogleProtobufEmpty.Empty>(`/v1/organizations/${req["organizationId"]}/projects/${req["projectId"]}/users/${req["userId"]}`, {...initReq, method: "DELETE"})
+    return fm.fetchReq<DeleteProjectUserRequest, GoogleProtobufEmpty.Empty>(`/v1/organizations/${req["organization_id"]}/projects/${req["project_id"]}/users/${req["user_id"]}`, {...initReq, method: "DELETE"})
   }
   static GetUserSelf(req: GetUserSelfRequest, initReq?: fm.InitReq): Promise<User> {
     return fm.fetchReq<GetUserSelfRequest, User>(`/v1/users:getSelf?${fm.renderURLSearchParams(req, [])}`, {...initReq, method: "GET"})
