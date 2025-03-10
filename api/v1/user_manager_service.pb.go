@@ -643,7 +643,6 @@ type Project struct {
 	// assignments is the list of assigned clusters and namespaces for the project.
 	Assignments []*ProjectAssignment `protobuf:"bytes,7,rep,name=assignments,proto3" json:"assignments,omitempty"`
 	// kubernetes_namespace is the namespace where the fine-tuning jobs for the project run.
-	// TODO(
 	KubernetesNamespace string `protobuf:"bytes,3,opt,name=kubernetes_namespace,json=kubernetesNamespace,proto3" json:"kubernetes_namespace,omitempty"`
 	OrganizationId      string `protobuf:"bytes,4,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
 	CreatedAt           int64  `protobuf:"varint,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
