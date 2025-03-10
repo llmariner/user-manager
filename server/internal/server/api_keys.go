@@ -252,7 +252,7 @@ func (s *S) createProjectAPIKey(
 	if isServiceAccount {
 		var key *store.APIKey
 		err := s.store.Transaction(func(tx *gorm.DB) error {
-			userID := fmt.Sprintf("system:serviceaccount:%s", name)
+			userID := toServiceAccountUserID(name)
 			if _, err := findOrCreateUserInTransaction(tx, userID); err != nil {
 				return err
 			}
@@ -469,7 +469,11 @@ func (s *S) DeleteProjectAPIKey(
 
 // CreateDefaultAPIKey creates a default API key.
 func (s *S) CreateDefaultAPIKey(ctx context.Context, c *config.DefaultAPIKeyConfig, orgID, projectID, tenantID string) error {
-	if _, err := s.store.GetAPIKeyByNameAndUserID(c.Name, c.UserID); err == nil {
+	userID := c.UserID
+	if c.IsServiceAccount {
+		userID = toServiceAccountUserID(c.Name)
+	}
+	if _, err := s.store.GetAPIKeyByNameAndUserID(c.Name, userID); err == nil {
 		// Do nothing.
 		return nil
 	}
@@ -677,4 +681,8 @@ func obfuscateSecret(secret string) string {
 	}
 	obfuscated := strings.Repeat("*", starLen)
 	return prefix + obfuscated + suffix
+}
+
+func toServiceAccountUserID(name string) string {
+	return fmt.Sprintf("system:serviceaccount:%s", name)
 }
