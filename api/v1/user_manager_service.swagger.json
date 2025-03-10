@@ -1085,7 +1085,7 @@
         },
         "kubernetesNamespace": {
           "type": "string",
-          "title": "kubernetes_namespace is the namespace where the fine-tuning jobs for the project run.\nTODO("
+          "description": "kubernetes_namespace is the namespace where the fine-tuning jobs for the project run."
         },
         "organizationId": {
           "type": "string"

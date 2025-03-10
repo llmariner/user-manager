@@ -102,7 +102,6 @@ message Project {
   repeated ProjectAssignment assignments = 7;
 
   // kubernetes_namespace is the namespace where the fine-tuning jobs for the project run.
-  // TODO(
   string kubernetes_namespace = 3;
 
   string organization_id = 4;
