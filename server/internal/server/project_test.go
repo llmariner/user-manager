@@ -625,3 +625,66 @@ func TestProjectUser_EnableAuth(t *testing.T) {
 	_, err = srv.DeleteProjectUser(u0Ctx, dreq)
 	assert.NoError(t, err)
 }
+
+func TestListProjectUsers_HiddenUser(t *testing.T) {
+	st, tearDown := store.NewTest(t)
+	defer tearDown()
+
+	srv := New(st, nil, testr.New(t))
+
+	ctx := metadata.NewIncomingContext(fakeAuthInto(context.Background()), metadata.Pairs("Authorization", "dummy"))
+	org, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
+		Title: "Test organization",
+	})
+	assert.NoError(t, err)
+
+	// Delete the default user to make the rest of the test simple.
+	_, err = srv.DeleteOrganizationUser(ctx, &v1.DeleteOrganizationUserRequest{
+		OrganizationId: org.Id,
+		UserId:         defaultUserID,
+	})
+	assert.NoError(t, err)
+
+	proj, err := srv.CreateProject(ctx, &v1.CreateProjectRequest{
+		Title:               "Test project",
+		OrganizationId:      org.Id,
+		KubernetesNamespace: "test",
+	})
+	assert.NoError(t, err)
+
+	pu0, err := srv.CreateProjectUser(ctx, &v1.CreateProjectUserRequest{
+		ProjectId:      proj.Id,
+		OrganizationId: org.Id,
+		UserId:         "u0",
+		Role:           v1.ProjectRole_PROJECT_ROLE_OWNER,
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, "u0", pu0.UserId)
+
+	pu1, err := srv.CreateProjectUser(ctx, &v1.CreateProjectUserRequest{
+		ProjectId:      proj.Id,
+		OrganizationId: org.Id,
+		UserId:         "u1",
+		Role:           v1.ProjectRole_PROJECT_ROLE_MEMBER,
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, "u1", pu1.UserId)
+
+	resp, err := srv.ListProjectUsers(ctx, &v1.ListProjectUsersRequest{
+		ProjectId:      proj.Id,
+		OrganizationId: org.Id,
+	})
+	assert.NoError(t, err)
+	assert.Len(t, resp.Users, 2)
+
+	// Hide the user.
+	err = st.HideProjectUser(proj.Id, pu1.UserId)
+	assert.NoError(t, err)
+
+	resp, err = srv.ListProjectUsers(ctx, &v1.ListProjectUsersRequest{
+		ProjectId:      proj.Id,
+		OrganizationId: org.Id,
+	})
+	assert.NoError(t, err)
+	assert.Len(t, resp.Users, 1)
+}

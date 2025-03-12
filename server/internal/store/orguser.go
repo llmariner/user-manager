@@ -13,6 +13,9 @@ type OrganizationUser struct {
 	UserID         string `gorm:"uniqueIndex:user_id_org_id"`
 
 	Role string
+
+	// Hidden is set to true if the user is not visible from the list/get API call.
+	Hidden bool
 }
 
 // ToProto converts the model to Porto.
@@ -69,6 +72,24 @@ func (s *S) ListAllOrganizationUsers() ([]OrganizationUser, error) {
 		return nil, err
 	}
 	return users, nil
+}
+
+// HideOrganizationUser sets the hide field of the organization user to true.
+func (s *S) HideOrganizationUser(orgID, userID string) error {
+	result := s.db.Model(&OrganizationUser{}).
+		Where("organization_id = ?", orgID).
+		Where("user_id = ?", userID).
+		Updates(map[string]interface{}{
+			"hidden": true,
+		})
+	if err := result.Error; err != nil {
+		return err
+	}
+
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
 }
 
 // DeleteOrganizationUser deletes a organization user.

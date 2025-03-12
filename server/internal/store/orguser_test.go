@@ -52,3 +52,19 @@ func TestOrganizationUser(t *testing.T) {
 	assert.Error(t, err)
 	assert.True(t, errors.Is(err, gorm.ErrRecordNotFound))
 }
+
+func TestHideOrganizationUser(t *testing.T) {
+	s, tearDown := NewTest(t)
+	defer tearDown()
+
+	ou, err := s.CreateOrganizationUser("o1", "user1", "r1")
+	assert.NoError(t, err)
+	assert.False(t, ou.Hidden)
+
+	err = s.HideOrganizationUser("o1", "user1")
+	assert.NoError(t, err)
+
+	ou, err = s.GetOrganizationUser("o1", "user1")
+	assert.NoError(t, err)
+	assert.True(t, ou.Hidden)
+}

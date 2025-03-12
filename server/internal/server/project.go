@@ -313,6 +313,10 @@ func (s *S) ListProjectUsers(ctx context.Context, req *v1.ListProjectUsersReques
 
 	var userProtos []*v1.ProjectUser
 	for _, user := range users {
+		if user.Hidden {
+			continue
+		}
+
 		userProtos = append(userProtos, user.ToProto())
 	}
 	return &v1.ListProjectUsersResponse{
