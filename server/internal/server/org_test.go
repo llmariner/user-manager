@@ -235,6 +235,53 @@ func TestListOrganizationUsers(t *testing.T) {
 	}
 }
 
+func TestListOrganizationUsers_HiddenUser(t *testing.T) {
+	st, tearDown := store.NewTest(t)
+	defer tearDown()
+
+	srv := New(st, nil, testr.New(t))
+	ctx := fakeAuthInto(context.Background())
+
+	org, err := srv.CreateOrganization(ctx, &v1.CreateOrganizationRequest{
+		Title: "Title",
+	})
+	assert.NoError(t, err)
+
+	// Delete the default user to make the rest of the test simple.
+	_, err = srv.DeleteOrganizationUser(ctx, &v1.DeleteOrganizationUserRequest{
+		OrganizationId: org.Id,
+		UserId:         defaultUserID,
+	})
+	assert.NoError(t, err)
+
+	_, err = srv.CreateOrganizationUser(ctx, &v1.CreateOrganizationUserRequest{
+		OrganizationId: org.Id,
+		UserId:         "user",
+		Role:           v1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
+	})
+	assert.NoError(t, err)
+
+	u, err := srv.CreateOrganizationUser(ctx, &v1.CreateOrganizationUserRequest{
+		OrganizationId: org.Id,
+		UserId:         "hidden user",
+		Role:           v1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
+	})
+	assert.NoError(t, err)
+
+	resp, err := srv.ListOrganizationUsers(ctx, &v1.ListOrganizationUsersRequest{OrganizationId: org.Id})
+	assert.NoError(t, err)
+	assert.Len(t, resp.Users, 2)
+
+	// Hide the user.
+	err = st.HideOrganizationUser(org.Id, u.UserId)
+	assert.NoError(t, err)
+
+	resp, err = srv.ListOrganizationUsers(ctx, &v1.ListOrganizationUsersRequest{OrganizationId: org.Id})
+	assert.NoError(t, err)
+	assert.Len(t, resp.Users, 1)
+	assert.Equal(t, "user", resp.Users[0].UserId)
+}
+
 func TestDeleteDeleteOrganizationUser(t *testing.T) {
 	const userID = "u0"
 

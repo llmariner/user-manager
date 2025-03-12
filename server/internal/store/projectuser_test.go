@@ -63,3 +63,24 @@ func TestProjectUser(t *testing.T) {
 	assert.Error(t, err)
 	assert.True(t, errors.Is(err, gorm.ErrRecordNotFound))
 }
+
+func TestHideProjectUser(t *testing.T) {
+	s, tearDown := NewTest(t)
+	defer tearDown()
+
+	pu, err := s.CreateProjectUser(CreateProjectUserParams{
+		ProjectID:      "p1",
+		OrganizationID: "o1",
+		UserID:         "user1",
+		Role:           v1.ProjectRole_PROJECT_ROLE_OWNER,
+	})
+	assert.NoError(t, err)
+	assert.False(t, pu.Hidden)
+
+	err = s.HideProjectUser("p1", "user1")
+	assert.NoError(t, err)
+
+	pu, err = s.GetProjectUser("p1", "user1")
+	assert.NoError(t, err)
+	assert.True(t, pu.Hidden)
+}

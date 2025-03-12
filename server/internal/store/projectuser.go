@@ -14,6 +14,9 @@ type ProjectUser struct {
 	UserID         string `gorm:"uniqueIndex:user_id_project_id"`
 
 	Role string
+
+	// Hidden is set to true if the user is not visible from the list/get API call.
+	Hidden bool
 }
 
 // ToProto converts the model to Porto.
@@ -88,6 +91,24 @@ func (s *S) ListAllProjectUsers() ([]ProjectUser, error) {
 		return nil, err
 	}
 	return users, nil
+}
+
+// HideProjectUser sets the hide field of the project user to true.
+func (s *S) HideProjectUser(projectID, userID string) error {
+	result := s.db.Model(&ProjectUser{}).
+		Where("project_id = ?", projectID).
+		Where("user_id = ?", userID).
+		Updates(map[string]interface{}{
+			"hidden": true,
+		})
+	if err := result.Error; err != nil {
+		return err
+	}
+
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
 }
 
 // DeleteProjectUser deletes a project user.

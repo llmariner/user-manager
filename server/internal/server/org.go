@@ -293,6 +293,9 @@ func (s *S) ListOrganizationUsers(ctx context.Context, req *v1.ListOrganizationU
 
 	var userProtos []*v1.OrganizationUser
 	for _, user := range users {
+		if user.Hidden {
+			continue
+		}
 		// Do not populate the internal User ID for non-internal RPC.
 		userProtos = append(userProtos, user.ToProto(""))
 	}
