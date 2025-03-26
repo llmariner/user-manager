@@ -299,7 +299,7 @@ service UsersService {
   rpc UpdateAPIKey(UpdateAPIKeyRequest) returns (APIKey) {
     option (google.api.http) = {
       patch: "/v1/api_keys/{api_key.id}"
-      body: "api_key"
+      body: "*"
     };
   }
 
