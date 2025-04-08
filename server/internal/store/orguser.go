@@ -65,6 +65,15 @@ func (s *S) ListOrganizationUsersByOrganizationID(orgID string) ([]OrganizationU
 	return users, nil
 }
 
+// ListOrganizationNonHiddenUsersByOrganizationID lists organization users in the specified organization.
+func (s *S) ListOrganizationNonHiddenUsersByOrganizationID(orgID string) ([]OrganizationUser, error) {
+	var users []OrganizationUser
+	if err := s.db.Where("organization_id = ?", orgID).Where("hidden = ?", false).Find(&users).Error; err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
 // ListAllOrganizationUsers lists all organization users.
 func (s *S) ListAllOrganizationUsers() ([]OrganizationUser, error) {
 	var users []OrganizationUser

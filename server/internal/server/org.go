@@ -137,7 +137,7 @@ func (s *S) ListOrganizations(ctx context.Context, req *v1.ListOrganizationsRequ
 
 			var visibleUserCount int32
 			if s.isOrganizationOwner(org.Id, userInfo.UserID) {
-				us, err := s.store.ListOrganizationUsersByOrganizationID(org.Id)
+				us, err := s.store.ListOrganizationNonHiddenUsersByOrganizationID(org.Id)
 				if err != nil {
 					return nil, status.Errorf(codes.Internal, "list organization users: %s", err)
 				}
