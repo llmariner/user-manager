@@ -16,6 +16,8 @@ type User struct {
 
 	UserID         string `gorm:"uniqueIndex"`
 	InternalUserID string `gorm:"uniqueIndex"`
+
+	Hidden bool
 }
 
 // FindOrCreateUserInTransaction creates a new user.
