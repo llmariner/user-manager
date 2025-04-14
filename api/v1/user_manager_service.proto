@@ -53,7 +53,7 @@ message OrganizationUser {
   string organization_id = 2;
   OrganizationRole role = 3;
 
-  // Next ID: 5
+  bool hidden = 5;
 }
 
 message Organization {

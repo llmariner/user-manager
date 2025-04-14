@@ -34,6 +34,7 @@ export type OrganizationUser = {
     internal_user_id?: string;
     organization_id?: string;
     role?: OrganizationRole;
+    hidden?: boolean;
 };
 export type OrganizationSummary = {
     project_count?: number;

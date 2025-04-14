@@ -1064,6 +1064,9 @@
         },
         "role": {
           "$ref": "#/definitions/v1OrganizationRole"
+        },
+        "hidden": {
+          "type": "boolean"
         }
       }
     },

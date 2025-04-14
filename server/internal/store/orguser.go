@@ -25,6 +25,7 @@ func (o *OrganizationUser) ToProto(internalUserID string) *v1.OrganizationUser {
 		UserId:         o.UserID,
 		InternalUserId: internalUserID,
 		Role:           v1.OrganizationRole(v1.OrganizationRole_value[o.Role]),
+		Hidden:         o.Hidden,
 	}
 }
 
