@@ -38,6 +38,7 @@ export type User = {
   id?: string
   internal_id?: string
   is_service_account?: boolean
+  hidden?: boolean
 }
 
 export type OrganizationUser = {

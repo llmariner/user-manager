@@ -41,6 +41,7 @@ func (s *IS) ListUsers(ctx context.Context, req *v1.ListUsersRequest) (*v1.ListU
 			Id:               u.UserID,
 			InternalId:       u.InternalUserID,
 			IsServiceAccount: false,
+			Hidden:           u.Hidden,
 		})
 	}
 	return &res, nil

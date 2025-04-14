@@ -1160,6 +1160,9 @@
         },
         "isServiceAccount": {
           "type": "boolean"
+        },
+        "hidden": {
+          "type": "boolean"
         }
       }
     }

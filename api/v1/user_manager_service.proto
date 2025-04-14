@@ -28,6 +28,7 @@ message User {
   // internal_id is populated only for internal gRPC service.
   string internal_id = 2;
   bool is_service_account = 3;
+  bool hidden = 4;
 }
 
 enum OrganizationRole {
