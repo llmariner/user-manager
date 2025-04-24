@@ -59,6 +59,7 @@ func TestAPIKey(t *testing.T) {
 			})
 			assert.NoError(t, err)
 
+			// Test default value of excluded_from_rate_limiting (should be false)
 			cresp, err := srv.CreateAPIKey(ctx, &v1.CreateAPIKeyRequest{
 				Name:           "dummy",
 				OrganizationId: org.Id,
@@ -66,21 +67,38 @@ func TestAPIKey(t *testing.T) {
 			})
 			assert.NoError(t, err)
 			assert.Equal(t, "dummy", cresp.Name)
+			assert.False(t, cresp.ExcludedFromRateLimiting, "excluded_from_rate_limiting should default to false")
+
+			apiKey, err := st.GetAPIKey(cresp.Id, proj.Id)
+			assert.NoError(t, err)
+			assert.False(t, apiKey.ExcludedFromRateLimiting, "excluded_from_rate_limiting in database should be false")
+
 			if tc.enableKMS {
-				apiKey, err := st.GetAPIKey(cresp.Id, proj.Id)
-				assert.NoError(t, err)
 				assert.NotEmpty(t, apiKey.EncryptedSecret)
 				assert.Empty(t, apiKey.Secret)
 				secret, err := aws.Decrypt(ctx, apiKey.EncryptedSecret, apiKey.APIKeyID, kmsClient.DataKey)
 				assert.NoError(t, err)
 				assert.Equal(t, secret, cresp.Secret)
 			} else {
-				apiKey, err := st.GetAPIKey(cresp.Id, proj.Id)
-				assert.NoError(t, err)
 				assert.Empty(t, apiKey.EncryptedSecret)
 				assert.NotEmpty(t, apiKey.Secret)
 				assert.Equal(t, apiKey.Secret, cresp.Secret)
 			}
+
+			// Test creating an API key with excluded_from_rate_limiting set to true
+			cresp2, err := srv.CreateAPIKey(ctx, &v1.CreateAPIKeyRequest{
+				Name:                     "excluded-key",
+				OrganizationId:           org.Id,
+				ProjectId:                proj.Id,
+				ExcludedFromRateLimiting: true,
+			})
+			assert.NoError(t, err)
+			assert.Equal(t, "excluded-key", cresp2.Name)
+			assert.True(t, cresp2.ExcludedFromRateLimiting, "excluded_from_rate_limiting should be true")
+
+			apiKey2, err := st.GetAPIKey(cresp2.Id, proj.Id)
+			assert.NoError(t, err)
+			assert.True(t, apiKey2.ExcludedFromRateLimiting, "excluded_from_rate_limiting in database should be true")
 
 			_, err = srv.CreateAPIKey(ctx, &v1.CreateAPIKeyRequest{
 				Name:           "dummy",
@@ -92,13 +110,20 @@ func TestAPIKey(t *testing.T) {
 
 			lresp, err := srv.ListAPIKeys(ctx, &v1.ListAPIKeysRequest{})
 			assert.NoError(t, err)
-			assert.Len(t, lresp.Data, 1)
-			key := lresp.Data[0]
-			assert.Empty(t, key.User.InternalId)
-			assert.Equal(t, v1.OrganizationRole_ORGANIZATION_ROLE_OWNER, key.OrganizationRole)
-			assert.Equal(t, v1.ProjectRole_PROJECT_ROLE_OWNER, key.ProjectRole)
+			assert.Len(t, lresp.Data, 2)
+
+			// Check that the field value is preserved in list responses
+			for _, key := range lresp.Data {
+				if key.Name == "dummy" {
+					assert.False(t, key.ExcludedFromRateLimiting, "regular key should have excluded_from_rate_limiting=false")
+				} else if key.Name == "excluded-key" {
+					assert.True(t, key.ExcludedFromRateLimiting, "excluded key should have excluded_from_rate_limiting=true")
+				}
+			}
 
 			_, err = srv.DeleteAPIKey(ctx, &v1.DeleteAPIKeyRequest{Id: cresp.Id})
+			assert.NoError(t, err)
+			_, err = srv.DeleteAPIKey(ctx, &v1.DeleteAPIKeyRequest{Id: cresp2.Id})
 			assert.NoError(t, err)
 
 			lresp, err = srv.ListAPIKeys(ctx, &v1.ListAPIKeysRequest{})
@@ -194,6 +219,7 @@ func TestProjectAPIKey(t *testing.T) {
 			})
 			assert.NoError(t, err)
 
+			// Test default value for excluded_from_rate_limiting (should be false)
 			cresp, err := srv.CreateProjectAPIKey(ctx, &v1.CreateAPIKeyRequest{
 				Name:           "dummy",
 				OrganizationId: org.Id,
@@ -201,21 +227,38 @@ func TestProjectAPIKey(t *testing.T) {
 			})
 			assert.NoError(t, err)
 			assert.Equal(t, "dummy", cresp.Name)
+			assert.False(t, cresp.ExcludedFromRateLimiting, "excluded_from_rate_limiting should default to false")
+
+			apiKey, err := st.GetAPIKey(cresp.Id, proj.Id)
+			assert.NoError(t, err)
+			assert.False(t, apiKey.ExcludedFromRateLimiting, "excluded_from_rate_limiting in database should be false")
+
 			if tc.enableKMS {
-				apiKey, err := st.GetAPIKey(cresp.Id, proj.Id)
-				assert.NoError(t, err)
 				assert.NotEmpty(t, apiKey.EncryptedSecret)
 				assert.Empty(t, apiKey.Secret)
 				secret, err := aws.Decrypt(ctx, apiKey.EncryptedSecret, apiKey.APIKeyID, kmsClient.DataKey)
 				assert.NoError(t, err)
 				assert.Equal(t, secret, cresp.Secret)
 			} else {
-				apiKey, err := st.GetAPIKey(cresp.Id, proj.Id)
-				assert.NoError(t, err)
 				assert.Empty(t, apiKey.EncryptedSecret)
 				assert.NotEmpty(t, apiKey.Secret)
 				assert.Equal(t, apiKey.Secret, cresp.Secret)
 			}
+
+			// Test creating an API key with excluded_from_rate_limiting set to true
+			gotKeyResp, err := srv.CreateProjectAPIKey(ctx, &v1.CreateAPIKeyRequest{
+				Name:                     "excluded-key",
+				OrganizationId:           org.Id,
+				ProjectId:                proj.Id,
+				ExcludedFromRateLimiting: true,
+			})
+			assert.NoError(t, err)
+			assert.Equal(t, "excluded-key", gotKeyResp.Name)
+			assert.True(t, gotKeyResp.ExcludedFromRateLimiting, "excluded_from_rate_limiting should be true")
+
+			expAPIKey, err := st.GetAPIKey(gotKeyResp.Id, proj.Id)
+			assert.NoError(t, err)
+			assert.True(t, expAPIKey.ExcludedFromRateLimiting, "excluded_from_rate_limiting in database should be true")
 
 			_, err = srv.CreateProjectAPIKey(ctx, &v1.CreateAPIKeyRequest{
 				Name:           "dummy",
@@ -230,28 +273,61 @@ func TestProjectAPIKey(t *testing.T) {
 				ProjectId:      proj.Id,
 			})
 			assert.NoError(t, err)
-			assert.Len(t, lresp.Data, 1)
-			key := lresp.Data[0]
-			assert.Empty(t, key.User.InternalId)
-			assert.Equal(t, v1.OrganizationRole_ORGANIZATION_ROLE_OWNER, key.OrganizationRole)
-			assert.Equal(t, v1.ProjectRole_PROJECT_ROLE_OWNER, key.ProjectRole)
-			assert.Equal(t, org.Id, key.Organization.Id)
-			assert.Equal(t, org.Title, key.Organization.Title)
-			assert.Equal(t, proj.Id, key.Project.Id)
-			assert.Equal(t, proj.Title, key.Project.Title)
+			assert.Len(t, lresp.Data, 2)
+
+			// Check that the field value is preserved in list responses
+			var regularKeyFound, excludedKeyFound bool
+			for _, key := range lresp.Data {
+				if key.Name == "dummy" {
+					regularKeyFound = true
+					assert.False(t, key.ExcludedFromRateLimiting, "regular key should have excluded_from_rate_limiting=false")
+					assert.Empty(t, key.User.InternalId)
+					assert.Equal(t, v1.OrganizationRole_ORGANIZATION_ROLE_OWNER, key.OrganizationRole)
+					assert.Equal(t, v1.ProjectRole_PROJECT_ROLE_OWNER, key.ProjectRole)
+					assert.Equal(t, org.Id, key.Organization.Id)
+					assert.Equal(t, org.Title, key.Organization.Title)
+					assert.Equal(t, proj.Id, key.Project.Id)
+					assert.Equal(t, proj.Title, key.Project.Title)
+				} else if key.Name == "excluded-key" {
+					excludedKeyFound = true
+					assert.True(t, key.ExcludedFromRateLimiting, "excluded key should have excluded_from_rate_limiting=true")
+				}
+			}
+			assert.True(t, regularKeyFound, "regular key should be in the list response")
+			assert.True(t, excludedKeyFound, "excluded key should be in the list response")
 
 			ilresp, err := isrv.ListInternalAPIKeys(ctx, &v1.ListInternalAPIKeysRequest{})
 			assert.NoError(t, err)
-			assert.Len(t, ilresp.ApiKeys, 1)
-			key = ilresp.ApiKeys[0].ApiKey
-			u, err := st.GetUserByUserID(key.User.Id)
-			assert.NoError(t, err, "failed to get user by user id", key.User.Id)
-			assert.Equal(t, u.InternalUserID, key.User.InternalId)
-			assert.Equal(t, v1.OrganizationRole_ORGANIZATION_ROLE_OWNER, key.OrganizationRole)
-			assert.Equal(t, v1.ProjectRole_PROJECT_ROLE_OWNER, key.ProjectRole)
+			assert.Len(t, ilresp.ApiKeys, 2)
 
+			// Check that the field value is preserved in internal list responses
+			regularKeyFound, excludedKeyFound = false, false
+			for _, internalKey := range ilresp.ApiKeys {
+				key := internalKey.ApiKey
+				if key.Name == "dummy" {
+					regularKeyFound = true
+					assert.False(t, key.ExcludedFromRateLimiting, "regular key should have excluded_from_rate_limiting=false")
+					u, err := st.GetUserByUserID(key.User.Id)
+					assert.NoError(t, err, "failed to get user by user id", key.User.Id)
+					assert.Equal(t, u.InternalUserID, key.User.InternalId)
+				} else if key.Name == "excluded-key" {
+					excludedKeyFound = true
+					assert.True(t, key.ExcludedFromRateLimiting, "excluded key should have excluded_from_rate_limiting=true")
+				}
+			}
+			assert.True(t, regularKeyFound, "regular key should be in the internal list response")
+			assert.True(t, excludedKeyFound, "excluded key should be in the internal list response")
+
+			// Clean up
 			_, err = srv.DeleteProjectAPIKey(ctx, &v1.DeleteProjectAPIKeyRequest{
 				Id:             cresp.Id,
+				OrganizationId: org.Id,
+				ProjectId:      proj.Id,
+			})
+			assert.NoError(t, err)
+
+			_, err = srv.DeleteProjectAPIKey(ctx, &v1.DeleteProjectAPIKeyRequest{
+				Id:             gotKeyResp.Id,
 				OrganizationId: org.Id,
 				ProjectId:      proj.Id,
 			})

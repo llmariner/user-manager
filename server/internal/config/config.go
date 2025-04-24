@@ -46,10 +46,11 @@ func (c *DefaultProjectConfig) validate() error {
 
 // DefaultAPIKeyConfig is the default API key configuration.
 type DefaultAPIKeyConfig struct {
-	Name             string `yaml:"name"`
-	Secret           string `yaml:"secret"`
-	UserID           string `yaml:"userId"`
-	IsServiceAccount bool   `yaml:"isServiceAccount"`
+	Name                     string `yaml:"name"`
+	Secret                   string `yaml:"secret"`
+	UserID                   string `yaml:"userId"`
+	IsServiceAccount         bool   `yaml:"isServiceAccount"`
+	ExcludedFromRateLimiting bool   `yaml:"excludedFromRateLimiting"`
 }
 
 // validate validates the configuration.

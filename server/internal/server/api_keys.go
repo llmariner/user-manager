@@ -219,6 +219,7 @@ func (s *S) CreateProjectAPIKey(
 		userInfo.TenantID,
 		req.IsServiceAccount,
 		req.Role,
+		req.ExcludedFromRateLimiting,
 	)
 	if err != nil {
 		if gerrors.IsUniqueConstraintViolation(err) {
@@ -248,6 +249,7 @@ func (s *S) createProjectAPIKey(
 	tenantID string,
 	isServiceAccount bool,
 	role v1.OrganizationRole,
+	excludedFromRateLimiting bool,
 ) (*store.APIKey, error) {
 	if isServiceAccount {
 		var key *store.APIKey
@@ -272,7 +274,7 @@ func (s *S) createProjectAPIKey(
 			}); err != nil {
 				return err
 			}
-			spec, err := createAPIKeySpec(ctx, s.dataKey, name, secKey, userID, organizationID, projectID, tenantID, true)
+			spec, err := createAPIKeySpec(ctx, s.dataKey, name, secKey, userID, organizationID, projectID, tenantID, true, excludedFromRateLimiting)
 			if err != nil {
 				return err
 			}
@@ -288,7 +290,7 @@ func (s *S) createProjectAPIKey(
 		return key, nil
 	}
 
-	spec, err := createAPIKeySpec(ctx, s.dataKey, name, secKey, userID, organizationID, projectID, tenantID, false)
+	spec, err := createAPIKeySpec(ctx, s.dataKey, name, secKey, userID, organizationID, projectID, tenantID, false, excludedFromRateLimiting)
 	if err != nil {
 		return nil, err
 	}
@@ -305,19 +307,21 @@ func createAPIKeySpec(
 	projectID string,
 	tenantID string,
 	isServiceAccount bool,
+	excludedFromRateLimiting bool,
 ) (store.APIKeySpec, error) {
 	trackID, err := id.GenerateID("key_", 16)
 	if err != nil {
 		return store.APIKeySpec{}, fmt.Errorf("generate api key id: %s", err)
 	}
 	spec := store.APIKeySpec{
-		APIKeyID:         trackID,
-		TenantID:         tenantID,
-		OrganizationID:   organizationID,
-		ProjectID:        projectID,
-		UserID:           userID,
-		Name:             name,
-		IsServiceAccount: isServiceAccount,
+		APIKeyID:                 trackID,
+		TenantID:                 tenantID,
+		OrganizationID:           organizationID,
+		ProjectID:                projectID,
+		UserID:                   userID,
+		Name:                     name,
+		IsServiceAccount:         isServiceAccount,
+		ExcludedFromRateLimiting: excludedFromRateLimiting,
 	}
 	if len(dataKey) > 0 {
 		encryptedAPIKey, err := aws.Encrypt(ctx, secKey, trackID, dataKey)
@@ -488,6 +492,7 @@ func (s *S) CreateDefaultAPIKey(ctx context.Context, c *config.DefaultAPIKeyConf
 		tenantID,
 		c.IsServiceAccount,
 		v1.OrganizationRole_ORGANIZATION_ROLE_TENANT_SYSTEM,
+		c.ExcludedFromRateLimiting,
 	)
 	return err
 }
@@ -639,9 +644,10 @@ func toAPIKeyProto(
 			Id:    k.ProjectID,
 			Title: projectTitle,
 		},
-		OrganizationRole: orgRole,
-		ProjectRole:      projectRole,
-		Secret:           secret,
+		OrganizationRole:         orgRole,
+		ProjectRole:              projectRole,
+		Secret:                   secret,
+		ExcludedFromRateLimiting: k.ExcludedFromRateLimiting,
 	}, nil
 }
 

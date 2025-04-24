@@ -19,6 +19,8 @@ type APIKey struct {
 	UserID         string `gorm:"uniqueIndex:idx_api_key_name_user_id"`
 
 	IsServiceAccount bool
+	// ExcludedFromRateLimiting indicates whether this API key is excluded from rate limiting
+	ExcludedFromRateLimiting bool
 
 	// Secret is set when kms encryption is disabled.
 	Secret string
@@ -37,6 +39,8 @@ type APIKeySpec struct {
 	UserID         string
 
 	IsServiceAccount bool
+	// ExcludedFromRateLimiting indicates whether this API key is excluded from rate limiting
+	ExcludedFromRateLimiting bool
 
 	Name   string
 	Secret string
@@ -52,12 +56,13 @@ func (s *S) CreateAPIKey(spec APIKeySpec) (*APIKey, error) {
 // CreateAPIKeyInTransaction creates a new API key in a transaction.
 func CreateAPIKeyInTransaction(db *gorm.DB, spec APIKeySpec) (*APIKey, error) {
 	k := &APIKey{
-		APIKeyID:         spec.APIKeyID,
-		TenantID:         spec.TenantID,
-		OrganizationID:   spec.OrganizationID,
-		ProjectID:        spec.ProjectID,
-		UserID:           spec.UserID,
-		IsServiceAccount: spec.IsServiceAccount,
+		APIKeyID:                 spec.APIKeyID,
+		TenantID:                 spec.TenantID,
+		OrganizationID:           spec.OrganizationID,
+		ProjectID:                spec.ProjectID,
+		UserID:                   spec.UserID,
+		IsServiceAccount:         spec.IsServiceAccount,
+		ExcludedFromRateLimiting: spec.ExcludedFromRateLimiting,
 
 		Name:            spec.Name,
 		Secret:          spec.Secret,
