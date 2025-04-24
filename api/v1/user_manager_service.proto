@@ -21,6 +21,8 @@ message APIKey {
 
   OrganizationRole organization_role = 9;
   ProjectRole project_role = 10;
+  // Indicates whether this API key is excluded from rate limiting
+  bool excluded_from_rate_limiting = 11;
 }
 
 message User {
@@ -127,6 +129,8 @@ message CreateAPIKeyRequest {
   bool is_service_account = 4;
   // role is used only for service account keys.
   OrganizationRole role = 5;
+  // Indicates whether this API key should be excluded from rate limiting
+  bool excluded_from_rate_limiting = 6;
 }
 
 message ListProjectAPIKeysRequest {
