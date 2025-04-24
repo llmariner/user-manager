@@ -440,6 +440,10 @@
                 "role": {
                   "$ref": "#/definitions/v1OrganizationRole",
                   "description": "role is used only for service account keys."
+                },
+                "excludedFromRateLimiting": {
+                  "type": "boolean",
+                  "title": "Indicates whether this API key should be excluded from rate limiting"
                 }
               }
             }
@@ -817,6 +821,10 @@
         },
         "projectRole": {
           "$ref": "#/definitions/v1ProjectRole"
+        },
+        "excludedFromRateLimiting": {
+          "type": "boolean",
+          "title": "Indicates whether this API key is excluded from rate limiting"
         }
       }
     },
@@ -838,6 +846,10 @@
         "role": {
           "$ref": "#/definitions/v1OrganizationRole",
           "description": "role is used only for service account keys."
+        },
+        "excludedFromRateLimiting": {
+          "type": "boolean",
+          "title": "Indicates whether this API key should be excluded from rate limiting"
         }
       }
     },

@@ -32,6 +32,7 @@ export type APIKey = {
   project?: Project
   organization_role?: OrganizationRole
   project_role?: ProjectRole
+  excluded_from_rate_limiting?: boolean
 }
 
 export type User = {
@@ -96,6 +97,7 @@ export type CreateAPIKeyRequest = {
   organization_id?: string
   is_service_account?: boolean
   role?: OrganizationRole
+  excluded_from_rate_limiting?: boolean
 }
 
 export type ListProjectAPIKeysRequest = {
