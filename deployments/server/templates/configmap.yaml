@@ -9,6 +9,7 @@ data:
     httpPort: {{ .Values.httpPort }}
     grpcPort: {{ .Values.grpcPort }}
     internalGrpcPort: {{ .Values.internalGrpcPort }}
+    gracefulShutdownDelay: {{ .Values.gracefulShutdownDelay }}
     {{- with .Values.defaultOrganization }}
     {{- if .title }}
     defaultOrganization:

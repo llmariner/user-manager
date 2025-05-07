@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/llmariner/api-usage/pkg/sender"
 	"github.com/llmariner/common/pkg/db"
@@ -142,6 +143,9 @@ type Config struct {
 	HTTPPort         int `yaml:"httpPort"`
 	InternalGRPCPort int `yaml:"internalGrpcPort"`
 
+	// GracefulShutdownDelay is the delay before shutting down the server.
+	GracefulShutdownDelay time.Duration `yaml:"gracefulShutdownDelay"`
+
 	Database    db.Config     `yaml:"database"`
 	AuthConfig  AuthConfig    `yaml:"auth"`
 	UsageSender sender.Config `yaml:"usageSender"`
@@ -165,6 +169,9 @@ func (c *Config) Validate() error {
 	}
 	if c.InternalGRPCPort <= 0 {
 		return fmt.Errorf("internalGrpcPort must be greater than 0")
+	}
+	if c.GracefulShutdownDelay < 0 {
+		return fmt.Errorf("gracefulShutdownDelay must be greater than or equal to 0")
 	}
 
 	if c.Debug.Standalone {
