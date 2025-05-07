@@ -152,6 +152,16 @@ kms:
   #   roleArn: ""
   #   externalId: ""
 
+# Delay before shutting down the server.
+gracefulShutdownDelay: 0s
+
+# Optional duration in seconds the pod needs to terminate gracefully.
+# The value zero indicates stop immediately via the kill signal (no
+# opportunity to shut down). If not specified, the default grace
+# period (30 seconds) will be used instead.
+# +docs:property
+# terminationGracePeriodSeconds: ""
+
 # Override the "user-manager-server.fullname" value. This value is used as part of
 # most of the names of the resources created by this Helm chart.
 # +docs:property

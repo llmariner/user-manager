@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -100,6 +103,10 @@ func run(ctx context.Context, c *config.Config) error {
 	}
 
 	errCh := make(chan error)
+
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
+
 	go func() {
 		log.Info("Starting HTTP server...", "port", c.HTTPPort)
 		errCh <- http.ListenAndServe(fmt.Sprintf(":%d", c.HTTPPort), mux)
@@ -134,12 +141,23 @@ func run(ctx context.Context, c *config.Config) error {
 		return err
 	}
 
+	is := server.NewInternal(st, dataKey, logger)
 	go func() {
-		s := server.NewInternal(st, dataKey, logger)
-		errCh <- s.Run(c.InternalGRPCPort)
+		errCh <- is.Run(c.InternalGRPCPort)
 	}()
 
-	return <-errCh
+	select {
+	case err := <-errCh:
+		return err
+	case sig := <-sigCh:
+		log.Info("Got signal, waiting for graceful shutdown", "signal", sig, "delay", c.GracefulShutdownDelay)
+		time.Sleep(c.GracefulShutdownDelay)
+
+		log.Info("Starting graceful shutdown.")
+		s.GracefulStop()
+		is.GracefulStop()
+	}
+	return nil
 }
 
 func getDataKey(ctx context.Context, st *store.S, c *config.Config, log logr.Logger) ([]byte, error) {

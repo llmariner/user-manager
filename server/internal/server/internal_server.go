@@ -53,3 +53,8 @@ func (s *IS) Run(port int) error {
 	}
 	return nil
 }
+
+// GracefulStop gracefully stops the gRPC server.
+func (s *IS) GracefulStop() {
+	s.srv.GracefulStop()
+}

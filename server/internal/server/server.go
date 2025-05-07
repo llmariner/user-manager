@@ -121,6 +121,11 @@ func (s *S) Stop() {
 	s.srv.Stop()
 }
 
+// GracefulStop gracefully stops the gRPC server.
+func (s *S) GracefulStop() {
+	s.srv.GracefulStop()
+}
+
 // fakeAuthInto sets dummy user info and token into the context.
 func fakeAuthInto(ctx context.Context) context.Context {
 	return auth.AppendUserInfoToContext(ctx, auth.UserInfo{
