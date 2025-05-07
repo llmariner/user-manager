@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
+	"github.com/go-logr/logr"
 	"github.com/go-logr/stdr"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/llmariner/api-usage/pkg/sender"
@@ -117,31 +119,10 @@ func run(ctx context.Context, c *config.Config) error {
 
 	var dataKey []byte
 	if c.KMSConfig.Enable {
-		opts := aws.NewConfigOptions{
-			Region: c.KMSConfig.Region,
-		}
-		if ar := c.KMSConfig.AssumeRole; ar != nil {
-			opts.AssumeRole = &aws.AssumeRole{
-				RoleARN:    ar.RoleARN,
-				ExternalID: ar.ExternalID,
-			}
-		}
-		kmsClient, err := aws.NewKMSClient(ctx, opts, c.KMSConfig.KeyAlias)
+		dataKey, err = getDataKey(ctx, st, c, log)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to get data key: %w", err)
 		}
-		dk, err := st.GetDataKey(ctx, kmsClient)
-		if err != nil {
-			if !errors.Is(err, gorm.ErrRecordNotFound) {
-				return err
-			}
-			log.Info("Creating a data key")
-			dk, err = st.CreateDataKey(ctx, kmsClient)
-			if err != nil {
-				return err
-			}
-		}
-		dataKey = dk
 	}
 
 	s := server.New(st, dataKey, logger)
@@ -159,6 +140,55 @@ func run(ctx context.Context, c *config.Config) error {
 	}()
 
 	return <-errCh
+}
+
+func getDataKey(ctx context.Context, st *store.S, c *config.Config, log logr.Logger) ([]byte, error) {
+	opts := aws.NewConfigOptions{
+		Region: c.KMSConfig.Region,
+	}
+	if ar := c.KMSConfig.AssumeRole; ar != nil {
+		opts.AssumeRole = &aws.AssumeRole{
+			RoleARN:    ar.RoleARN,
+			ExternalID: ar.ExternalID,
+		}
+	}
+	kmsClient, err := aws.NewKMSClient(ctx, opts, c.KMSConfig.KeyAlias)
+	if err != nil {
+		return nil, err
+	}
+
+	const (
+		retryCount = 3
+		retryDelay = 5 * time.Second
+	)
+
+	var i int
+	for {
+		dk, err := st.GetDataKey(ctx, kmsClient)
+		if err == nil {
+			log.Info("Data key found")
+			return dk, nil
+		}
+
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Info("Creating a data key")
+			dk, err = st.CreateDataKey(ctx, kmsClient)
+			if err != nil {
+				return nil, err
+			}
+			return dk, nil
+		}
+
+		log.Error(err, "Failed to get data key")
+
+		i++
+		if i >= retryCount {
+			log.Error(err, "Failed to get data key after retries")
+			return nil, err
+		}
+		log.Info("Retrying to get data key", "attempt", i)
+		time.Sleep(retryDelay)
+	}
 }
 
 func createDefaultResources(ctx context.Context, s *server.S, c *config.Config) error {
