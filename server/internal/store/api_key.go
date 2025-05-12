@@ -77,7 +77,7 @@ func CreateAPIKeyInTransaction(db *gorm.DB, spec APIKeySpec) (*APIKey, error) {
 // ListAPIKeysByProjectID lists API keys by a tenant ID.
 func (s *S) ListAPIKeysByProjectID(projectID string) ([]*APIKey, error) {
 	var ks []*APIKey
-	if err := s.db.Where("project_id = ?", projectID).Find(&ks).Error; err != nil {
+	if err := s.db.Where("project_id = ?", projectID).Order("name").Find(&ks).Error; err != nil {
 		return nil, err
 	}
 	return ks, nil
@@ -86,7 +86,7 @@ func (s *S) ListAPIKeysByProjectID(projectID string) ([]*APIKey, error) {
 // ListAPIKeysByTenantID lists API keys by a tenant ID.
 func (s *S) ListAPIKeysByTenantID(tenantID string) ([]*APIKey, error) {
 	var ks []*APIKey
-	if err := s.db.Where("tenant_id = ?", tenantID).Find(&ks).Error; err != nil {
+	if err := s.db.Where("tenant_id = ?", tenantID).Order("name").Find(&ks).Error; err != nil {
 		return nil, err
 	}
 	return ks, nil

@@ -69,7 +69,7 @@ func (s *S) GetProjectUser(projectID, userID string) (*ProjectUser, error) {
 // ListProjectUsersByProjectID lists project users in the specified project.
 func (s *S) ListProjectUsersByProjectID(projectID string) ([]ProjectUser, error) {
 	var users []ProjectUser
-	if err := s.db.Where("project_id = ?", projectID).Find(&users).Error; err != nil {
+	if err := s.db.Where("project_id = ?", projectID).Order("user_id").Find(&users).Error; err != nil {
 		return nil, err
 	}
 	return users, nil

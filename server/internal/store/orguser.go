@@ -59,7 +59,7 @@ func (s *S) GetOrganizationUser(orgID, userID string) (*OrganizationUser, error)
 // ListOrganizationUsersByOrganizationID lists organization users in the specified organization.
 func (s *S) ListOrganizationUsersByOrganizationID(orgID string) ([]OrganizationUser, error) {
 	var users []OrganizationUser
-	if err := s.db.Where("organization_id = ?", orgID).Find(&users).Error; err != nil {
+	if err := s.db.Where("organization_id = ?", orgID).Order("user_id").Find(&users).Error; err != nil {
 		return nil, err
 	}
 	return users, nil
@@ -68,7 +68,7 @@ func (s *S) ListOrganizationUsersByOrganizationID(orgID string) ([]OrganizationU
 // ListOrganizationNonHiddenUsersByOrganizationID lists organization users in the specified organization.
 func (s *S) ListOrganizationNonHiddenUsersByOrganizationID(orgID string) ([]OrganizationUser, error) {
 	var users []OrganizationUser
-	if err := s.db.Where("organization_id = ?", orgID).Where("hidden = ?", false).Find(&users).Error; err != nil {
+	if err := s.db.Where("organization_id = ?", orgID).Where("hidden = ?", false).Order("user_id").Find(&users).Error; err != nil {
 		return nil, err
 	}
 	return users, nil
