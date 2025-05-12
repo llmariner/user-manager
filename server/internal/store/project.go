@@ -134,7 +134,7 @@ func (s *S) GetDefaultProject(tenantID string) (*Project, error) {
 // ListProjectsByTenantIDAndOrganizationID lists projects by tenant ID and organization ID.
 func (s *S) ListProjectsByTenantIDAndOrganizationID(tenantID, orgID string) ([]*Project, error) {
 	var projects []*Project
-	if err := s.db.Where("tenant_id = ? AND organization_id = ?", tenantID, orgID).Find(&projects).Error; err != nil {
+	if err := s.db.Where("tenant_id = ? AND organization_id = ?", tenantID, orgID).Find(&projects).Order("title").Error; err != nil {
 		return nil, err
 	}
 	return projects, nil
@@ -143,7 +143,7 @@ func (s *S) ListProjectsByTenantIDAndOrganizationID(tenantID, orgID string) ([]*
 // ListProjectsByTenantID lists projects by tenant ID.
 func (s *S) ListProjectsByTenantID(tenantID string) ([]*Project, error) {
 	var projects []*Project
-	if err := s.db.Where("tenant_id = ?", tenantID).Find(&projects).Error; err != nil {
+	if err := s.db.Where("tenant_id = ?", tenantID).Order("title").Find(&projects).Error; err != nil {
 		return nil, err
 	}
 	return projects, nil

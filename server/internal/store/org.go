@@ -66,7 +66,7 @@ func (s *S) GetDefaultOrganization(tenantID string) (*Organization, error) {
 // ListOrganizations lists all organizations in the tenant.
 func (s *S) ListOrganizations(tenantID string) ([]*Organization, error) {
 	var orgs []*Organization
-	if err := s.db.Where("tenant_id = ?", tenantID).Find(&orgs).Error; err != nil {
+	if err := s.db.Where("tenant_id = ?", tenantID).Find(&orgs).Order("title").Error; err != nil {
 		return nil, err
 	}
 	return orgs, nil
