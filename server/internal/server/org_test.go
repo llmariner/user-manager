@@ -480,18 +480,19 @@ func TestListOrganizations_EnableAuth(t *testing.T) {
 	assert.Len(t, resp.Organizations, 2)
 	var numFound int
 	for _, o := range resp.Organizations {
-		if o.Id == o0.OrganizationID {
+		switch o.Id {
+		case o0.OrganizationID:
 			numFound++
 			assert.NotNil(t, o.Summary)
 			assert.Equal(t, int32(0), o.Summary.ProjectCount)
 			// Only user0
 			assert.Equal(t, int32(1), o.Summary.UserCount)
-		} else if o.Id == o1.Id {
+		case o1.Id:
 			numFound++
 			assert.NotNil(t, o.Summary)
 			assert.Equal(t, int32(1), o.Summary.ProjectCount)
 			assert.Equal(t, int32(4), o.Summary.UserCount)
-		} else {
+		default:
 			t.Fatalf("unexpected org %q", o.Id)
 		}
 	}
