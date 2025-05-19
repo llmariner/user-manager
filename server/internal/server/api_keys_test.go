@@ -114,9 +114,10 @@ func TestAPIKey(t *testing.T) {
 
 			// Check that the field value is preserved in list responses
 			for _, key := range lresp.Data {
-				if key.Name == "dummy" {
+				switch key.Name {
+				case "dummy":
 					assert.False(t, key.ExcludedFromRateLimiting, "regular key should have excluded_from_rate_limiting=false")
-				} else if key.Name == "excluded-key" {
+				case "excluded-key":
 					assert.True(t, key.ExcludedFromRateLimiting, "excluded key should have excluded_from_rate_limiting=true")
 				}
 			}
