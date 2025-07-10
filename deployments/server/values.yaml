@@ -300,7 +300,7 @@ securityContext:
 
 # Additional environment variables for the user-manager-server container.
 # +docs:property
-# userManagerServer:
+# user-manager-server:
 #   env: []
 #   envFrom: []
 

@@ -57,12 +57,14 @@ spec:
             secretKeyRef:
               name: {{ .Values.global.databaseSecret.name }}
               key: {{ .Values.global.databaseSecret.key }}
-        {{- with .Values.userManagerServer.env }}
+        {{- with index .Values "user-manager-server" }}
+          {{- with .env }}
         {{- toYaml . | nindent 8 }}
-        {{- end }}
-        {{- with .Values.userManagerServer.envFrom }}
+          {{- end }}
+          {{- with .envFrom }}
         envFrom:
         {{- toYaml . | nindent 8 }}
+          {{- end }}
         {{- end }}
         {{- if .Values.livenessProbe.enabled }}
         livenessProbe:
