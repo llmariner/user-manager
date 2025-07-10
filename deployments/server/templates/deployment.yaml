@@ -25,7 +25,7 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-      - name: user-manager-server
+      - name: userManagerServer
         securityContext:
           {{- toYaml .Values.securityContext | nindent 10 }}
         image: "{{ .Values.image.repository }}:{{ default .Chart.Version .Values.version }}"
@@ -57,7 +57,7 @@ spec:
             secretKeyRef:
               name: {{ .Values.global.databaseSecret.name }}
               key: {{ .Values.global.databaseSecret.key }}
-        {{- with index .Values "user-manager-server" }}
+        {{- with .Values.userManagerServer }}
           {{- with .env }}
         {{- toYaml . | nindent 8 }}
           {{- end }}
