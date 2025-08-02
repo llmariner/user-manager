@@ -101,7 +101,7 @@ message ProjectAssignment {
   repeated NodeSelector node_selector = 4;
 }
 
-// ProjectAssignemnt is a list of assigned clusters and namespaces for the project.
+// ProjectAssignment is a list of assigned clusters and namespaces for the project.
 // This is used to marshal a repeated field in the proto message so that
 // it can be persisted in a database.
 message ProjectAssignments {
