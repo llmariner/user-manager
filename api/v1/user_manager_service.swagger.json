@@ -760,6 +760,17 @@
     }
   },
   "definitions": {
+    "ProjectAssignmentNodeSelector": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
     "protobufAny": {
       "type": "object",
       "properties": {
@@ -1117,10 +1128,21 @@
       "properties": {
         "clusterId": {
           "type": "string",
-          "description": "cluster_id is set of a namespace for a specific cluster is assigned to this project. It it empty\nwhen the namespace of any registered clusters is assigned to this project."
+          "description": "cluster_id specifies a cluster assigned to this project. It is empty\nwhen the namespace of any registered clusters is assigned to this project."
         },
         "namespace": {
           "type": "string"
+        },
+        "kueueQueueName": {
+          "type": "string",
+          "description": "kueue_queue_name is the name of the Kueue queue assigned to this project."
+        },
+        "nodeSelector": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ProjectAssignmentNodeSelector"
+          },
+          "description": "node_selector specifies nodes where this project can run its workloads."
         }
       }
     },
