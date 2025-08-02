@@ -53,9 +53,15 @@ export type ProjectUser = {
     organization_id?: string;
     role?: ProjectRole;
 };
+export type ProjectAssignmentNodeSelector = {
+    key?: string;
+    value?: string;
+};
 export type ProjectAssignment = {
     cluster_id?: string;
     namespace?: string;
+    kueue_queue_name?: string;
+    node_selector?: ProjectAssignmentNodeSelector[];
 };
 export type ProjectAssignments = {
     assignments?: ProjectAssignment[];

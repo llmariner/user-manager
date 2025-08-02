@@ -84,13 +84,24 @@ message ProjectUser {
 }
 
 message ProjectAssignment {
-    // cluster_id specifies a cluster assigned to this project. It is empty
-    // when the namespace of any registered clusters is assigned to this project.
-    string cluster_id = 1;
-    string namespace = 2;
+  message NodeSelector {
+    string key = 1;
+    string value = 2;
+  }
+
+  // cluster_id specifies a cluster assigned to this project. It is empty
+  // when the namespace of any registered clusters is assigned to this project.
+  string cluster_id = 1;
+  string namespace = 2;
+
+  // kueue_queue_name is the name of the Kueue queue assigned to this project.
+  string kueue_queue_name = 3;
+
+  // node_selector specifies nodes where this project can run its workloads.
+  repeated NodeSelector node_selector = 4;
 }
 
-// ProjectAssignemnt is a list of assigned clusters and namespaces for the project.
+// ProjectAssignment is a list of assigned clusters and namespaces for the project.
 // This is used to marshal a repeated field in the proto message so that
 // it can be persisted in a database.
 message ProjectAssignments {
