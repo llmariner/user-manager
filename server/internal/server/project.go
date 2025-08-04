@@ -78,6 +78,14 @@ func createProject(
 		}
 
 		// TODO(kenji): If the cluster is not empty, check if the cluster exists.
+		for _, kv := range a.NodeSelector {
+			if kv.Key == "" {
+				return nil, status.Error(codes.InvalidArgument, "node selector key is required")
+			}
+			if kv.Value == "" {
+				return nil, status.Error(codes.InvalidArgument, "node selector value is required")
+			}
+		}
 	}
 
 	projectID, err := id.GenerateID("proj_", 24)
