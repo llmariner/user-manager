@@ -66,6 +66,9 @@ export class UsersService {
     static DeleteProject(req, initReq) {
         return fm.fetchReq(`/v1/organizations/${req["organization_id"]}/projects/${req["id"]}`, Object.assign(Object.assign({}, initReq), { method: "DELETE" }));
     }
+    static UpdateProject(req, initReq) {
+        return fm.fetchReq(`/v1/organizations/${req["project.organization_id"]}/projects/${req["project.id"]}`, Object.assign(Object.assign({}, initReq), { method: "PATCH", body: JSON.stringify(req["project"]) }));
+    }
     static CreateProjectUser(req, initReq) {
         return fm.fetchReq(`/v1/organizations/${req["organization_id"]}/projects/${req["project_id"]}/users`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
     }

@@ -36,6 +36,7 @@ type UsersServiceClient interface {
 	CreateProject(ctx context.Context, in *CreateProjectRequest, opts ...grpc.CallOption) (*Project, error)
 	ListProjects(ctx context.Context, in *ListProjectsRequest, opts ...grpc.CallOption) (*ListProjectsResponse, error)
 	DeleteProject(ctx context.Context, in *DeleteProjectRequest, opts ...grpc.CallOption) (*DeleteProjectResponse, error)
+	UpdateProject(ctx context.Context, in *UpdateProjectRequest, opts ...grpc.CallOption) (*Project, error)
 	CreateProjectUser(ctx context.Context, in *CreateProjectUserRequest, opts ...grpc.CallOption) (*ProjectUser, error)
 	ListProjectUsers(ctx context.Context, in *ListProjectUsersRequest, opts ...grpc.CallOption) (*ListProjectUsersResponse, error)
 	DeleteProjectUser(ctx context.Context, in *DeleteProjectUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -194,6 +195,15 @@ func (c *usersServiceClient) DeleteProject(ctx context.Context, in *DeleteProjec
 	return out, nil
 }
 
+func (c *usersServiceClient) UpdateProject(ctx context.Context, in *UpdateProjectRequest, opts ...grpc.CallOption) (*Project, error) {
+	out := new(Project)
+	err := c.cc.Invoke(ctx, "/llmariner.users.server.v1.UsersService/UpdateProject", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *usersServiceClient) CreateProjectUser(ctx context.Context, in *CreateProjectUserRequest, opts ...grpc.CallOption) (*ProjectUser, error) {
 	out := new(ProjectUser)
 	err := c.cc.Invoke(ctx, "/llmariner.users.server.v1.UsersService/CreateProjectUser", in, out, opts...)
@@ -251,6 +261,7 @@ type UsersServiceServer interface {
 	CreateProject(context.Context, *CreateProjectRequest) (*Project, error)
 	ListProjects(context.Context, *ListProjectsRequest) (*ListProjectsResponse, error)
 	DeleteProject(context.Context, *DeleteProjectRequest) (*DeleteProjectResponse, error)
+	UpdateProject(context.Context, *UpdateProjectRequest) (*Project, error)
 	CreateProjectUser(context.Context, *CreateProjectUserRequest) (*ProjectUser, error)
 	ListProjectUsers(context.Context, *ListProjectUsersRequest) (*ListProjectUsersResponse, error)
 	DeleteProjectUser(context.Context, *DeleteProjectUserRequest) (*emptypb.Empty, error)
@@ -309,6 +320,9 @@ func (UnimplementedUsersServiceServer) ListProjects(context.Context, *ListProjec
 }
 func (UnimplementedUsersServiceServer) DeleteProject(context.Context, *DeleteProjectRequest) (*DeleteProjectResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteProject not implemented")
+}
+func (UnimplementedUsersServiceServer) UpdateProject(context.Context, *UpdateProjectRequest) (*Project, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateProject not implemented")
 }
 func (UnimplementedUsersServiceServer) CreateProjectUser(context.Context, *CreateProjectUserRequest) (*ProjectUser, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateProjectUser not implemented")
@@ -623,6 +637,24 @@ func _UsersService_DeleteProject_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UsersService_UpdateProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateProjectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServiceServer).UpdateProject(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/llmariner.users.server.v1.UsersService/UpdateProject",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServiceServer).UpdateProject(ctx, req.(*UpdateProjectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _UsersService_CreateProjectUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateProjectUserRequest)
 	if err := dec(in); err != nil {
@@ -765,6 +797,10 @@ var UsersService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteProject",
 			Handler:    _UsersService_DeleteProject_Handler,
+		},
+		{
+			MethodName: "UpdateProject",
+			Handler:    _UsersService_UpdateProject_Handler,
 		},
 		{
 			MethodName: "CreateProjectUser",
