@@ -260,6 +260,16 @@ message DeleteProjectResponse {
   bool deleted = 3;
 }
 
+message UpdateProjectRequest {
+  // Project to update.
+  //
+  // The project's id is used to identify the project to update.
+  Project project = 1;
+  
+  // The list of fields to update.
+  google.protobuf.FieldMask update_mask = 2;
+}
+
 message CreateProjectUserRequest {
   string organization_id = 1;
   string project_id = 2;
@@ -387,6 +397,12 @@ service UsersService {
   rpc DeleteProject(DeleteProjectRequest) returns (DeleteProjectResponse) {
     option (google.api.http) = {
       delete: "/v1/organizations/{organization_id}/projects/{id}"
+    };
+  }
+  rpc UpdateProject(UpdateProjectRequest) returns (Project) {
+    option (google.api.http) = {
+      patch: "/v1/organizations/{project.organization_id}/projects/{project.id}"
+      body: "project"
     };
   }
 
