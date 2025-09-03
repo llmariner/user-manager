@@ -263,21 +263,35 @@ func (s *S) UpdateProject(ctx context.Context, req *v1.UpdateProjectRequest) (*v
 	if err := s.validateProjectOwner(req.Project.Id, req.Project.OrganizationId, userInfo.UserID); err != nil {
 		return nil, err
 	}
-
 	for _, path := range req.UpdateMask.Paths {
 		switch path {
 		case "title":
-			s.store.UpdateProjectTitle(
+			err := s.store.UpdateProject(
 				req.Project.Id,
 				map[string]interface{}{
 					"title": req.Project.Title,
 				})
+			if err != nil {
+				return nil, err
+			}
 		default:
 			return nil, status.Errorf(codes.InvalidArgument, "unsupported update path: %s", path)
 		}
 	}
 
-	return req.Project, nil
+	p, err := s.store.GetProject(store.GetProjectParams{
+		TenantID:       userInfo.TenantID,
+		OrganizationID: req.Project.OrganizationId,
+		ProjectID:      req.Project.Id,
+	})
+	if err != nil {
+		return nil, err
+	}
+	pProto, err := p.ToProto()
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "convert project to proto: %s", err)
+	}
+	return pProto, nil
 }
 
 // CreateProjectUser adds a user to an project.
