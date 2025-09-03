@@ -240,6 +240,60 @@ func (s *S) DeleteProject(ctx context.Context, req *v1.DeleteProjectRequest) (*v
 	}, nil
 }
 
+// UpdateProject updates an existing project.
+func (s *S) UpdateProject(ctx context.Context, req *v1.UpdateProjectRequest) (*v1.Project, error) {
+	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("failed to extract user info from context")
+	}
+	if req.Project.Id == "" {
+		return nil, fmt.Errorf("project id is required")
+	}
+	if req.Project.OrganizationId == "" {
+		return nil, fmt.Errorf("organization id is required")
+	}
+	if req.UpdateMask == nil {
+		return nil, fmt.Errorf("update mask is required")
+	}
+
+	// Auth
+	if _, err := validateProjectID(s.store, req.Project.Id, req.Project.OrganizationId, userInfo.TenantID); err != nil {
+		return nil, err
+	}
+	if err := s.validateProjectOwner(req.Project.Id, req.Project.OrganizationId, userInfo.UserID); err != nil {
+		return nil, err
+	}
+	for _, path := range req.UpdateMask.Paths {
+		switch path {
+		case "title":
+			err := s.store.UpdateProject(
+				req.Project.Id,
+				map[string]interface{}{
+					"title": req.Project.Title,
+				})
+			if err != nil {
+				return nil, err
+			}
+		default:
+			return nil, status.Errorf(codes.InvalidArgument, "unsupported update path: %s", path)
+		}
+	}
+
+	p, err := s.store.GetProject(store.GetProjectParams{
+		TenantID:       userInfo.TenantID,
+		OrganizationID: req.Project.OrganizationId,
+		ProjectID:      req.Project.Id,
+	})
+	if err != nil {
+		return nil, err
+	}
+	pProto, err := p.ToProto()
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "convert project to proto: %s", err)
+	}
+	return pProto, nil
+}
+
 // CreateProjectUser adds a user to an project.
 func (s *S) CreateProjectUser(ctx context.Context, req *v1.CreateProjectUserRequest) (*v1.ProjectUser, error) {
 	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)

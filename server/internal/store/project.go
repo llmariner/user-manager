@@ -174,3 +174,19 @@ func DeleteProjectInTransaction(tx *gorm.DB, projectID string) error {
 	}
 	return nil
 }
+
+// UpdateProject updates an existing project.
+func (s *S) UpdateProject(
+	projectID string,
+	updates map[string]interface{},
+) error {
+	res := s.db.Model(&Project{}).Where("project_id = ?", projectID).
+		Updates(updates)
+	if err := res.Error; err != nil {
+		return err
+	}
+	if res.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
+}

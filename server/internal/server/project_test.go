@@ -15,6 +15,7 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
 func TestProject(t *testing.T) {
@@ -70,6 +71,28 @@ func TestProject(t *testing.T) {
 	resp, err = isrv.ListProjects(ctx, &v1.ListProjectsRequest{})
 	assert.NoError(t, err)
 	assert.Len(t, resp.Projects, 2)
+
+	updatedTitle := "Updated project title"
+	p, err := srv.UpdateProject(ctx, &v1.UpdateProjectRequest{
+		Project: &v1.Project{
+			Id:             projs[0].Id,
+			OrganizationId: orgs[0].Id,
+			Title:          updatedTitle,
+		},
+		UpdateMask: &fieldmaskpb.FieldMask{
+			Paths: []string{"title"},
+		},
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, updatedTitle, p.Title)
+	assert.Equal(t, orgs[0].Id, p.OrganizationId)
+
+	resp, err = srv.ListProjects(ctx, &v1.ListProjectsRequest{
+		OrganizationId: orgs[0].Id,
+	})
+	assert.NoError(t, err)
+	assert.Len(t, resp.Projects, 1)
+	assert.Equal(t, updatedTitle, resp.Projects[0].Title)
 
 	_, err = srv.DeleteProject(ctx, &v1.DeleteProjectRequest{
 		OrganizationId: orgs[0].Id,

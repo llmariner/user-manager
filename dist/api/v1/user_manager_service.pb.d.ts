@@ -171,6 +171,10 @@ export type DeleteProjectResponse = {
     object?: string;
     deleted?: boolean;
 };
+export type UpdateProjectRequest = {
+    project?: Project;
+    update_mask?: GoogleProtobufField_mask.FieldMask;
+};
 export type CreateProjectUserRequest = {
     organization_id?: string;
     project_id?: string;
@@ -238,6 +242,7 @@ export declare class UsersService {
     static CreateProject(req: CreateProjectRequest, initReq?: fm.InitReq): Promise<Project>;
     static ListProjects(req: ListProjectsRequest, initReq?: fm.InitReq): Promise<ListProjectsResponse>;
     static DeleteProject(req: DeleteProjectRequest, initReq?: fm.InitReq): Promise<DeleteProjectResponse>;
+    static UpdateProject(req: UpdateProjectRequest, initReq?: fm.InitReq): Promise<Project>;
     static CreateProjectUser(req: CreateProjectUserRequest, initReq?: fm.InitReq): Promise<ProjectUser>;
     static ListProjectUsers(req: ListProjectUsersRequest, initReq?: fm.InitReq): Promise<ListProjectUsersResponse>;
     static DeleteProjectUser(req: DeleteProjectUserRequest, initReq?: fm.InitReq): Promise<GoogleProtobufEmpty.Empty>;

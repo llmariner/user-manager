@@ -215,6 +215,11 @@ export type DeleteProjectResponse = {
   deleted?: boolean
 }
 
+export type UpdateProjectRequest = {
+  project?: Project
+  update_mask?: GoogleProtobufField_mask.FieldMask
+}
+
 export type CreateProjectUserRequest = {
   organization_id?: string
   project_id?: string
@@ -332,6 +337,9 @@ export class UsersService {
   }
   static DeleteProject(req: DeleteProjectRequest, initReq?: fm.InitReq): Promise<DeleteProjectResponse> {
     return fm.fetchReq<DeleteProjectRequest, DeleteProjectResponse>(`/v1/organizations/${req["organization_id"]}/projects/${req["id"]}`, {...initReq, method: "DELETE"})
+  }
+  static UpdateProject(req: UpdateProjectRequest, initReq?: fm.InitReq): Promise<Project> {
+    return fm.fetchReq<UpdateProjectRequest, Project>(`/v1/organizations/${req["project.organization_id"]}/projects/${req["project.id"]}`, {...initReq, method: "PATCH", body: JSON.stringify(req["project"])})
   }
   static CreateProjectUser(req: CreateProjectUserRequest, initReq?: fm.InitReq): Promise<ProjectUser> {
     return fm.fetchReq<CreateProjectUserRequest, ProjectUser>(`/v1/organizations/${req["organization_id"]}/projects/${req["project_id"]}/users`, {...initReq, method: "POST", body: JSON.stringify(req)})
