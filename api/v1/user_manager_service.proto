@@ -3,6 +3,7 @@ syntax = "proto3";
 package llmariner.users.server.v1;
 
 import "google/api/annotations.proto";
+import "google/api/client.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/field_mask.proto";
 
@@ -317,6 +318,7 @@ service UsersService {
       patch: "/v1/api_keys/{api_key.id}"
       body: "api_key"
     };
+    option (google.api.method_signature) = "api_key,update_mask";
   }
 
   // TODO(kenji): Remove the follwoing three RPC endpoints in favor of "/v1/api_keys".
