@@ -421,6 +421,11 @@ func (s *S) CreateDefaultProject(ctx context.Context, c *config.DefaultProjectCo
 		return nil, err
 	}
 
+	p, err = s.store.GetDefaultProject(tenantID)
+	if err != nil {
+		return nil, err
+	}
+
 	return p, nil
 }
 
