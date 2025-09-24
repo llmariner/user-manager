@@ -46,6 +46,7 @@ export type Organization = {
     title?: string;
     created_at?: string;
     summary?: OrganizationSummary;
+    is_default?: boolean;
 };
 export type ProjectUser = {
     user_id?: string;
@@ -77,6 +78,7 @@ export type Project = {
     organization_id?: string;
     created_at?: string;
     summary?: ProjectSummary;
+    is_default?: boolean;
 };
 export type CreateAPIKeyRequest = {
     name?: string;

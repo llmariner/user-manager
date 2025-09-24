@@ -23,6 +23,7 @@ func (o *Organization) ToProto() *v1.Organization {
 		Id:        o.OrganizationID,
 		Title:     o.Title,
 		CreatedAt: o.CreatedAt.UTC().Unix(),
+		IsDefault: o.IsDefault,
 	}
 }
 

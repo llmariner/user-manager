@@ -67,6 +67,7 @@ func (p *Project) ToProto() (*v1.Project, error) {
 		KubernetesNamespace: kn,
 		Assignments:         as,
 		CreatedAt:           p.CreatedAt.UTC().Unix(),
+		IsDefault:           p.IsDefault,
 	}, nil
 }
 
