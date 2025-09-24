@@ -74,6 +74,8 @@ message Organization {
   // Summary holds summary information about the organization.
   // This field is filled only when `include_summary` is set to true.
   Summary summary = 4;
+
+  bool is_default = 5;
 }
 
 message ProjectUser {
@@ -130,7 +132,9 @@ message Project {
   // This field is filled only when `include_summary` is set to true.
   Summary summary = 6;
 
-  // Next ID: 8
+  bool is_default = 8;
+
+  // Next ID: 9
 }
 
 message CreateAPIKeyRequest {
@@ -265,7 +269,7 @@ message UpdateProjectRequest {
   //
   // The project's id is used to identify the project to update.
   Project project = 1;
-  
+
   // The list of fields to update.
   google.protobuf.FieldMask update_mask = 2;
 }

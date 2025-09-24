@@ -1095,6 +1095,9 @@
         "summary": {
           "$ref": "#/definitions/v1OrganizationSummary",
           "description": "Summary holds summary information about the organization.\nThis field is filled only when `include_summary` is set to true."
+        },
+        "isDefault": {
+          "type": "boolean"
         }
       }
     },
@@ -1172,6 +1175,9 @@
         "summary": {
           "$ref": "#/definitions/v1ProjectSummary",
           "description": "Summary holds summary information about the project.\nThis field is filled only when `include_summary` is set to true."
+        },
+        "isDefault": {
+          "type": "boolean"
         }
       }
     },
