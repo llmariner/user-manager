@@ -31,6 +31,21 @@ message User {
   string internal_id = 2;
   bool is_service_account = 3;
   bool hidden = 4;
+
+  // The following fields are populated only for the external gRPC service.
+
+  message OrganizationRoleBinding {
+    string organization_id = 1;
+    OrganizationRole role = 2;
+  }
+  repeated OrganizationRoleBinding organization_roles = 5;
+
+  message ProjectRoleBinding {
+    string organization_id = 1;
+    string project_id = 2;
+    ProjectRole role = 3;
+  }
+  repeated ProjectRoleBinding project_roles = 6;
 }
 
 enum OrganizationRole {
@@ -306,6 +321,13 @@ message DeleteProjectUserResponse {
 message GetUserSelfRequest {
 }
 
+message ListUsersRequest {
+}
+
+message ListUsersResponse {
+  repeated User users = 1;
+}
+
 service UsersService {
   rpc CreateAPIKey(CreateAPIKeyRequest) returns (APIKey) {
     option (google.api.http) = {
@@ -433,6 +455,12 @@ service UsersService {
       get: "/v1/users:getSelf"
     };
   }
+
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse) {
+    option (google.api.http) = {
+      get: "/v1/users"
+    };
+  }
 }
 
 message InternalAPIKey {
@@ -457,13 +485,6 @@ message ListInternalOrganizationsRequest {
 
 message ListInternalOrganizationsResponse {
   repeated InternalOrganization organizations = 1;
-}
-
-message ListUsersRequest {
-}
-
-message ListUsersResponse {
-  repeated User users = 1;
 }
 
 message CreateUserInternalRequest {

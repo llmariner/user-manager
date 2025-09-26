@@ -25,11 +25,22 @@ export type APIKey = {
     project_role?: ProjectRole;
     excluded_from_rate_limiting?: boolean;
 };
+export type UserOrganizationRoleBinding = {
+    organization_id?: string;
+    role?: OrganizationRole;
+};
+export type UserProjectRoleBinding = {
+    organization_id?: string;
+    project_id?: string;
+    role?: ProjectRole;
+};
 export type User = {
     id?: string;
     internal_id?: string;
     is_service_account?: boolean;
     hidden?: boolean;
+    organization_roles?: UserOrganizationRoleBinding[];
+    project_roles?: UserProjectRoleBinding[];
 };
 export type OrganizationUser = {
     user_id?: string;
@@ -201,6 +212,10 @@ export type DeleteProjectUserResponse = {
     deleted?: boolean;
 };
 export type GetUserSelfRequest = {};
+export type ListUsersRequest = {};
+export type ListUsersResponse = {
+    users?: User[];
+};
 export type InternalAPIKey = {
     api_key?: APIKey;
     tenant_id?: string;
@@ -216,10 +231,6 @@ export type InternalOrganization = {
 export type ListInternalOrganizationsRequest = {};
 export type ListInternalOrganizationsResponse = {
     organizations?: InternalOrganization[];
-};
-export type ListUsersRequest = {};
-export type ListUsersResponse = {
-    users?: User[];
 };
 export type CreateUserInternalRequest = {
     tenant_id?: string;
@@ -249,6 +260,7 @@ export declare class UsersService {
     static ListProjectUsers(req: ListProjectUsersRequest, initReq?: fm.InitReq): Promise<ListProjectUsersResponse>;
     static DeleteProjectUser(req: DeleteProjectUserRequest, initReq?: fm.InitReq): Promise<GoogleProtobufEmpty.Empty>;
     static GetUserSelf(req: GetUserSelfRequest, initReq?: fm.InitReq): Promise<User>;
+    static ListUsers(req: ListUsersRequest, initReq?: fm.InitReq): Promise<ListUsersResponse>;
 }
 export declare class UsersInternalService {
     static ListInternalAPIKeys(req: ListInternalAPIKeysRequest, initReq?: fm.InitReq): Promise<ListInternalAPIKeysResponse>;
