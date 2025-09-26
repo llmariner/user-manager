@@ -129,14 +129,6 @@ func (s *S) UpdateAPIKey(
 		return nil, status.Error(codes.InvalidArgument, "name is required")
 	}
 
-	// Currently only support the update of the name field.
-	if req.UpdateMask == nil {
-		return nil, status.Error(codes.InvalidArgument, "update mask is required")
-	}
-	if len(req.UpdateMask.Paths) != 1 || req.UpdateMask.Paths[0] != "name" {
-		return nil, status.Error(codes.InvalidArgument, "only name field is supported for update")
-	}
-
 	key, err := s.store.GetAPIKeyByID(req.ApiKey.Id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -150,7 +142,21 @@ func (s *S) UpdateAPIKey(
 		return nil, status.Errorf(codes.NotFound, "api key %q not found", req.ApiKey.Id)
 	}
 
-	key.Name = req.ApiKey.Name
+	// Currently only support the update of the name field and the "excluded_from_rate_limiting" field.
+	if req.UpdateMask == nil {
+		return nil, status.Error(codes.InvalidArgument, "update mask is required")
+	}
+	for _, p := range req.UpdateMask.Paths {
+		switch p {
+		case "name":
+			key.Name = req.ApiKey.Name
+		case "excluded_from_rate_limiting":
+			key.ExcludedFromRateLimiting = req.ApiKey.ExcludedFromRateLimiting
+		default:
+			return nil, status.Error(codes.InvalidArgument, "only the 'name' and 'excluded_from_rate_limiting' fields can be updated")
+		}
+	}
+
 	if err := s.store.UpdateAPIKey(key); err != nil {
 		return nil, status.Errorf(codes.Internal, "update api key: %s", err)
 	}
