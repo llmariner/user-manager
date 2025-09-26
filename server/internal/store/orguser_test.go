@@ -41,6 +41,12 @@ func TestOrganizationUser(t *testing.T) {
 	assert.Len(t, users, 1)
 	assert.Equal(t, "user2", users[0].UserID)
 
+	users, err = s.ListOrganizationUsersByUserID("user1")
+	assert.NoError(t, err)
+	assert.Len(t, users, 1)
+	assert.Equal(t, "user1", users[0].UserID)
+	assert.Equal(t, "o1", users[0].OrganizationID)
+
 	err = s.DeleteOrganizationUser("o1", "user1")
 	assert.NoError(t, err)
 
