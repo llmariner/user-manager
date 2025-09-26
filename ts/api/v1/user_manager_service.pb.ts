@@ -35,11 +35,24 @@ export type APIKey = {
   excluded_from_rate_limiting?: boolean
 }
 
+export type UserOrganizationRoleBinding = {
+  organization_id?: string
+  role?: OrganizationRole
+}
+
+export type UserProjectRoleBinding = {
+  organization_id?: string
+  project_id?: string
+  role?: ProjectRole
+}
+
 export type User = {
   id?: string
   internal_id?: string
   is_service_account?: boolean
   hidden?: boolean
+  organization_roles?: UserOrganizationRoleBinding[]
+  project_roles?: UserProjectRoleBinding[]
 }
 
 export type OrganizationUser = {
@@ -253,6 +266,13 @@ export type DeleteProjectUserResponse = {
 export type GetUserSelfRequest = {
 }
 
+export type ListUsersRequest = {
+}
+
+export type ListUsersResponse = {
+  users?: User[]
+}
+
 export type InternalAPIKey = {
   api_key?: APIKey
   tenant_id?: string
@@ -275,13 +295,6 @@ export type ListInternalOrganizationsRequest = {
 
 export type ListInternalOrganizationsResponse = {
   organizations?: InternalOrganization[]
-}
-
-export type ListUsersRequest = {
-}
-
-export type ListUsersResponse = {
-  users?: User[]
 }
 
 export type CreateUserInternalRequest = {
@@ -354,6 +367,9 @@ export class UsersService {
   }
   static GetUserSelf(req: GetUserSelfRequest, initReq?: fm.InitReq): Promise<User> {
     return fm.fetchReq<GetUserSelfRequest, User>(`/v1/users:getSelf?${fm.renderURLSearchParams(req, [])}`, {...initReq, method: "GET"})
+  }
+  static ListUsers(req: ListUsersRequest, initReq?: fm.InitReq): Promise<ListUsersResponse> {
+    return fm.fetchReq<ListUsersRequest, ListUsersResponse>(`/v1/users?${fm.renderURLSearchParams(req, [])}`, {...initReq, method: "GET"})
   }
 }
 export class UsersInternalService {

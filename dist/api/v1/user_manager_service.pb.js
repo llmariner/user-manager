@@ -81,6 +81,9 @@ export class UsersService {
     static GetUserSelf(req, initReq) {
         return fm.fetchReq(`/v1/users:getSelf?${fm.renderURLSearchParams(req, [])}`, Object.assign(Object.assign({}, initReq), { method: "GET" }));
     }
+    static ListUsers(req, initReq) {
+        return fm.fetchReq(`/v1/users?${fm.renderURLSearchParams(req, [])}`, Object.assign(Object.assign({}, initReq), { method: "GET" }));
+    }
 }
 export class UsersInternalService {
     static ListInternalAPIKeys(req, initReq) {

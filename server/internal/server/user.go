@@ -25,6 +25,7 @@ func (s *S) GetUserSelf(ctx context.Context, req *v1.GetUserSelfRequest) (*v1.Us
 
 	return &v1.User{
 		Id: userInfo.UserID,
+		// Populate more fields.
 	}, nil
 }
 

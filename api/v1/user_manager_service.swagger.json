@@ -788,6 +788,28 @@
         ]
       }
     },
+    "/v1/users": {
+      "get": {
+        "operationId": "UsersService_ListUsers",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListUsersResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "UsersService"
+        ]
+      }
+    },
     "/v1/users:getSelf": {
       "get": {
         "operationId": "UsersService_GetUserSelf",
@@ -820,6 +842,31 @@
         },
         "value": {
           "type": "string"
+        }
+      }
+    },
+    "UserOrganizationRoleBinding": {
+      "type": "object",
+      "properties": {
+        "organizationId": {
+          "type": "string"
+        },
+        "role": {
+          "$ref": "#/definitions/v1OrganizationRole"
+        }
+      }
+    },
+    "UserProjectRoleBinding": {
+      "type": "object",
+      "properties": {
+        "organizationId": {
+          "type": "string"
+        },
+        "projectId": {
+          "type": "string"
+        },
+        "role": {
+          "$ref": "#/definitions/v1ProjectRole"
         }
       }
     },
@@ -1255,6 +1302,18 @@
         },
         "hidden": {
           "type": "boolean"
+        },
+        "organizationRoles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserOrganizationRoleBinding"
+          }
+        },
+        "projectRoles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserProjectRoleBinding"
+          }
         }
       }
     }
