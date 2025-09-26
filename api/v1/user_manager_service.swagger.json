@@ -1303,13 +1303,13 @@
         "hidden": {
           "type": "boolean"
         },
-        "organizationRoles": {
+        "organizationRoleBindings": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/UserOrganizationRoleBinding"
           }
         },
-        "projectRoles": {
+        "projectRoleBindings": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/UserProjectRoleBinding"

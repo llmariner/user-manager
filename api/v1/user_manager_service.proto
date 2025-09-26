@@ -38,14 +38,14 @@ message User {
     string organization_id = 1;
     OrganizationRole role = 2;
   }
-  repeated OrganizationRoleBinding organization_roles = 5;
+  repeated OrganizationRoleBinding organization_role_bindings = 5;
 
   message ProjectRoleBinding {
     string organization_id = 1;
     string project_id = 2;
     ProjectRole role = 3;
   }
-  repeated ProjectRoleBinding project_roles = 6;
+  repeated ProjectRoleBinding project_role_bindings = 6;
 }
 
 enum OrganizationRole {

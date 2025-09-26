@@ -23,9 +23,19 @@ func (s *S) GetUserSelf(ctx context.Context, req *v1.GetUserSelfRequest) (*v1.Us
 		return nil, fmt.Errorf("failed to extract user info from context")
 	}
 
+	orgUsers, err := s.store.ListOrganizationUsersByUserID(userInfo.UserID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "list organization users: %s", err)
+	}
+	projUsers, err := s.store.ListProjectUsersByUserID(userInfo.UserID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "list project users: %s", err)
+	}
+
 	return &v1.User{
-		Id: userInfo.UserID,
-		// Populate more fields.
+		Id:                       userInfo.UserID,
+		OrganizationRoleBindings: toOrganizationRoleBindings(orgUsers),
+		ProjectRoleBindings:      toProjectRoleBindings(projUsers),
 	}, nil
 }
 
@@ -43,6 +53,7 @@ func (s *IS) ListUsers(ctx context.Context, req *v1.ListUsersRequest) (*v1.ListU
 			InternalId:       u.InternalUserID,
 			IsServiceAccount: false,
 			Hidden:           u.Hidden,
+			// Do not populate organization_role_bindings and project_role_bindings as they are not used.
 		})
 	}
 	return &res, nil
@@ -177,4 +188,26 @@ func (s *IS) CreateUserInternal(ctx context.Context, req *v1.CreateUserInternalR
 	}
 	s.log.Info("Created orgnization, project, and user", "user_id", userID)
 	return &emptypb.Empty{}, nil
+}
+
+func toOrganizationRoleBindings(ous []store.OrganizationUser) []*v1.User_OrganizationRoleBinding {
+	var bindings []*v1.User_OrganizationRoleBinding
+	for _, ou := range ous {
+		bindings = append(bindings, &v1.User_OrganizationRoleBinding{
+			OrganizationId: ou.OrganizationID,
+			Role:           v1.OrganizationRole(v1.OrganizationRole_value[ou.Role]),
+		})
+	}
+	return bindings
+}
+
+func toProjectRoleBindings(pus []store.ProjectUser) []*v1.User_ProjectRoleBinding {
+	var bindings []*v1.User_ProjectRoleBinding
+	for _, pu := range pus {
+		bindings = append(bindings, &v1.User_ProjectRoleBinding{
+			ProjectId: pu.ProjectID,
+			Role:      v1.ProjectRole(v1.ProjectRole_value[pu.Role]),
+		})
+	}
+	return bindings
 }
