@@ -75,6 +75,15 @@ func (s *S) ListProjectUsersByProjectID(projectID string) ([]ProjectUser, error)
 	return users, nil
 }
 
+// ListProjectUsersByUserID lists project users for the specified user.
+func (s *S) ListProjectUsersByUserID(userID string) ([]ProjectUser, error) {
+	var users []ProjectUser
+	if err := s.db.Where("user_id = ?", userID).Order("project_id").Find(&users).Error; err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
 // CountProjectUsersByProjectID counts the number of project users in the specified project.
 func (s *S) CountProjectUsersByProjectID(projectID string) (int64, error) {
 	var numUsers int64

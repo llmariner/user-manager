@@ -52,6 +52,12 @@ func TestProjectUser(t *testing.T) {
 	assert.Len(t, users, 1)
 	assert.Equal(t, "user2", users[0].UserID)
 
+	users, err = s.ListProjectUsersByUserID("user1")
+	assert.NoError(t, err)
+	assert.Len(t, users, 1)
+	assert.Equal(t, "user1", users[0].UserID)
+	assert.Equal(t, "p1", users[0].ProjectID)
+
 	err = s.DeleteProjectUser("p1", "user1")
 	assert.NoError(t, err)
 
