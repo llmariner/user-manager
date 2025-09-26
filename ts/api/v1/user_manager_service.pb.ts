@@ -51,8 +51,8 @@ export type User = {
   internal_id?: string
   is_service_account?: boolean
   hidden?: boolean
-  organization_roles?: UserOrganizationRoleBinding[]
-  project_roles?: UserProjectRoleBinding[]
+  organization_role_bindings?: UserOrganizationRoleBinding[]
+  project_role_bindings?: UserProjectRoleBinding[]
 }
 
 export type OrganizationUser = {
