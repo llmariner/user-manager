@@ -21,9 +21,10 @@ import (
 )
 
 const (
-	defaultUserID    = "defaultuser"
-	defaultProjectID = "defaultProject"
-	defaultTenantID  = "default-tenant-id"
+	defaultUserID         = "defaultuser"
+	defaultOrganizationID = "defaultOrganization"
+	defaultProjectID      = "defaultProject"
+	defaultTenantID       = "default-tenant-id"
 )
 
 // New creates a server.
@@ -130,7 +131,7 @@ func (s *S) GracefulStop() {
 func fakeAuthInto(ctx context.Context) context.Context {
 	return auth.AppendUserInfoToContext(ctx, auth.UserInfo{
 		UserID:         defaultUserID,
-		OrganizationID: "default",
+		OrganizationID: defaultOrganizationID,
 		ProjectID:      defaultProjectID,
 		AssignedKubernetesEnvs: []auth.AssignedKubernetesEnv{
 			{

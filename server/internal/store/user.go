@@ -20,6 +20,11 @@ type User struct {
 	Hidden bool
 }
 
+// FindOrCreateUser finds or creates a user.
+func (s *S) FindOrCreateUser(userID, internalUserID string) (*User, error) {
+	return FindOrCreateUserInTransaction(s.db, userID, internalUserID)
+}
+
 // FindOrCreateUserInTransaction creates a new user.
 func FindOrCreateUserInTransaction(tx *gorm.DB, userID, internalUserID string) (*User, error) {
 	var us []*User
