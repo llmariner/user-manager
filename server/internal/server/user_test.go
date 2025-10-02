@@ -10,7 +10,6 @@ import (
 	"github.com/llmariner/user-manager/server/internal/store"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/protobuf/proto"
-	"gorm.io/gorm"
 )
 
 func TestGetUserSelf(t *testing.T) {
@@ -25,15 +24,92 @@ func TestGetUserSelf(t *testing.T) {
 	assert.Equal(t, "defaultuser", user.Id)
 }
 
-func TestListUsers(t *testing.T) {
+func TestListUsers_ExternalService(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()
 
-	err := st.Transaction(func(tx *gorm.DB) error {
-		_, err := store.FindOrCreateUserInTransaction(tx, "uid", "iuid")
-		return err
-	})
+	var users []*store.User
+	for _, uid := range []string{defaultUserID, "uid0", "uid2"} {
+		u, err := st.FindOrCreateUser(uid, "i"+uid)
+		assert.NoError(t, err)
+		users = append(users, u)
+	}
+
+	_, err := st.CreateOrganizationUser(
+		defaultOrganizationID,
+		users[0].UserID,
+		v1.OrganizationRole_ORGANIZATION_ROLE_OWNER.String(),
+	)
 	assert.NoError(t, err)
+
+	_, err = st.CreateOrganizationUser(
+		defaultOrganizationID,
+		users[1].UserID,
+		v1.OrganizationRole_ORGANIZATION_ROLE_READER.String(),
+	)
+	assert.NoError(t, err)
+
+	_, err = st.CreateProjectUser(store.CreateProjectUserParams{
+		ProjectID:      "p0",
+		OrganizationID: defaultOrganizationID,
+		UserID:         users[1].UserID,
+		Role:           v1.ProjectRole_PROJECT_ROLE_MEMBER,
+	})
+
+	assert.NoError(t, err)
+
+	_, err = st.CreateOrganizationUser(
+		"different-org",
+		users[2].UserID,
+		"owner",
+	)
+	assert.NoError(t, err)
+
+	srv := New(st, nil, testr.New(t))
+	ctx := fakeAuthInto(context.Background())
+
+	resp, err := srv.ListUsers(ctx, &v1.ListUsersRequest{})
+	assert.NoError(t, err)
+	assert.Len(t, resp.Users, 2)
+	wants := []*v1.User{
+		{
+			Id: users[0].UserID,
+			OrganizationRoleBindings: []*v1.User_OrganizationRoleBinding{
+				{
+					OrganizationId: defaultOrganizationID,
+					Role:           v1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
+				},
+			},
+		},
+		{
+			Id: users[1].UserID,
+			OrganizationRoleBindings: []*v1.User_OrganizationRoleBinding{
+				{
+					OrganizationId: defaultOrganizationID,
+					Role:           v1.OrganizationRole_ORGANIZATION_ROLE_READER,
+				},
+			},
+			ProjectRoleBindings: []*v1.User_ProjectRoleBinding{
+				{
+					ProjectId: "p0",
+					Role:      v1.ProjectRole_PROJECT_ROLE_MEMBER,
+				},
+			},
+		},
+	}
+
+	for i, got := range resp.Users {
+		assert.True(t, proto.Equal(wants[i], got), "want %+v, got %+v", wants[i], got)
+	}
+}
+
+func TestListUsers_InternalService(t *testing.T) {
+	st, tearDown := store.NewTest(t)
+	defer tearDown()
+
+	_, err := st.FindOrCreateUser("uid", "iuid")
+	assert.NoError(t, err)
+
 	isrv := NewInternal(st, []byte{}, testr.New(t))
 	resp, err := isrv.ListUsers(context.Background(), &v1.ListUsersRequest{})
 	assert.NoError(t, err)

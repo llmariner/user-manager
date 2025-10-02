@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"sort"
 
 	gerrors "github.com/llmariner/common/pkg/gormlib/errors"
 	"github.com/llmariner/rbac-manager/pkg/auth"
@@ -36,6 +37,102 @@ func (s *S) GetUserSelf(ctx context.Context, req *v1.GetUserSelfRequest) (*v1.Us
 		Id:                       userInfo.UserID,
 		OrganizationRoleBindings: toOrganizationRoleBindings(orgUsers),
 		ProjectRoleBindings:      toProjectRoleBindings(projUsers),
+	}, nil
+}
+
+// ListUsers lists all users.
+//   - An organization owner can view users in their organizations.
+//   - An organization reader can view users in their organizations if they belong to the projects
+//     where the organization member also belongs to.
+func (s *S) ListUsers(ctx context.Context, req *v1.ListUsersRequest) (*v1.ListUsersResponse, error) {
+	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("failed to extract user info from context")
+	}
+
+	orgUsers, err := s.store.ListAllOrganizationUsers()
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "list organization users: %s", err)
+	}
+	orgUsersByUserID := make(map[string][]store.OrganizationUser)
+	for _, ou := range orgUsers {
+		orgUsersByUserID[ou.UserID] = append(orgUsersByUserID[ou.UserID], ou)
+	}
+
+	projUsers, err := s.store.ListAllProjectUsers()
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "list project users: %s", err)
+	}
+	projUsersByUserID := make(map[string][]store.ProjectUser)
+	for _, pu := range projUsers {
+		projUsersByUserID[pu.UserID] = append(projUsersByUserID[pu.UserID], pu)
+	}
+
+	// Identify visible orgs and projects.
+
+	userByUserID := make(map[string]*v1.User)
+	for _, ou := range orgUsersByUserID[userInfo.UserID] {
+		r, ok := v1.OrganizationRole_value[ou.Role]
+		if !ok {
+			return nil, status.Errorf(codes.Internal, "unknown organization role: %q", ou.Role)
+		}
+		if v1.OrganizationRole(r) != v1.OrganizationRole_ORGANIZATION_ROLE_OWNER {
+			continue
+		}
+
+		users, err := s.store.ListOrganizationNonHiddenUsersByOrganizationID(ou.OrganizationID)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "list organization users: %s", err)
+		}
+		for _, u := range users {
+			if _, ok := userByUserID[u.UserID]; ok {
+				continue
+			}
+
+			userByUserID[u.UserID] = &v1.User{
+				Id: u.UserID,
+				// TODO(kenji): Consider restricting the visibility of organization role bindings
+				// (i.e., do not show org role bindings if the requester is not an org owner).
+				OrganizationRoleBindings: toOrganizationRoleBindings(orgUsersByUserID[u.UserID]),
+				ProjectRoleBindings:      toProjectRoleBindings(projUsersByUserID[u.UserID]),
+			}
+		}
+	}
+
+	for _, pu := range projUsersByUserID[userInfo.UserID] {
+		if _, ok := userByUserID[pu.UserID]; ok {
+			// Already visible with org owner role.
+			continue
+		}
+
+		users, err := s.store.ListProjectUsersByProjectID(pu.ProjectID)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "list project users: %s", err)
+		}
+		for _, u := range users {
+			if _, ok := userByUserID[u.UserID]; ok {
+				continue
+			}
+
+			userByUserID[u.UserID] = &v1.User{
+				Id: u.UserID,
+				// Do not expose the organization role bindings.
+				ProjectRoleBindings: toProjectRoleBindings(projUsersByUserID[u.UserID]),
+			}
+		}
+	}
+
+	var users []*v1.User
+	for _, u := range userByUserID {
+		users = append(users, u)
+	}
+
+	sort.Slice(users, func(i, j int) bool {
+		return users[i].Id < users[j].Id
+	})
+
+	return &v1.ListUsersResponse{
+		Users: users,
 	}, nil
 }
 
