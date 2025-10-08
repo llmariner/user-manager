@@ -315,7 +315,7 @@ export class UsersService {
     return fm.fetchReq<DeleteAPIKeyRequest, DeleteAPIKeyResponse>(`/v1/api_keys/${req["id"]}`, {...initReq, method: "DELETE"})
   }
   static UpdateAPIKey(req: UpdateAPIKeyRequest, initReq?: fm.InitReq): Promise<APIKey> {
-    return fm.fetchReq<UpdateAPIKeyRequest, APIKey>(`/v1/api_keys/${req["api_key.id"]}`, {...initReq, method: "PATCH", body: JSON.stringify(req["api_key"])})
+    return fm.fetchReq<UpdateAPIKeyRequest, APIKey>(`/v1/api_keys/${req["api_key.id"]}`, {...initReq, method: "PATCH", body: JSON.stringify(req)})
   }
   static CreateProjectAPIKey(req: CreateAPIKeyRequest, initReq?: fm.InitReq): Promise<APIKey> {
     return fm.fetchReq<CreateAPIKeyRequest, APIKey>(`/v1/organizations/${req["organization_id"]}/projects/${req["project_id"]}/api_keys`, {...initReq, method: "POST", body: JSON.stringify(req)})
@@ -354,7 +354,7 @@ export class UsersService {
     return fm.fetchReq<DeleteProjectRequest, DeleteProjectResponse>(`/v1/organizations/${req["organization_id"]}/projects/${req["id"]}`, {...initReq, method: "DELETE"})
   }
   static UpdateProject(req: UpdateProjectRequest, initReq?: fm.InitReq): Promise<Project> {
-    return fm.fetchReq<UpdateProjectRequest, Project>(`/v1/organizations/${req["project.organization_id"]}/projects/${req["project.id"]}`, {...initReq, method: "PATCH", body: JSON.stringify(req["project"])})
+    return fm.fetchReq<UpdateProjectRequest, Project>(`/v1/organizations/${req["project.organization_id"]}/projects/${req["project.id"]}`, {...initReq, method: "PATCH", body: JSON.stringify(req)})
   }
   static CreateProjectUser(req: CreateProjectUserRequest, initReq?: fm.InitReq): Promise<ProjectUser> {
     return fm.fetchReq<CreateProjectUserRequest, ProjectUser>(`/v1/organizations/${req["organization_id"]}/projects/${req["project_id"]}/users`, {...initReq, method: "POST", body: JSON.stringify(req)})
