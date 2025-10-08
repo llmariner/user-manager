@@ -28,7 +28,7 @@ export class UsersService {
         return fm.fetchReq(`/v1/api_keys/${req["id"]}`, Object.assign(Object.assign({}, initReq), { method: "DELETE" }));
     }
     static UpdateAPIKey(req, initReq) {
-        return fm.fetchReq(`/v1/api_keys/${req["api_key.id"]}`, Object.assign(Object.assign({}, initReq), { method: "PATCH", body: JSON.stringify(req["api_key"]) }));
+        return fm.fetchReq(`/v1/api_keys/${req["api_key.id"]}`, Object.assign(Object.assign({}, initReq), { method: "PATCH", body: JSON.stringify(req) }));
     }
     static CreateProjectAPIKey(req, initReq) {
         return fm.fetchReq(`/v1/organizations/${req["organization_id"]}/projects/${req["project_id"]}/api_keys`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
@@ -67,7 +67,7 @@ export class UsersService {
         return fm.fetchReq(`/v1/organizations/${req["organization_id"]}/projects/${req["id"]}`, Object.assign(Object.assign({}, initReq), { method: "DELETE" }));
     }
     static UpdateProject(req, initReq) {
-        return fm.fetchReq(`/v1/organizations/${req["project.organization_id"]}/projects/${req["project.id"]}`, Object.assign(Object.assign({}, initReq), { method: "PATCH", body: JSON.stringify(req["project"]) }));
+        return fm.fetchReq(`/v1/organizations/${req["project.organization_id"]}/projects/${req["project.id"]}`, Object.assign(Object.assign({}, initReq), { method: "PATCH", body: JSON.stringify(req) }));
     }
     static CreateProjectUser(req, initReq) {
         return fm.fetchReq(`/v1/organizations/${req["organization_id"]}/projects/${req["project_id"]}/users`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
