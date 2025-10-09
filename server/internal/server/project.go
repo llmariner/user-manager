@@ -14,6 +14,7 @@ import (
 	"github.com/llmariner/user-manager/server/internal/store"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"gorm.io/gorm"
 	"k8s.io/apimachinery/pkg/api/validation"
@@ -68,24 +69,8 @@ func createProject(
 		return nil, err
 	}
 
-	for _, a := range assignmetns {
-		if a.Namespace == "" {
-			return nil, status.Error(codes.InvalidArgument, "namespace is required")
-		}
-
-		if errs := validation.ValidateNamespaceName(a.Namespace, false); len(errs) != 0 {
-			return nil, status.Errorf(codes.InvalidArgument, "invalid kubernetes namespace: %s", errs)
-		}
-
-		// TODO(kenji): If the cluster is not empty, check if the cluster exists.
-		for _, kv := range a.NodeSelector {
-			if kv.Key == "" {
-				return nil, status.Error(codes.InvalidArgument, "node selector key is required")
-			}
-			if kv.Value == "" {
-				return nil, status.Error(codes.InvalidArgument, "node selector value is required")
-			}
-		}
+	if err := validateAssignments(assignmetns); err != nil {
+		return nil, err
 	}
 
 	projectID, err := id.GenerateID("proj_", 24)
@@ -141,6 +126,36 @@ func createProject(
 		return nil, status.Errorf(codes.Internal, "convert project to proto: %s", err)
 	}
 	return pp, nil
+}
+
+func validateAssignments(assignments []*v1.ProjectAssignment) error {
+	for _, a := range assignments {
+		if err := validateAssignment(a); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func validateAssignment(a *v1.ProjectAssignment) error {
+	if a.Namespace == "" {
+		return status.Error(codes.InvalidArgument, "namespace is required")
+	}
+
+	if errs := validation.ValidateNamespaceName(a.Namespace, false); len(errs) != 0 {
+		return status.Errorf(codes.InvalidArgument, "invalid kubernetes namespace: %s", errs)
+	}
+
+	// TODO(kenji): If the cluster is not empty, check if the cluster exists.
+	for _, kv := range a.NodeSelector {
+		if kv.Key == "" {
+			return status.Error(codes.InvalidArgument, "node selector key is required")
+		}
+		if kv.Value == "" {
+			return status.Error(codes.InvalidArgument, "node selector value is required")
+		}
+	}
+	return nil
 }
 
 // ListProjects lists all projects.
@@ -256,27 +271,43 @@ func (s *S) UpdateProject(ctx context.Context, req *v1.UpdateProjectRequest) (*v
 		return nil, fmt.Errorf("update mask is required")
 	}
 
-	// Auth
 	if _, err := validateProjectID(s.store, req.Project.Id, req.Project.OrganizationId, userInfo.TenantID); err != nil {
 		return nil, err
 	}
 	if err := s.validateProjectOwner(req.Project.Id, req.Project.OrganizationId, userInfo.UserID); err != nil {
 		return nil, err
 	}
+
+	updates := map[string]interface{}{}
 	for _, path := range req.UpdateMask.Paths {
 		switch path {
 		case "title":
-			err := s.store.UpdateProject(
-				req.Project.Id,
-				map[string]interface{}{
-					"title": req.Project.Title,
-				})
-			if err != nil {
-				return nil, err
+			if req.Project.Title == "" {
+				return nil, status.Error(codes.InvalidArgument, "title is required")
+			}
+			updates["title"] = req.Project.Title
+		case "assignments":
+			// TODO(kenji): Support patching to individual assignments.
+			if len(req.Project.Assignments) == 0 {
+				updates["assignments"] = nil
+			} else {
+				if err := validateAssignments(req.Project.Assignments); err != nil {
+					return nil, err
+				}
+
+				asb, err := proto.Marshal(&v1.ProjectAssignments{Assignments: req.Project.Assignments})
+				if err != nil {
+					return nil, err
+				}
+				updates["assignments"] = asb
 			}
 		default:
 			return nil, status.Errorf(codes.InvalidArgument, "unsupported update path: %s", path)
 		}
+	}
+
+	if err := s.store.UpdateProject(req.Project.Id, updates); err != nil {
+		return nil, err
 	}
 
 	p, err := s.store.GetProject(store.GetProjectParams{
