@@ -74,12 +74,14 @@ func (s *S) Run(ctx context.Context, port int, authConfig config.AuthConfig, usa
 					return "api.organizations"
 				case "CreateOrganizationUser", "DeleteOrganizationUser", "ListOrganizationUsers":
 					return "api.organizations.users"
-				case "CreateProject", "DeleteProject", "ListProjects":
+				case "CreateProject", "DeleteProject", "ListProjects", "UpdateProject":
 					return "api.organizations.projects"
 				case "CreateProjectUser", "DeleteProjectUser", "ListProjectUsers":
 					return "api.organizations.projects.users"
 				case "GetUserSelf":
 					return "api.selfuser"
+				case "ListUsers":
+					return "api.organizations.users"
 				default:
 					return "unknown"
 				}
