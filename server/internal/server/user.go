@@ -108,6 +108,10 @@ func (s *S) ListUsers(ctx context.Context, req *v1.ListUsersRequest) (*v1.ListUs
 
 	userByUserID := make(map[string]*v1.User)
 	for _, ou := range orgUsersByUserID[userInfo.UserID] {
+		if ou.Hidden {
+			continue
+		}
+
 		r, ok := v1.OrganizationRole_value[ou.Role]
 		if !ok {
 			return nil, status.Errorf(codes.Internal, "unknown organization role: %q", ou.Role)
