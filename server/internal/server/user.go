@@ -33,10 +33,28 @@ func (s *S) GetUserSelf(ctx context.Context, req *v1.GetUserSelfRequest) (*v1.Us
 		return nil, status.Errorf(codes.Internal, "list project users: %s", err)
 	}
 
+	orgs, err := s.store.ListOrganizations(userInfo.TenantID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "list organizations: %s", err)
+	}
+	orgsByID := make(map[string]*store.Organization)
+	for _, o := range orgs {
+		orgsByID[o.OrganizationID] = o
+	}
+
+	projs, err := s.store.ListProjectsByTenantID(userInfo.TenantID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "list projects: %s", err)
+	}
+	projsByID := make(map[string]*store.Project)
+	for _, p := range projs {
+		projsByID[p.ProjectID] = p
+	}
+
 	return &v1.User{
 		Id:                       userInfo.UserID,
-		OrganizationRoleBindings: toOrganizationRoleBindings(orgUsers),
-		ProjectRoleBindings:      toProjectRoleBindings(projUsers),
+		OrganizationRoleBindings: toOrganizationRoleBindings(orgUsers, orgsByID),
+		ProjectRoleBindings:      toProjectRoleBindings(projUsers, orgsByID, projsByID),
 	}, nil
 }
 
@@ -48,6 +66,24 @@ func (s *S) ListUsers(ctx context.Context, req *v1.ListUsersRequest) (*v1.ListUs
 	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
 	if !ok {
 		return nil, fmt.Errorf("failed to extract user info from context")
+	}
+
+	orgs, err := s.store.ListOrganizations(userInfo.TenantID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "list organizations: %s", err)
+	}
+	orgsByID := make(map[string]*store.Organization)
+	for _, o := range orgs {
+		orgsByID[o.OrganizationID] = o
+	}
+
+	projs, err := s.store.ListProjectsByTenantID(userInfo.TenantID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "list projects: %s", err)
+	}
+	projsByID := make(map[string]*store.Project)
+	for _, p := range projs {
+		projsByID[p.ProjectID] = p
 	}
 
 	orgUsers, err := s.store.ListAllOrganizationUsers()
@@ -93,8 +129,8 @@ func (s *S) ListUsers(ctx context.Context, req *v1.ListUsersRequest) (*v1.ListUs
 				Id: u.UserID,
 				// TODO(kenji): Consider restricting the visibility of organization role bindings
 				// (i.e., do not show org role bindings if the requester is not an org owner).
-				OrganizationRoleBindings: toOrganizationRoleBindings(orgUsersByUserID[u.UserID]),
-				ProjectRoleBindings:      toProjectRoleBindings(projUsersByUserID[u.UserID]),
+				OrganizationRoleBindings: toOrganizationRoleBindings(orgUsersByUserID[u.UserID], orgsByID),
+				ProjectRoleBindings:      toProjectRoleBindings(projUsersByUserID[u.UserID], orgsByID, projsByID),
 			}
 		}
 	}
@@ -117,7 +153,7 @@ func (s *S) ListUsers(ctx context.Context, req *v1.ListUsersRequest) (*v1.ListUs
 			userByUserID[u.UserID] = &v1.User{
 				Id: u.UserID,
 				// Do not expose the organization role bindings.
-				ProjectRoleBindings: toProjectRoleBindings(projUsersByUserID[u.UserID]),
+				ProjectRoleBindings: toProjectRoleBindings(projUsersByUserID[u.UserID], orgsByID, projsByID),
 			}
 		}
 	}
@@ -287,23 +323,54 @@ func (s *IS) CreateUserInternal(ctx context.Context, req *v1.CreateUserInternalR
 	return &emptypb.Empty{}, nil
 }
 
-func toOrganizationRoleBindings(ous []store.OrganizationUser) []*v1.User_OrganizationRoleBinding {
+func toOrganizationRoleBindings(
+	ous []store.OrganizationUser,
+	orgsByID map[string]*store.Organization,
+) []*v1.User_OrganizationRoleBinding {
 	var bindings []*v1.User_OrganizationRoleBinding
 	for _, ou := range ous {
+		var title string
+		if org, ok := orgsByID[ou.OrganizationID]; ok {
+			title = org.Title
+		} else {
+			title = "(unknown)"
+		}
+
 		bindings = append(bindings, &v1.User_OrganizationRoleBinding{
-			OrganizationId: ou.OrganizationID,
-			Role:           v1.OrganizationRole(v1.OrganizationRole_value[ou.Role]),
+			OrganizationId:    ou.OrganizationID,
+			OrganizationTitle: title,
+			Role:              v1.OrganizationRole(v1.OrganizationRole_value[ou.Role]),
 		})
 	}
 	return bindings
 }
 
-func toProjectRoleBindings(pus []store.ProjectUser) []*v1.User_ProjectRoleBinding {
+func toProjectRoleBindings(
+	pus []store.ProjectUser,
+	orgsByID map[string]*store.Organization,
+	projsByID map[string]*store.Project,
+) []*v1.User_ProjectRoleBinding {
 	var bindings []*v1.User_ProjectRoleBinding
 	for _, pu := range pus {
+		var otitle string
+		if org, ok := orgsByID[pu.OrganizationID]; ok {
+			otitle = org.Title
+		} else {
+			otitle = "(unknown)"
+		}
+		var ptitle string
+		if proj, ok := projsByID[pu.ProjectID]; ok {
+			ptitle = proj.Title
+		} else {
+			ptitle = "(unknown)"
+		}
+
 		bindings = append(bindings, &v1.User_ProjectRoleBinding{
-			ProjectId: pu.ProjectID,
-			Role:      v1.ProjectRole(v1.ProjectRole_value[pu.Role]),
+			OrganizationId:    pu.OrganizationID,
+			OrganizationTitle: otitle,
+			ProjectId:         pu.ProjectID,
+			ProjectTitle:      ptitle,
+			Role:              v1.ProjectRole(v1.ProjectRole_value[pu.Role]),
 		})
 	}
 	return bindings

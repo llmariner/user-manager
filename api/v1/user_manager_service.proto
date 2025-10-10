@@ -36,14 +36,17 @@ message User {
 
   message OrganizationRoleBinding {
     string organization_id = 1;
-    OrganizationRole role = 2;
+    string organization_title = 2;
+    OrganizationRole role = 3;
   }
   repeated OrganizationRoleBinding organization_role_bindings = 5;
 
   message ProjectRoleBinding {
     string organization_id = 1;
-    string project_id = 2;
-    ProjectRole role = 3;
+    string organization_title = 2;
+    string project_id = 3;
+    string project_title = 4;
+    ProjectRole role = 5;
   }
   repeated ProjectRoleBinding project_role_bindings = 6;
 }

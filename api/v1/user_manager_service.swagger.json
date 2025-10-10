@@ -835,6 +835,9 @@
         "organizationId": {
           "type": "string"
         },
+        "organizationTitle": {
+          "type": "string"
+        },
         "role": {
           "$ref": "#/definitions/v1OrganizationRole"
         }
@@ -846,7 +849,13 @@
         "organizationId": {
           "type": "string"
         },
+        "organizationTitle": {
+          "type": "string"
+        },
         "projectId": {
+          "type": "string"
+        },
+        "projectTitle": {
           "type": "string"
         },
         "role": {
