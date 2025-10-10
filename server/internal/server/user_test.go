@@ -111,7 +111,7 @@ func TestListUsers_ExternalService(t *testing.T) {
 				{
 					OrganizationId:    defaultOrganizationID,
 					OrganizationTitle: org.Title,
-					ProjectId:         "p0",
+					ProjectId:         proj.ProjectID,
 					ProjectTitle:      proj.Title,
 					Role:              v1.ProjectRole_PROJECT_ROLE_MEMBER,
 				},
