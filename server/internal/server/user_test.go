@@ -35,7 +35,23 @@ func TestListUsers_ExternalService(t *testing.T) {
 		users = append(users, u)
 	}
 
-	_, err := st.CreateOrganizationUser(
+	org, err := st.CreateOrganization(
+		defaultTenantID,
+		defaultOrganizationID,
+		"Org Title",
+		false,
+	)
+	assert.NoError(t, err)
+
+	proj, err := st.CreateProject(store.CreateProjectParams{
+		TenantID:       defaultTenantID,
+		OrganizationID: defaultOrganizationID,
+		ProjectID:      "p0",
+		Title:          "Project Title",
+	})
+	assert.NoError(t, err)
+
+	_, err = st.CreateOrganizationUser(
 		defaultOrganizationID,
 		users[0].UserID,
 		v1.OrganizationRole_ORGANIZATION_ROLE_OWNER.String(),
@@ -50,7 +66,7 @@ func TestListUsers_ExternalService(t *testing.T) {
 	assert.NoError(t, err)
 
 	_, err = st.CreateProjectUser(store.CreateProjectUserParams{
-		ProjectID:      "p0",
+		ProjectID:      proj.ProjectID,
 		OrganizationID: defaultOrganizationID,
 		UserID:         users[1].UserID,
 		Role:           v1.ProjectRole_PROJECT_ROLE_MEMBER,
@@ -76,8 +92,9 @@ func TestListUsers_ExternalService(t *testing.T) {
 			Id: users[0].UserID,
 			OrganizationRoleBindings: []*v1.User_OrganizationRoleBinding{
 				{
-					OrganizationId: defaultOrganizationID,
-					Role:           v1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
+					OrganizationId:    defaultOrganizationID,
+					OrganizationTitle: org.Title,
+					Role:              v1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
 				},
 			},
 		},
@@ -85,14 +102,18 @@ func TestListUsers_ExternalService(t *testing.T) {
 			Id: users[1].UserID,
 			OrganizationRoleBindings: []*v1.User_OrganizationRoleBinding{
 				{
-					OrganizationId: defaultOrganizationID,
-					Role:           v1.OrganizationRole_ORGANIZATION_ROLE_READER,
+					OrganizationId:    defaultOrganizationID,
+					OrganizationTitle: org.Title,
+					Role:              v1.OrganizationRole_ORGANIZATION_ROLE_READER,
 				},
 			},
 			ProjectRoleBindings: []*v1.User_ProjectRoleBinding{
 				{
-					ProjectId: "p0",
-					Role:      v1.ProjectRole_PROJECT_ROLE_MEMBER,
+					OrganizationId:    defaultOrganizationID,
+					OrganizationTitle: org.Title,
+					ProjectId:         "p0",
+					ProjectTitle:      proj.Title,
+					Role:              v1.ProjectRole_PROJECT_ROLE_MEMBER,
 				},
 			},
 		},

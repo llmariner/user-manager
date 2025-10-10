@@ -37,12 +37,15 @@ export type APIKey = {
 
 export type UserOrganizationRoleBinding = {
   organization_id?: string
+  organization_title?: string
   role?: OrganizationRole
 }
 
 export type UserProjectRoleBinding = {
   organization_id?: string
+  organization_title?: string
   project_id?: string
+  project_title?: string
   role?: ProjectRole
 }
 
